@@ -1,0 +1,10 @@
+export enum Routes {
+  Home = "/",
+  Login = "/login",
+  Logout = "/logout",
+  Register = "/register",
+  ForgotPassword = "/forgot-password",
+  Dashboard = "/dashboard",
+  Onboarding = "/onboarding",
+  Blog = "/blog",
+}
