@@ -25,6 +25,19 @@ export default async function Page() {
               Sign up
             </a>
           </div>
+          <div className="w-full text-center text-xs">
+            <p>
+              By clicking login, you agree to our
+              <a href={Routes.Tos} className="underline underline-offset-4">
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a href={Routes.Tos} className="underline underline-offset-4">
+                Privacy Policy
+              </a>
+              .
+            </p>
+          </div>
         </div>
       </div>
       <div className="hidden lg:w-1/2 bg-muted relative lg:block">

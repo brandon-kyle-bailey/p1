@@ -4,11 +4,14 @@ import { Routes } from "./lib/routes";
 
 const ignoredRoutes = [
   Routes.Home,
+  Routes.Tos,
+  Routes.PrivacyPolicy,
   Routes.Login,
   Routes.Logout,
   Routes.ForgotPassword,
   Routes.Register,
   Routes.Blog,
+  Routes.PaymentsSuccess,
 ];
 
 export const config = {

@@ -7,4 +7,7 @@ export enum Routes {
   Dashboard = "/dashboard",
   Onboarding = "/onboarding",
   Blog = "/blog",
+  Tos = "/terms-of-service",
+  PrivacyPolicy = "/privacy-policy",
+  PaymentsSuccess = "/payments/success",
 }
