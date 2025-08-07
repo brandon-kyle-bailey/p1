@@ -5,6 +5,11 @@ export async function POST(req: NextRequest) {
   try {
     const { priceId, userId, email, isSubscription } = await req.json();
 
+    const headers = req.headers;
+    const referer = headers.get("referer");
+
+    const redirectUrl = referer || `${process.env.NEXT_PUBLIC_APP_URL}/`;
+
     const session = await stripe.checkout.sessions.create({
       mode: isSubscription ? "subscription" : "payment",
       payment_method_types: ["card"],
@@ -18,8 +23,8 @@ export async function POST(req: NextRequest) {
         userId: userId,
         email: email,
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payments/success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payments/checkout`,
+      success_url: redirectUrl,
+      cancel_url: redirectUrl,
       allow_promotion_codes: true,
     });
 

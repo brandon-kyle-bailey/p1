@@ -19,7 +19,7 @@ export default function CheckoutButton({
   const router = useRouter();
 
   const handleCheckout = async () => {
-    const res = await fetch("/api/payment/checkout-session", {
+    const res = await fetch("/api/payments/checkout-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
