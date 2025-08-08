@@ -38,3 +38,11 @@ export default function CheckoutSessionForm(props: CheckoutSessionFormProps) {
     </form>
   );
 }
+
+// <CheckoutSessionForm
+//   text={"Purchase Subscription"}
+//   priceId={"price_1Pork5BPkmIjU4TJidywH5kc"}
+//   userId={session.user.id!}
+//   email={session.user.email!}
+//   isSubscription={true}
+// />

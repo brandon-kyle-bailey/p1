@@ -47,3 +47,7 @@ export enum StripeWebhookEvents {
   InvoicePaymentFailed = "invoice.payment_failed",
   InvoicePaymentSucceeded = "invoice.payment_succeeded",
 }
+
+export enum Cookies {
+  SidebarState = "sidebar_state",
+}

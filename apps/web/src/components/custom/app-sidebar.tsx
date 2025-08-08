@@ -36,7 +36,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,6 +50,7 @@ import { WebRoutes } from "@/lib/constants";
 import { Session, User } from "next-auth";
 import Link from "next/link";
 import { SignOutServerAction } from "../../actions/authentication/server/sign-out.action";
+import AvatarComponent from "../avatar.component";
 
 const data = {
   teams: [
@@ -248,10 +248,7 @@ export function NavUser({ user }: { user: User }) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user.image!} alt={user.name!} />
-                <AvatarFallback className="rounded-lg">Avatar</AvatarFallback>
-              </Avatar>
+              <AvatarComponent />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
@@ -267,10 +264,7 @@ export function NavUser({ user }: { user: User }) {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.image!} alt={user.name!} />
-                  <AvatarFallback className="">Avatar</AvatarFallback>
-                </Avatar>
+                <AvatarComponent />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
