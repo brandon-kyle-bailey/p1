@@ -6,6 +6,7 @@ export enum WebRoutes {
   Dashboard = "/dashboard",
   Onboarding = "/onboarding",
   Blog = "/blog",
+  Contact = "/contact",
   PrivacyPolicy = "/privacy-policy",
   Tos = "/terms-of-service",
   Home = "/",
