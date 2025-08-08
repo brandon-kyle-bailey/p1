@@ -1,0 +1,64 @@
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { WebRoutes } from "@/lib/constants";
+import { GalleryVerticalEnd } from "lucide-react";
+import Link from "next/link";
+import ResetPasswordForm from "../../../components/forms/authentication/reset-password.form";
+
+export default function Page() {
+  return (
+    <main className="flex flex-col items-center justify-center h-screen gap-4">
+      <a
+        href="#"
+        className="flex items-center gap-4 self-center font-medium text-2xl"
+      >
+        <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
+          <GalleryVerticalEnd className="size-4" />
+        </div>
+        Acme Inc.
+      </a>
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>Reset your password</CardTitle>
+          <CardDescription>
+            Enter your email address below to reset your password.
+          </CardDescription>
+          <CardAction>
+            <Link href={WebRoutes.Login} className="underline">
+              Login
+            </Link>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <ResetPasswordForm />
+        </CardContent>
+        <CardFooter className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground">
+            By clicking login, you agree to our{" "}
+            <Link
+              href={WebRoutes.Tos}
+              className="underline text-muted-foreground hover:text-primary"
+            >
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link
+              href={WebRoutes.PrivacyPolicy}
+              className="underline text-muted-foreground hover:text-primary"
+            >
+              Privacy Policy
+            </Link>
+            .
+          </p>
+        </CardFooter>
+      </Card>
+    </main>
+  );
+}

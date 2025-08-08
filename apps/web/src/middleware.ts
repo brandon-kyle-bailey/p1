@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { Routes } from "./lib/routes";
+import { WebRoutes } from "./lib/constants";
 
 const ignoredRoutes = [
-  Routes.Home,
-  Routes.Tos,
-  Routes.PrivacyPolicy,
-  Routes.Login,
-  Routes.Logout,
-  Routes.ForgotPassword,
-  Routes.Register,
-  Routes.Blog,
-  Routes.PaymentsSuccess,
+  WebRoutes.Home,
+  WebRoutes.Tos,
+  WebRoutes.PrivacyPolicy,
+  WebRoutes.Login,
+  WebRoutes.Logout,
+  WebRoutes.ForgotPassword,
+  WebRoutes.Register,
+  WebRoutes.Blog,
+  WebRoutes.PaymentsSuccess,
 ];
 
 export const config = {
@@ -32,7 +32,7 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });
 
   if (!token) {
-    const loginUrl = new URL(Routes.Login, req.url);
+    const loginUrl = new URL(WebRoutes.Login, req.url);
     return NextResponse.redirect(loginUrl);
   }
 

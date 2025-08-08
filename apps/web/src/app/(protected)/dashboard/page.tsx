@@ -1,20 +1,26 @@
-import { ModeToggle } from "@/components/custom/mode-toggle";
-import CheckoutButton from "@/components/custom/payments/checkout-button";
 import { auth } from "@/lib/auth";
+import CheckoutSessionForm from "@/components/forms/billing/checkout-session.form";
+import LoginWithGithubForm from "@/components/forms/authentication/login-with-github.form";
 
 export default async function Page() {
   const session = await auth();
   if (!session?.user) return null;
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <ModeToggle />
-      <CheckoutButton
-        priceId="price_1Pork5BPkmIjU4TJidywH5kc"
-        userId={session.user.id}
-        email={session.user.email!}
-        isSubscription={true}
-      />
-    </div>
+    <main>
+      <section>
+        <h1>Dashboard</h1>
+
+        <CheckoutSessionForm
+          text={"Purchase Subscription"}
+          priceId={"price_1Pork5BPkmIjU4TJidywH5kc"}
+          userId={session.user.id!}
+          email={session.user.email!}
+          isSubscription={true}
+        />
+      </section>
+      <section>
+        <LoginWithGithubForm />
+      </section>
+    </main>
   );
 }
