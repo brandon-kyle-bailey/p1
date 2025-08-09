@@ -12,6 +12,7 @@ import { WebRoutes } from "@/lib/constants";
 import { GalleryVerticalEnd } from "lucide-react";
 import Link from "next/link";
 import RegisterForm from "@/components/forms/authentication/register.form";
+import DisclaimerComponent from "@/components/disclaimer.component";
 
 export default function Page() {
   return (
@@ -53,23 +54,7 @@ export default function Page() {
             <LoginWithGithubForm />
             {/* <LoginWithGoogleForm /> */}
           </div>
-          <p className="text-sm text-muted-foreground">
-            By clicking login, you agree to our{" "}
-            <Link
-              href={WebRoutes.Tos}
-              className="underline text-muted-foreground hover:text-primary"
-            >
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link
-              href={WebRoutes.PrivacyPolicy}
-              className="underline text-muted-foreground hover:text-primary"
-            >
-              Privacy Policy
-            </Link>
-            .
-          </p>
+          <DisclaimerComponent />
         </CardFooter>
       </Card>
     </main>

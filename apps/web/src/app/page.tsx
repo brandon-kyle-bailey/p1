@@ -1,396 +1,692 @@
-"use client";
-
-import Head from "next/head";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ArrowRight,
+  BarChart3,
+  Check,
+  Github,
+  Linkedin,
+  Mail,
+  Shield,
+  Star,
+  Twitter,
+  Users,
+  Zap,
+} from "lucide-react";
+import { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+
+import placeholderImage from "@/assets/placeholder-rsreo.png";
 import { WebRoutes } from "../lib/constants";
-import { ArrowRightIcon, CheckIcon } from "lucide-react";
 
-const FEATURES = [
-  {
-    title: "Elegant UI Kit",
-    description: "Crafted with ShadCN components and modern UX best practices.",
-  },
-  {
-    title: "Integrated Payments",
-    description: "Seamless Stripe subscription flows ready out of the box.",
-  },
-  {
-    title: "Enterprise-Ready Auth",
-    description: "Robust authentication powered by Auth.js and Next.js.",
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    quote:
-      "The Startup transformed our product launch timeline from months to weeks. Highly recommended.",
-    author: "Jane Doe, Founder",
-  },
-  {
-    quote:
-      "A game-changer for SaaS founders — development speed and quality skyrocketed.",
-    author: "John Smith, CTO",
-  },
-  {
-    quote:
-      "Reliable, beautiful, and well-supported — everything you want in a starter kit.",
-    author: "Emily Chen, Product Lead",
-  },
-];
-
-const PRICING_PLANS = [
-  {
-    tier: "Free",
-    price: "$0",
-    features: ["Basic Components", "Community Access"],
-  },
-  {
-    tier: "Startup",
-    price: "$199",
-    features: ["Stripe & Auth.js", "Lifetime Updates"],
-    featured: true,
-  },
-  {
-    tier: "Enterprise",
-    price: "Contact Us",
-    features: ["Custom Integrations", "Priority Support"],
-  },
-];
-
-export default function Page() {
-  const router = useRouter();
-
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: "The Startup",
+export const metadata: Metadata = {
+  title: "Your SaaS — Empower Your Workflow",
+  description:
+    "Your SaaS helps teams streamline workflows, boost productivity, and manage tasks effortlessly. Try free today!",
+  openGraph: {
+    title: "Your SaaS — Empower Your Workflow",
     description:
-      "Powerful, off-the-shelf SaaS starter template for developers who want to launch production-ready applications with minimal effort.",
-    brand: {
-      "@type": "Brand",
-      name: "The Startup",
-    },
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "USD",
-      price: "199",
-      availability: "https://schema.org/InStock",
-    },
-  };
+      "Your SaaS helps teams streamline workflows, boost productivity, and manage tasks effortlessly. Try free today!",
+    url: "https://www.yoursaas.com",
+    siteName: "Your SaaS",
+    type: "website",
+    images: [{ url: "https://www.yoursaas.com/og-image.jpg" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Your SaaS — Empower Your Workflow",
+    description:
+      "Your SaaS helps teams streamline workflows, boost productivity, and manage tasks effortlessly. Try free today!",
+    images: ["https://www.yoursaas.com/og-image.jpg"],
+  },
+};
 
+export default function LandingPage() {
   return (
-    <>
-      <Head>
-        <title>The Startup – SaaS Starter Template</title>
-        <meta
-          name="description"
-          content="Launch your SaaS product faster with The Startup, a modern starter template built with Next.js, ShadCN, Stripe, and more."
-        />
-        <meta
-          property="og:title"
-          content="The Startup – SaaS Starter Template"
-        />
-        <meta
-          property="og:description"
-          content="Off-the-shelf SaaS starter template for developers to build production-ready applications quickly."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://yourdomain.com/" />
-        <meta
-          property="og:image"
-          content="https://yourdomain.com/og-image.png"
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
-      </Head>
+    <div className="flex flex-col gap-24 p-16">
+      <header className="sticky top-0 z-50 bg-secondary h-16">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center rounded-lg bg-primary p-2">
+              <Zap className="text-secondary" />
+            </div>
+            <span className="text-xl font-bold">The Startup</span>
+          </div>
 
-      <div className="bg-background text-foreground min-h-screen font-sans antialiased">
-        {/* Navigation */}
-        <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border shadow-sm">
-          <nav
-            className="max-w-7xl mx-auto flex items-center justify-between py-6 px-8"
-            aria-label="Primary navigation"
-          >
-            <h1 className="text-3xl font-extrabold tracking-tight text-primary transition-colors hover:text-primary/80">
-              <Link href="/" aria-label="Home">
-                The Startup
-              </Link>
-            </h1>
+          <nav className="hidden md:flex items-center gap-8">
+            <Link
+              href="#features"
+              className="text-sm font-medium transition-colors"
+            >
+              Features
+            </Link>
+            <Link
+              href="#testimonials"
+              className="text-sm font-medium transition-colors"
+            >
+              Testimonials
+            </Link>
+            <Link
+              href="#pricing"
+              className="text-sm font-medium transition-colors"
+            >
+              Pricing
+            </Link>
+            <Link
+              href="#contact"
+              className="text-sm font-medium transition-colors"
+            >
+              Contact
+            </Link>
+          </nav>
 
-            <ul className="hidden md:flex space-x-10 text-lg font-medium tracking-wide text-muted-foreground">
-              <li>
-                <a
-                  href="#features"
-                  className="hover:text-primary transition-colors"
+          <div className="flex items-center gap-4">
+            <Link href={WebRoutes.Login} className="hidden md:flex">
+              Log in
+            </Link>
+            <Link href={WebRoutes.Register} className="hidden md:flex">
+              <Button className="bg-primary">Register</Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+      <section>
+        <div>
+          <div className="flex flex-col justify-center items-center gap-4 p-4">
+            <div className="flex flex-col gap-4 justify-center items-center">
+              <Badge variant="secondary" className="bg-green-500">
+                🚀 New: AI-Powered Automation
+              </Badge>
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                Streamline Your
+                <span className="text-green-500"> Workflow</span>
+              </h1>
+              <p className="text-xl text-gray-600">
+                Automate repetitive tasks, boost team productivity, and focus on
+                what matters most. StreamLine helps you build efficient
+                workflows in minutes, not hours.
+              </p>
+
+              <div className="flex gap-4">
+                <Button size="lg">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button size="lg" variant="outline">
+                  Watch Demo
+                </Button>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>14-day free trial</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>No credit card required</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Image
+                src={placeholderImage}
+                alt="StreamLine Dashboard"
+                width={800}
+                height={600}
+                className="rounded-xl shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features">
+        <div className="flex flex-col gap-4 justify-center items-center">
+          <div className="text-center">
+            <Badge
+              variant="secondary"
+              className="bg-emerald-100 text-emerald-800"
+            >
+              Features
+            </Badge>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+              Everything you need to succeed
+            </h2>
+            <p className="text-xl text-gray-600 max-w-[800px] mx-auto">
+              Powerful features designed to help teams work smarter, not harder.
+              From automation to analytics, we've got you covered.
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-4 w-full">
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4">
+                  <Zap className="h-6 w-6 text-emerald-600" />
+                </div>
+                <CardTitle>Smart Automation</CardTitle>
+                <CardDescription>
+                  Create powerful workflows that run automatically, saving hours
+                  of manual work every week.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6 text-emerald-600" />
+                </div>
+                <CardTitle>Team Collaboration</CardTitle>
+                <CardDescription>
+                  Work together seamlessly with real-time updates, comments, and
+                  shared workspaces.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4">
+                  <BarChart3 className="h-6 w-6 text-emerald-600" />
+                </div>
+                <CardTitle>Advanced Analytics</CardTitle>
+                <CardDescription>
+                  Get insights into your team's productivity with detailed
+                  reports and performance metrics.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4">
+                  <Shield className="h-6 w-6 text-emerald-600" />
+                </div>
+                <CardTitle>Enterprise Security</CardTitle>
+                <CardDescription>
+                  Bank-level security with SOC 2 compliance, SSO, and advanced
+                  permission controls.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <section id="testimonials">
+        <div className="flex flex-col gap-4 justify-center items-center">
+          <div className="text-center">
+            <Badge
+              variant="secondary"
+              className="bg-emerald-100 text-emerald-800"
+            >
+              Testimonials
+            </Badge>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+              Loved by teams worldwide
+            </h2>
+            <p className="text-xl text-gray-600 max-w-[800px] mx-auto">
+              Join thousands of teams who have transformed their productivity
+              with StreamLine.
+            </p>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-3 w-full">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center space-x-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    />
+                  ))}
+                </div>
+                <CardDescription className="text-base">
+                  "StreamLine has completely transformed how our team works.
+                  We've reduced manual tasks by 80% and our productivity has
+                  never been higher."
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="flex items-center space-x-4">
+                <Image
+                  src="/professional-woman-headshot.png"
+                  alt="Sarah Chen"
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+                <div>
+                  <p className="font-semibold">Sarah Chen</p>
+                  <p className="text-sm text-gray-600">
+                    VP of Operations, TechCorp
+                  </p>
+                </div>
+              </CardFooter>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center space-x-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    />
+                  ))}
+                </div>
+                <CardDescription className="text-base">
+                  "The automation features are incredible. What used to take our
+                  team hours now happens automatically. It's like having an
+                  extra team member."
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="flex items-center space-x-4">
+                <Image
+                  src="/professional-man-headshot.png"
+                  alt="Michael Rodriguez"
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+                <div>
+                  <p className="font-semibold">Michael Rodriguez</p>
+                  <p className="text-sm text-gray-600">CTO, StartupXYZ</p>
+                </div>
+              </CardFooter>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center space-x-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    />
+                  ))}
+                </div>
+                <CardDescription className="text-base">
+                  "StreamLine's analytics give us insights we never had before.
+                  We can now optimize our processes based on real data, not
+                  guesswork."
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="flex items-center space-x-4">
+                <Image
+                  src="/professional-woman-headshot.png"
+                  alt="Emily Johnson"
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+                <div>
+                  <p className="font-semibold">Emily Johnson</p>
+                  <p className="text-sm text-gray-600">
+                    Head of Marketing, GrowthCo
+                  </p>
+                </div>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <section id="pricing">
+        <div className="flex flex-col gap-4 justify-center items-center">
+          <div className="text-center">
+            <Badge
+              variant="secondary"
+              className="bg-emerald-100 text-emerald-800"
+            >
+              Pricing
+            </Badge>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-xl text-gray-600 max-w-[800px] mx-auto">
+              Choose the plan that's right for your team. All plans include a
+              14-day free trial.
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl">Starter</CardTitle>
+                <CardDescription>
+                  Perfect for small teams getting started
+                </CardDescription>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">$9</span>
+                  <span className="text-gray-600">/user/month</span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Up to 5 team members</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Basic automation workflows</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Email support</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Basic analytics</span>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-transparent" variant="outline">
+                  Start Free Trial
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="border-2 border-emerald-600 shadow-xl relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-emerald-600 text-white">
+                  Most Popular
+                </Badge>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-2xl">Professional</CardTitle>
+                <CardDescription>
+                  Best for growing teams and businesses
+                </CardDescription>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">$29</span>
+                  <span className="text-gray-600">/user/month</span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Up to 25 team members</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Advanced automation workflows</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Priority support</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Advanced analytics & reporting</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>API access</span>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+                  Start Free Trial
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl">Enterprise</CardTitle>
+                <CardDescription>
+                  For large organizations with custom needs
+                </CardDescription>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">Custom</span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Unlimited team members</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Custom workflows & integrations</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>24/7 dedicated support</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Advanced security & compliance</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>On-premise deployment</span>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-transparent" variant="outline">
+                  Contact Sales
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="flex flex-col gap-4 justify-center items-center">
+          <div className="text-center flex flex-col gap-4">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+              Ready to streamline your workflow?
+            </h2>
+            <p className="text-xl text-gray-600">
+              Join thousands of teams who have already transformed their
+              productivity. Start your free trial today and see the difference
+              StreamLine can make.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700">
+                Start Free Trial
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button size="lg" variant="outline">
+                Schedule Demo
+              </Button>
+            </div>
+            <div className="flex items-center justify-center space-x-8 text-sm text-gray-600">
+              <div className="flex items-center space-x-2">
+                <Check className="h-4 w-4 text-emerald-600" />
+                <span>14-day free trial</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Check className="h-4 w-4 text-emerald-600" />
+                <span>No credit card required</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Check className="h-4 w-4 text-emerald-600" />
+                <span>Cancel anytime</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <footer id="contact">
+        <div>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600">
+                  <Zap className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-xl font-bold">StreamLine</span>
+              </div>
+              <p className="text-gray-400">
+                Streamline your workflow and boost productivity with our
+                powerful automation platform.
+              </p>
+              <div className="flex space-x-4">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-gray-400 hover:text-white"
+                >
+                  <Twitter className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-gray-400 hover:text-white"
+                >
+                  <Linkedin className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-gray-400 hover:text-white"
+                >
+                  <Github className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-gray-400 hover:text-white"
+                >
+                  <Mail className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Product</h3>
+              <div className="space-y-2">
+                <Link
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
                 >
                   Features
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#pricing"
-                  className="hover:text-primary transition-colors"
+                </Link>
+                <Link
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
                 >
                   Pricing
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#testimonials"
-                  className="hover:text-primary transition-colors"
-                >
-                  Testimonials
-                </a>
-              </li>
-              <li>
+                </Link>
                 <Link
-                  href="/blog"
-                  className="hover:text-primary transition-colors"
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
+                  Integrations
+                </Link>
+                <Link
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
+                  API
+                </Link>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Company</h3>
+              <div className="space-y-2">
+                <Link
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
+                  About
+                </Link>
+                <Link
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
                 >
                   Blog
                 </Link>
-              </li>
-            </ul>
-
-            <div className="hidden md:flex items-center gap-6">
-              <button
-                onClick={() => router.push(WebRoutes.Login)}
-                className="text-sm font-semibold px-5 py-2 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-white transition focus:outline-none focus:ring-4 focus:ring-primary/50"
-                aria-label="Go to Dashboard"
-              >
-                Dashboard
-              </button>
-            </div>
-
-            {/* Mobile menu button placeholder */}
-            <div className="md:hidden">
-              <button
-                aria-label="Open menu"
-                className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                onClick={() => alert("Mobile menu not implemented")}
-              >
-                <svg
-                  className="w-7 h-7"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
+                <Link
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16m-7 6h7"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-          </nav>
-        </header>
-
-        {/* Hero */}
-        <main>
-          <section
-            className="relative flex items-center justify-center h-screen px-6 text-center bg-gradient-to-br from-primary/20 via-background to-background"
-            aria-label="Hero section"
-          >
-            <div className="relative z-10 max-w-4xl">
-              <h2 className="text-6xl font-extrabold leading-tight tracking-tight text-balance drop-shadow-lg">
-                Build. Launch. Scale.{" "}
-                <span className="text-primary underline decoration-4 decoration-primary/50">
-                  Effortlessly
-                </span>
-                .
-              </h2>
-              <p className="mt-8 text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Premium SaaS starter template designed for founders who demand
-                excellence.
-              </p>
-              <div className="mt-12 flex flex-col sm:flex-row justify-center gap-6">
-                <button
-                  className="flex items-center justify-center gap-3 px-10 py-5 text-lg rounded-full shadow-lg bg-primary text-white hover:bg-primary-dark focus:outline-none focus:ring-4 focus:ring-primary/60 transition"
-                  onClick={() => router.push(WebRoutes.Register)}
-                  aria-label="Get started with The Startup"
+                  Careers
+                </Link>
+                <Link
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
                 >
-                  Get Started
-                  <ArrowRightIcon className="w-5 h-5" />
-                </button>
-                <a
-                  href="#features"
-                  className="flex items-center justify-center gap-3 px-10 py-5 text-lg rounded-full border-2 border-muted text-foreground hover:border-primary hover:text-primary transition focus:outline-none focus:ring-4 focus:ring-primary/40"
-                >
-                  Explore Features
-                  <ArrowRightIcon className="w-5 h-5" />
-                </a>
+                  Contact
+                </Link>
               </div>
             </div>
-          </section>
 
-          {/* Features */}
-          <section
-            id="features"
-            className="py-36 px-6 max-w-7xl mx-auto grid md:grid-cols-3 gap-14"
-            aria-label="Features"
-          >
-            {FEATURES.map(({ title, description }, idx) => (
-              <article
-                key={idx}
-                className="bg-card rounded-3xl p-12 shadow-md hover:shadow-2xl transition-transform transform hover:-translate-y-2 cursor-default group"
-                tabIndex={0}
-                aria-describedby={`feature-desc-${idx}`}
-              >
-                <h3 className="text-primary mb-3 text-5xl font-extrabold group-hover:scale-110 transition-transform">
-                  {title.split(" ")[0]}
-                </h3>
-                <h4 className="text-3xl font-semibold mb-5">{title}</h4>
-                <p
-                  id={`feature-desc-${idx}`}
-                  className="text-muted-foreground text-lg leading-relaxed"
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Support</h3>
+              <div className="space-y-2">
+                <Link
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
                 >
-                  {description}
-                </p>
-              </article>
-            ))}
-          </section>
-
-          {/* Testimonials */}
-          <section
-            id="testimonials"
-            className="py-36 bg-gradient-to-br from-muted/20 to-background px-6"
-            aria-label="Testimonials"
-          >
-            <h2 className="text-5xl font-bold text-center mb-20 tracking-wide">
-              What Founders Are Saying
-            </h2>
-            <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-14">
-              {TESTIMONIALS.map(({ quote, author }, idx) => (
-                <blockquote
-                  key={idx}
-                  className="bg-card rounded-3xl p-10 shadow-lg border border-muted/50 hover:shadow-xl transition cursor-default"
+                  Help Center
+                </Link>
+                <Link
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
                 >
-                  <div className="flex flex-col items-center text-center">
-                    <svg
-                      aria-hidden="true"
-                      className="w-10 h-10 text-primary mb-6"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M7.17 6.13a7.49 7.49 0 0 1 1.83-1.51c1.65-.93 3.58-1.1 5.37-.49a8.24 8.24 0 0 1 4.12 3.09 12.08 12.08 0 0 1-1.31 1.5c-1.07 1.02-2.66 1.59-4.49 1.5a7.31 7.31 0 0 1-2.58-.64L7.17 6.13zM4.1 10.2a11.7 11.7 0 0 0 1.56 4.15 12.16 12.16 0 0 0 1.84 2.85 13.3 13.3 0 0 0 2.1 1.83c1.61.99 3.53 1.5 5.31 1.27a9.3 9.3 0 0 0 5.65-2.95 7.96 7.96 0 0 0 1.58-3.19 9.22 9.22 0 0 0-.59-5.18c-1.2-3.07-4.58-5.04-8.06-4.65a9.9 9.9 0 0 0-6.21 4.27 9.4 9.4 0 0 0-1.57 4.01z" />
-                    </svg>
-                    <p className="italic text-lg leading-relaxed mb-6">
-                      &ldquo;{quote}&rdquo;
-                    </p>
-                    <footer className="font-semibold text-lg text-primary">
-                      {author}
-                    </footer>
-                  </div>
-                </blockquote>
-              ))}
+                  Documentation
+                </Link>
+                <Link
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
+                  Status
+                </Link>
+                <Link
+                  href="#"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
+                  Security
+                </Link>
+              </div>
             </div>
-          </section>
+          </div>
 
-          {/* Pricing */}
-          <section
-            id="pricing"
-            className="py-36 px-6 max-w-7xl mx-auto text-center"
-            aria-label="Pricing plans"
-          >
-            <h2 className="text-5xl font-extrabold mb-20 tracking-wide">
-              Choose Your Plan
-            </h2>
-            <div className="grid md:grid-cols-3 gap-12">
-              {PRICING_PLANS.map(({ tier, price, features, featured }, idx) => (
-                <section
-                  key={idx}
-                  className={`rounded-3xl p-12 shadow-lg transition-transform transform ${
-                    featured
-                      ? "border-4 border-primary scale-105 bg-primary/10"
-                      : "border border-muted hover:shadow-xl hover:scale-[1.03]"
-                  } cursor-default`}
-                  aria-labelledby={`plan-${tier.toLowerCase()}-title`}
-                >
-                  <h3
-                    id={`plan-${tier.toLowerCase()}-title`}
-                    className={`text-3xl font-extrabold mb-6 ${
-                      featured ? "text-primary" : "text-foreground"
-                    }`}
-                  >
-                    {tier}
-                  </h3>
-                  <p className="text-6xl font-extrabold mb-10 tracking-tight text-foreground">
-                    {price}
-                  </p>
-                  <ul
-                    className="text-muted-foreground mb-12 space-y-4 text-lg text-left max-w-xs mx-auto"
-                    role="list"
-                  >
-                    {features.map((feat, fidx) => (
-                      <li key={fidx} className="flex items-center gap-3">
-                        <CheckIcon className="w-6 h-6 text-primary flex-shrink-0" />
-                        {feat}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    className={`w-full rounded-full py-4 text-lg font-semibold transition focus:outline-none focus:ring-4 focus:ring-primary/50 ${
-                      featured
-                        ? "bg-primary text-white hover:bg-primary-dark"
-                        : "bg-background border border-primary text-primary hover:bg-primary hover:text-white"
-                    }`}
-                    aria-label={
-                      tier === "Enterprise"
-                        ? "Contact sales for Enterprise plan"
-                        : `Get started with ${tier} plan`
-                    }
-                    onClick={() => {
-                      if (tier === "Enterprise") {
-                        router.push(WebRoutes.Contact);
-                      } else {
-                        router.push(WebRoutes.Register);
-                      }
-                    }}
-                  >
-                    {tier === "Enterprise" ? "Contact Sales" : "Get Started"}
-                  </button>
-                </section>
-              ))}
-            </div>
-          </section>
-
-          {/* Final CTA */}
-          <section
-            className="py-32 bg-gradient-to-r from-primary to-secondary text-white text-center px-6"
-            aria-label="Call to action"
-          >
-            <h2 className="text-5xl font-extrabold mb-8 tracking-wide drop-shadow-lg">
-              Supercharge Your SaaS Today
-            </h2>
-            <p className="text-xl max-w-xl mx-auto mb-14 leading-relaxed">
-              Join top-tier founders building the next generation of SaaS
-              products.
+          <div className="mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 text-sm">
+              © {new Date().getFullYear()} StreamLine. All rights reserved.
             </p>
-            <button
-              className="inline-flex items-center justify-center gap-4 px-14 py-5 text-lg rounded-full bg-white text-primary font-semibold hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-white/50 transition shadow-lg"
-              onClick={() => router.push(WebRoutes.Register)}
-              aria-label="Get The Startup Template now"
-            >
-              Get The Startup Template
-              <ArrowRightIcon className="w-6 h-6" />
-            </button>
-          </section>
-        </main>
-
-        <footer
-          className="py-10 text-center text-muted-foreground text-sm font-mono"
-          role="contentinfo"
-        >
-          © {new Date().getFullYear()} The Startup. All rights reserved.
-        </footer>
-      </div>
-    </>
+            <div className="flex space-x-6 mt-4 md:mt-0">
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-white text-sm transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-white text-sm transition-colors"
+              >
+                Terms of Service
+              </Link>
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-white text-sm transition-colors"
+              >
+                Cookie Policy
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
