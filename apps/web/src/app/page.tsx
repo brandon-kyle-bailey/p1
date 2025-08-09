@@ -1,4 +1,7 @@
-import { Badge } from "@/components/ui/badge";
+"use client";
+
+import { useState } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,389 +11,837 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
-  ArrowRight,
-  BarChart3,
   Check,
-  Github,
-  Linkedin,
-  Mail,
-  Shield,
-  Star,
-  Twitter,
   Users,
-  Zap,
+  Calendar,
+  BarChart3,
+  Shield,
+  ArrowRight,
+  Star,
+  Menu,
+  Twitter,
+  Linkedin,
+  Github,
+  Mail,
+  Workflow,
 } from "lucide-react";
-import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
-import placeholderImage from "@/assets/placeholder-rsreo.png";
-import { WebRoutes } from "../lib/constants";
+function TestimonialCarousel() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-export const metadata: Metadata = {
-  title: "Your SaaS — Empower Your Workflow",
-  description:
-    "Your SaaS helps teams streamline workflows, boost productivity, and manage tasks effortlessly. Try free today!",
-  openGraph: {
-    title: "Your SaaS — Empower Your Workflow",
-    description:
-      "Your SaaS helps teams streamline workflows, boost productivity, and manage tasks effortlessly. Try free today!",
-    url: "https://www.yoursaas.com",
-    siteName: "Your SaaS",
-    type: "website",
-    images: [{ url: "https://www.yoursaas.com/og-image.jpg" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Your SaaS — Empower Your Workflow",
-    description:
-      "Your SaaS helps teams streamline workflows, boost productivity, and manage tasks effortlessly. Try free today!",
-    images: ["https://www.yoursaas.com/og-image.jpg"],
-  },
-};
+  const testimonials = [
+    {
+      content:
+        "FlowSync has revolutionized how our team manages projects. The intuitive interface and powerful features have increased our productivity by 40%.",
+      author: "Sarah Chen",
+      role: "Project Manager, TechCorp",
+      avatar: "SC",
+    },
+    {
+      content:
+        "The collaboration features are outstanding. Our remote team feels more connected than ever, and project delivery has never been smoother.",
+      author: "Michael Rodriguez",
+      role: "Team Lead, StartupXYZ",
+      avatar: "MR",
+    },
+    {
+      content:
+        "The analytics dashboard gives us incredible insights into our workflow. We can identify bottlenecks and optimize our processes like never before.",
+      author: "Emily Johnson",
+      role: "Operations Director, GrowthCo",
+      avatar: "EJ",
+    },
+    {
+      content:
+        "Implementation was seamless and the support team was incredibly helpful. We saw immediate improvements in our project delivery times.",
+      author: "David Park",
+      role: "Engineering Manager, DevCorp",
+      avatar: "DP",
+    },
+    {
+      content:
+        "The integrations with our existing tools made the transition effortless. FlowSync fits perfectly into our workflow without disruption.",
+      author: "Lisa Thompson",
+      role: "Product Manager, InnovateCo",
+      avatar: "LT",
+    },
+  ];
+
+  // Auto-play functionality
+  React.useEffect(() => {
+    if (!isAutoPlaying) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, testimonials.length]);
+
+  const nextTestimonial = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
+  };
+
+  const prevTestimonial = () => {
+    setCurrentIndex(
+      (prevIndex) =>
+        (prevIndex - 1 + testimonials.length) % testimonials.length,
+    );
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+  };
+
+  return (
+    <div
+      className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8"
+      onMouseEnter={() => setIsAutoPlaying(false)}
+      onMouseLeave={() => setIsAutoPlaying(true)}
+    >
+      <div className="overflow-hidden rounded-xl">
+        <div
+          className="flex transition-transform duration-500 ease-in-out"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {testimonials.map((testimonial, index) => (
+            <div key={index} className="w-full flex-shrink-0 px-2 sm:px-4">
+              <Card className="mx-auto max-w-3xl transform transition-all duration-300 hover:scale-105">
+                <CardHeader className="pb-4 sm:pb-6">
+                  <div className="flex items-center space-x-1 mb-4 justify-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="h-3 w-3 sm:h-4 sm:w-4 fill-primary text-primary animate-pulse"
+                        style={{ animationDelay: `${i * 0.1}s` }}
+                      />
+                    ))}
+                  </div>
+                  <CardDescription className="text-base sm:text-lg lg:text-xl text-center leading-relaxed px-2 sm:px-4">
+                    "{testimonial.content}"
+                  </CardDescription>
+                </CardHeader>
+                <CardFooter className="justify-center pt-2 sm:pt-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <Image
+                        src={`/transparent_placeholder.png?height=50&width=50&text=${testimonial.avatar}`}
+                        alt={testimonial.author}
+                        width={40}
+                        height={40}
+                        className="sm:w-[50px] sm:h-[50px] rounded-full transition-transform duration-300 hover:scale-110"
+                      />
+                      <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping opacity-75"></div>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-semibold text-sm sm:text-base">
+                        {testimonial.author}
+                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {testimonial.role}
+                      </p>
+                    </div>
+                  </div>
+                </CardFooter>
+              </Card>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Navigation Buttons - Hidden on mobile, visible on tablet+ */}
+      <Button
+        variant="outline"
+        size="icon"
+        className="hidden sm:flex absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-2 lg:-translate-x-4 bg-background/80 backdrop-blur-sm hover:bg-background hover:scale-110 transition-all duration-200 shadow-lg"
+        onClick={prevTestimonial}
+      >
+        <ArrowRight className="h-4 w-4 rotate-180" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        className="hidden sm:flex absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-2 lg:translate-x-4 bg-background/80 backdrop-blur-sm hover:bg-background hover:scale-110 transition-all duration-200 shadow-lg"
+        onClick={nextTestimonial}
+      >
+        <ArrowRight className="h-4 w-4" />
+      </Button>
+
+      {/* Mobile Navigation Buttons */}
+      <div className="flex sm:hidden justify-between mt-4 px-4">
+        <Button variant="outline" size="sm" onClick={prevTestimonial}>
+          <ArrowRight className="h-3 w-3 rotate-180 mr-1" />
+          Previous
+        </Button>
+        <Button variant="outline" size="sm" onClick={nextTestimonial}>
+          Next
+          <ArrowRight className="h-3 w-3 ml-1" />
+        </Button>
+      </div>
+
+      {/* Dots Indicator */}
+      <div className="flex justify-center space-x-1 sm:space-x-2 mt-6 sm:mt-8">
+        {testimonials.map((_, index) => (
+          <button
+            key={index}
+            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
+              index === currentIndex
+                ? "bg-primary scale-125 shadow-lg"
+                : "bg-muted-foreground/30 hover:bg-muted-foreground/50 hover:scale-110"
+            }`}
+            onClick={() => goToSlide(index)}
+          />
+        ))}
+      </div>
+
+      {/* Auto-play indicator */}
+      <div className="flex justify-center mt-3 sm:mt-4">
+        <div className="text-xs text-muted-foreground flex items-center space-x-2">
+          <div
+            className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isAutoPlaying ? "bg-green-500 animate-pulse" : "bg-gray-400"}`}
+          ></div>
+          <span className="hidden sm:inline">
+            {isAutoPlaying ? "Auto-playing" : "Paused"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   return (
-    <div className="flex flex-col gap-24 p-16">
-      <header className="sticky top-0 z-50 bg-secondary h-16">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center rounded-lg bg-primary p-2">
-              <Zap className="text-secondary" />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex h-16 items-center justify-between px-4 md:px-6">
+          <div className="flex items-center space-x-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+              <Workflow className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">The Startup</span>
+            <span className="text-xl font-bold">FlowSync</span>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center space-x-8">
             <Link
               href="#features"
-              className="text-sm font-medium transition-colors"
+              className="text-sm font-medium hover:text-primary transition-colors"
             >
               Features
             </Link>
             <Link
+              href="#integrations"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Integrations
+            </Link>
+            <Link
               href="#testimonials"
-              className="text-sm font-medium transition-colors"
+              className="text-sm font-medium hover:text-primary transition-colors"
             >
               Testimonials
             </Link>
             <Link
               href="#pricing"
-              className="text-sm font-medium transition-colors"
+              className="text-sm font-medium hover:text-primary transition-colors"
             >
               Pricing
             </Link>
             <Link
+              href="#faq"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              FAQ
+            </Link>
+            <Link
               href="#contact"
-              className="text-sm font-medium transition-colors"
+              className="text-sm font-medium hover:text-primary transition-colors"
             >
               Contact
             </Link>
           </nav>
 
-          <div className="flex items-center gap-4">
-            <Link href={WebRoutes.Login} className="hidden md:flex">
-              Log in
-            </Link>
-            <Link href={WebRoutes.Register} className="hidden md:flex">
-              <Button className="bg-primary">Register</Button>
-            </Link>
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" className="hidden md:inline-flex">
+              Sign In
+            </Button>
+            <Button className="hidden md:inline-flex">Get Started</Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
           </div>
         </div>
-      </header>
-      <section>
-        <div>
-          <div className="flex flex-col justify-center items-center gap-4 p-4">
-            <div className="flex flex-col gap-4 justify-center items-center">
-              <Badge variant="secondary" className="bg-green-500">
-                🚀 New: AI-Powered Automation
-              </Badge>
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-                Streamline Your
-                <span className="text-green-500"> Workflow</span>
-              </h1>
-              <p className="text-xl text-gray-600">
-                Automate repetitive tasks, boost team productivity, and focus on
-                what matters most. StreamLine helps you build efficient
-                workflows in minutes, not hours.
-              </p>
 
-              <div className="flex gap-4">
-                <Button size="lg">
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t bg-background">
+            <nav className="px-4 py-4 space-y-4">
+              <Link
+                href="#features"
+                className="block text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Features
+              </Link>
+              <Link
+                href="#integrations"
+                className="block text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Integrations
+              </Link>
+              <Link
+                href="#testimonials"
+                className="block text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Testimonials
+              </Link>
+              <Link
+                href="#pricing"
+                className="block text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Pricing
+              </Link>
+              <Link
+                href="#faq"
+                className="block text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                FAQ
+              </Link>
+              <Link
+                href="#contact"
+                className="block text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              <div className="pt-4 border-t space-y-2">
+                <Button variant="ghost" className="w-full justify-start">
+                  Sign In
+                </Button>
+                <Button className="w-full">Get Started</Button>
+              </div>
+            </nav>
+          </div>
+        )}
+      </header>
+
+      {/* Hero Section */}
+      <section className="py-12 sm:py-16 md:py-20 lg:py-32">
+        <div className="px-4 md:px-6">
+          <div className="grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16 items-center">
+            <div className="space-y-6 sm:space-y-8 text-center lg:text-left">
+              <div className="space-y-4">
+                <Badge variant="secondary" className="text-xs sm:text-sm">
+                  🚀 New: Real-time Collaboration
+                </Badge>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight">
+                  Sync Your Team's
+                  <span className="text-primary"> Workflow</span>
+                </h1>
+                <p className="text-lg sm:text-xl text-muted-foreground max-w-[600px] mx-auto lg:mx-0">
+                  Streamline project management, enhance team collaboration, and
+                  boost productivity with FlowSync's intuitive platform designed
+                  for modern teams.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
+                <Button size="lg" className="w-full sm:w-auto">
                   Start Free Trial
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button size="lg" variant="outline">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto bg-transparent"
+                >
                   Watch Demo
                 </Button>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-2 sm:space-y-0 sm:space-x-8 text-sm text-muted-foreground">
                 <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
+                  <Check className="h-4 w-4 text-primary" />
                   <span>14-day free trial</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
+                  <Check className="h-4 w-4 text-primary" />
                   <span>No credit card required</span>
                 </div>
               </div>
             </div>
 
-            <div>
+            <div className="relative order-first lg:order-last">
               <Image
-                src={placeholderImage}
-                alt="StreamLine Dashboard"
+                src="/placeholder.svg?height=600&width=800&text=FlowSync Dashboard"
+                alt="FlowSync Dashboard Preview"
                 width={800}
                 height={600}
-                className="rounded-xl shadow-2xl"
+                className="rounded-xl shadow-2xl border w-full h-auto"
               />
             </div>
           </div>
         </div>
       </section>
 
-      <section id="features">
-        <div className="flex flex-col gap-4 justify-center items-center">
-          <div className="text-center">
-            <Badge
-              variant="secondary"
-              className="bg-emerald-100 text-emerald-800"
-            >
-              Features
-            </Badge>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-              Everything you need to succeed
+      {/* Features Section */}
+      <section id="features" className="py-12 sm:py-16 md:py-20 bg-muted/50">
+        <div className="px-4 md:px-6">
+          <div className="text-center space-y-4 mb-12 sm:mb-16">
+            <Badge variant="secondary">Features</Badge>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+              Everything you need to manage projects
             </h2>
-            <p className="text-xl text-gray-600 max-w-[800px] mx-auto">
-              Powerful features designed to help teams work smarter, not harder.
-              From automation to analytics, we've got you covered.
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-[800px] mx-auto px-4">
+              Powerful features designed to help teams collaborate effectively
+              and deliver projects on time.
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-4 w-full">
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4">
-                  <Zap className="h-6 w-6 text-emerald-600" />
+          <div className="space-y-16 sm:space-y-20 lg:space-y-24">
+            {/* Feature 1 - Text Left, Image Right */}
+            <div className="grid gap-8 lg:grid-cols-2 items-center">
+              <div className="space-y-4 text-center lg:text-left">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle>Smart Automation</CardTitle>
-                <CardDescription>
-                  Create powerful workflows that run automatically, saving hours
-                  of manual work every week.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+                <h3 className="text-xl sm:text-2xl font-bold">
+                  Smart Task Management
+                </h3>
+                <p className="text-base sm:text-lg text-muted-foreground">
+                  Organize and prioritize tasks with ease
+                </p>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Create, assign, and track tasks with our intuitive board
+                  interface. Set priorities, due dates, and dependencies to keep
+                  your projects moving forward. Our smart algorithms help you
+                  identify bottlenecks before they become problems.
+                </p>
+                <ul className="space-y-2 text-left max-w-md mx-auto lg:mx-0">
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Drag-and-drop task organization
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Automated priority suggestions
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Real-time progress tracking
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              <div className="relative order-first lg:order-last">
+                <Image
+                  src="/placeholder.svg?height=400&width=600&text=Task Management Dashboard"
+                  alt="Task Management Dashboard showing organized project boards"
+                  width={600}
+                  height={400}
+                  className="rounded-xl shadow-lg border w-full h-auto"
+                />
+              </div>
+            </div>
 
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6 text-emerald-600" />
+            {/* Feature 2 - Image Left, Text Right */}
+            <div className="grid gap-8 lg:grid-cols-2 items-center">
+              <div className="relative">
+                <Image
+                  src="/placeholder.svg?height=400&width=600&text=Team Collaboration Tools"
+                  alt="Team collaboration interface with real-time chat and file sharing"
+                  width={600}
+                  height={400}
+                  className="rounded-xl shadow-lg border w-full h-auto"
+                />
+              </div>
+              <div className="space-y-4 text-center lg:text-left">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
+                  <Calendar className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle>Team Collaboration</CardTitle>
-                <CardDescription>
-                  Work together seamlessly with real-time updates, comments, and
-                  shared workspaces.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+                <h3 className="text-xl sm:text-2xl font-bold">
+                  Real-time Collaboration
+                </h3>
+                <p className="text-base sm:text-lg text-muted-foreground">
+                  Work together seamlessly, wherever you are
+                </p>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Connect your team with real-time updates, instant messaging,
+                  and collaborative workspaces. Share files, leave comments, and
+                  get notifications when things change. No more endless email
+                  chains or missed updates.
+                </p>
+                <ul className="space-y-2 text-left max-w-md mx-auto lg:mx-0">
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Instant messaging and comments
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      File sharing and version control
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Smart notification system
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
 
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4">
-                  <BarChart3 className="h-6 w-6 text-emerald-600" />
+            {/* Feature 3 - Text Left, Image Right */}
+            <div className="grid gap-8 lg:grid-cols-2 items-center">
+              <div className="space-y-4 text-center lg:text-left">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
+                  <BarChart3 className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle>Advanced Analytics</CardTitle>
-                <CardDescription>
-                  Get insights into your team's productivity with detailed
-                  reports and performance metrics.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+                <h3 className="text-xl sm:text-2xl font-bold">
+                  Advanced Analytics
+                </h3>
+                <p className="text-base sm:text-lg text-muted-foreground">
+                  Make data-driven decisions with powerful insights
+                </p>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Get deep insights into your team's performance with
+                  customizable dashboards and detailed reports. Track
+                  productivity trends, identify bottlenecks, and optimize your
+                  workflows for maximum efficiency.
+                </p>
+                <ul className="space-y-2 text-left max-w-md mx-auto lg:mx-0">
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Customizable analytics dashboards
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Performance trend analysis
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Automated reporting
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              <div className="relative order-first lg:order-last">
+                <Image
+                  src="/placeholder.svg?height=400&width=600&text=Analytics Dashboard"
+                  alt="Analytics dashboard showing project performance metrics and charts"
+                  width={600}
+                  height={400}
+                  className="rounded-xl shadow-lg border w-full h-auto"
+                />
+              </div>
+            </div>
 
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4">
-                  <Shield className="h-6 w-6 text-emerald-600" />
+            {/* Feature 4 - Image Left, Text Right */}
+            <div className="grid gap-8 lg:grid-cols-2 items-center">
+              <div className="relative">
+                <Image
+                  src="/placeholder.svg?height=400&width=600&text=Security Features"
+                  alt="Enterprise security dashboard with access controls and compliance features"
+                  width={600}
+                  height={400}
+                  className="rounded-xl shadow-lg border w-full h-auto"
+                />
+              </div>
+              <div className="space-y-4 text-center lg:text-left">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
+                  <Shield className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle>Enterprise Security</CardTitle>
-                <CardDescription>
-                  Bank-level security with SOC 2 compliance, SSO, and advanced
-                  permission controls.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+                <h3 className="text-xl sm:text-2xl font-bold">
+                  Enterprise Security
+                </h3>
+                <p className="text-base sm:text-lg text-muted-foreground">
+                  Keep your data safe with bank-level security
+                </p>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Protect your sensitive project data with enterprise-grade
+                  security features. From SSO integration to granular
+                  permissions, we ensure your information stays secure while
+                  keeping your team productive.
+                </p>
+                <ul className="space-y-2 text-left max-w-md mx-auto lg:mx-0">
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      SSO and SAML integration
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Granular access controls
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      SOC 2 Type II compliance
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="testimonials">
-        <div className="flex flex-col gap-4 justify-center items-center">
-          <div className="text-center">
-            <Badge
-              variant="secondary"
-              className="bg-emerald-100 text-emerald-800"
-            >
-              Testimonials
-            </Badge>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-              Loved by teams worldwide
+      {/* Integrations Section */}
+      <section id="integrations" className="py-12 sm:py-16 md:py-20">
+        <div className="px-4 md:px-6">
+          <div className="text-center space-y-4 mb-12 sm:mb-16">
+            <Badge variant="secondary">Integrations</Badge>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+              Connect with your favorite tools
             </h2>
-            <p className="text-xl text-gray-600 max-w-[800px] mx-auto">
-              Join thousands of teams who have transformed their productivity
-              with StreamLine.
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-[800px] mx-auto px-4">
+              FlowSync integrates seamlessly with the tools your team already
+              uses. No need to change your workflow.
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-3 w-full">
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <div className="flex items-center space-x-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                </div>
-                <CardDescription className="text-base">
-                  "StreamLine has completely transformed how our team works.
-                  We've reduced manual tasks by 80% and our productivity has
-                  never been higher."
-                </CardDescription>
-              </CardHeader>
-              <CardFooter className="flex items-center space-x-4">
-                <Image
-                  src="/professional-woman-headshot.png"
-                  alt="Sarah Chen"
-                  width={40}
-                  height={40}
-                  className="rounded-full"
-                />
-                <div>
-                  <p className="font-semibold">Sarah Chen</p>
-                  <p className="text-sm text-gray-600">
-                    VP of Operations, TechCorp
-                  </p>
-                </div>
-              </CardFooter>
+          <div className="grid gap-4 sm:gap-6 lg:gap-8 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 mb-8 sm:mb-12">
+            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+              <Image
+                src="/placeholder.svg?height=60&width=60&text=Slack"
+                alt="Slack integration"
+                width={60}
+                height={60}
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+              />
+              <h3 className="font-semibold mb-2 text-sm sm:text-base">Slack</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Get project updates directly in your Slack channels
+              </p>
             </Card>
 
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <div className="flex items-center space-x-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                </div>
-                <CardDescription className="text-base">
-                  "The automation features are incredible. What used to take our
-                  team hours now happens automatically. It's like having an
-                  extra team member."
-                </CardDescription>
-              </CardHeader>
-              <CardFooter className="flex items-center space-x-4">
-                <Image
-                  src="/professional-man-headshot.png"
-                  alt="Michael Rodriguez"
-                  width={40}
-                  height={40}
-                  className="rounded-full"
-                />
-                <div>
-                  <p className="font-semibold">Michael Rodriguez</p>
-                  <p className="text-sm text-gray-600">CTO, StartupXYZ</p>
-                </div>
-              </CardFooter>
+            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+              <Image
+                src="/placeholder.svg?height=60&width=60&text=GitHub"
+                alt="GitHub integration"
+                width={60}
+                height={60}
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+              />
+              <h3 className="font-semibold mb-2 text-sm sm:text-base">
+                GitHub
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Link commits and pull requests to project tasks
+              </p>
             </Card>
 
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <div className="flex items-center space-x-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                </div>
-                <CardDescription className="text-base">
-                  "StreamLine's analytics give us insights we never had before.
-                  We can now optimize our processes based on real data, not
-                  guesswork."
-                </CardDescription>
-              </CardHeader>
-              <CardFooter className="flex items-center space-x-4">
-                <Image
-                  src="/professional-woman-headshot.png"
-                  alt="Emily Johnson"
-                  width={40}
-                  height={40}
-                  className="rounded-full"
-                />
-                <div>
-                  <p className="font-semibold">Emily Johnson</p>
-                  <p className="text-sm text-gray-600">
-                    Head of Marketing, GrowthCo
-                  </p>
-                </div>
-              </CardFooter>
+            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+              <Image
+                src="/placeholder.svg?height=60&width=60&text=Google"
+                alt="Google Workspace integration"
+                width={60}
+                height={60}
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+              />
+              <h3 className="font-semibold mb-2 text-sm sm:text-base">
+                Google Workspace
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Sync with Google Calendar, Drive, and Gmail
+              </p>
             </Card>
+
+            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+              <Image
+                src="/placeholder.svg?height=60&width=60&text=Figma"
+                alt="Figma integration"
+                width={60}
+                height={60}
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+              />
+              <h3 className="font-semibold mb-2 text-sm sm:text-base">Figma</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Embed design files and track design progress
+              </p>
+            </Card>
+
+            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+              <Image
+                src="/placeholder.svg?height=60&width=60&text=Zoom"
+                alt="Zoom integration"
+                width={60}
+                height={60}
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+              />
+              <h3 className="font-semibold mb-2 text-sm sm:text-base">Zoom</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Schedule and join meetings directly from tasks
+              </p>
+            </Card>
+
+            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+              <Image
+                src="/placeholder.svg?height=60&width=60&text=Jira"
+                alt="Jira integration"
+                width={60}
+                height={60}
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+              />
+              <h3 className="font-semibold mb-2 text-sm sm:text-base">Jira</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Sync issues and track development progress
+              </p>
+            </Card>
+
+            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+              <Image
+                src="/placeholder.svg?height=60&width=60&text=Salesforce"
+                alt="Salesforce integration"
+                width={60}
+                height={60}
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+              />
+              <h3 className="font-semibold mb-2 text-sm sm:text-base">
+                Salesforce
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Connect customer data with project workflows
+              </p>
+            </Card>
+
+            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+              <Image
+                src="/placeholder.svg?height=60&width=60&text=API"
+                alt="Custom API integration"
+                width={60}
+                height={60}
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+              />
+              <h3 className="font-semibold mb-2 text-sm sm:text-base">
+                Custom API
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Build custom integrations with our REST API
+              </p>
+            </Card>
+          </div>
+
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4 text-sm sm:text-base">
+              Don't see your tool? We're always adding new integrations.
+            </p>
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto bg-transparent"
+            >
+              Request Integration
+            </Button>
           </div>
         </div>
       </section>
 
-      <section id="pricing">
-        <div className="flex flex-col gap-4 justify-center items-center">
-          <div className="text-center">
-            <Badge
-              variant="secondary"
-              className="bg-emerald-100 text-emerald-800"
-            >
-              Pricing
-            </Badge>
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-20">
+        <div className="px-4 md:px-6">
+          <div className="text-center space-y-4 mb-16">
+            <Badge variant="secondary">Testimonials</Badge>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-              Simple, transparent pricing
+              Trusted by teams worldwide
             </h2>
-            <p className="text-xl text-gray-600 max-w-[800px] mx-auto">
-              Choose the plan that's right for your team. All plans include a
-              14-day free trial.
+            <p className="text-xl text-muted-foreground max-w-[800px] mx-auto">
+              See what our customers have to say about FlowSync and how it's
+              improved their team productivity.
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl">Starter</CardTitle>
-                <CardDescription>
+          <TestimonialCarousel />
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-12 sm:py-16 md:py-20 bg-muted/50">
+        <div className="px-4 md:px-6">
+          <div className="text-center space-y-4 mb-12 sm:mb-16">
+            <Badge variant="secondary">Pricing</Badge>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+              Choose your plan
+            </h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-[800px] mx-auto px-4">
+              Flexible pricing options to fit teams of all sizes. Start with our
+              free trial.
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-3 max-w-6xl mx-auto">
+            <Card className="relative">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg sm:text-xl">Starter</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
                   Perfect for small teams getting started
                 </CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">$9</span>
-                  <span className="text-gray-600">/user/month</span>
+                  <span className="text-2xl sm:text-3xl font-bold">$12</span>
+                  <span className="text-muted-foreground text-sm sm:text-base">
+                    /user/month
+                  </span>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Up to 5 team members</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Basic automation workflows</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Email support</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Basic analytics</span>
-                </div>
+              <CardContent className="pb-4">
+                <ul className="space-y-2 sm:space-y-3">
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Up to 10 team members
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Basic project management
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Email support</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">5GB storage</span>
+                  </li>
+                </ul>
               </CardContent>
               <CardFooter>
                 <Button className="w-full bg-transparent" variant="outline">
@@ -399,82 +850,104 @@ export default function LandingPage() {
               </CardFooter>
             </Card>
 
-            <Card className="border-2 border-emerald-600 shadow-xl relative">
+            <Card className="border-primary shadow-lg relative lg:scale-105">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-emerald-600 text-white">
-                  Most Popular
-                </Badge>
+                <Badge className="text-xs sm:text-sm">Most Popular</Badge>
               </div>
-              <CardHeader>
-                <CardTitle className="text-2xl">Professional</CardTitle>
-                <CardDescription>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg sm:text-xl">
+                  Professional
+                </CardTitle>
+                <CardDescription className="text-sm sm:text-base">
                   Best for growing teams and businesses
                 </CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">$29</span>
-                  <span className="text-gray-600">/user/month</span>
+                  <span className="text-2xl sm:text-3xl font-bold">$24</span>
+                  <span className="text-muted-foreground text-sm sm:text-base">
+                    /user/month
+                  </span>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Up to 25 team members</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Advanced automation workflows</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Priority support</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Advanced analytics & reporting</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>API access</span>
-                </div>
+              <CardContent className="pb-4">
+                <ul className="space-y-2 sm:space-y-3">
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Up to 50 team members
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Advanced project features
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Priority support
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">100GB storage</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Advanced analytics
+                    </span>
+                  </li>
+                </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
-                  Start Free Trial
-                </Button>
+                <Button className="w-full">Start Free Trial</Button>
               </CardFooter>
             </Card>
 
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl">Enterprise</CardTitle>
-                <CardDescription>
-                  For large organizations with custom needs
+            <Card className="relative">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg sm:text-xl">Enterprise</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  For large organizations with advanced needs
                 </CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">Custom</span>
+                  <span className="text-2xl sm:text-3xl font-bold">Custom</span>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Unlimited team members</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Custom workflows & integrations</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>24/7 dedicated support</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Advanced security & compliance</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-emerald-600" />
-                  <span>On-premise deployment</span>
-                </div>
+              <CardContent className="pb-4">
+                <ul className="space-y-2 sm:space-y-3">
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Unlimited team members
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Custom integrations
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Dedicated support
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Unlimited storage
+                    </span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Advanced security
+                    </span>
+                  </li>
+                </ul>
               </CardContent>
               <CardFooter>
                 <Button className="w-full bg-transparent" variant="outline">
@@ -486,204 +959,277 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section>
-        <div className="flex flex-col gap-4 justify-center items-center">
-          <div className="text-center flex flex-col gap-4">
+      {/* FAQ Section */}
+      <section id="faq" className="py-20 bg-muted/50">
+        <div className="px-4 md:px-6">
+          <div className="text-center space-y-4 mb-16">
+            <Badge variant="secondary">FAQ</Badge>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-              Ready to streamline your workflow?
+              Frequently asked questions
             </h2>
-            <p className="text-xl text-gray-600">
-              Join thousands of teams who have already transformed their
-              productivity. Start your free trial today and see the difference
-              StreamLine can make.
+            <p className="text-xl text-muted-foreground max-w-[800px] mx-auto">
+              Got questions? We've got answers. Here are some of the most common
+              questions about FlowSync.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700">
+          </div>
+
+          <div className="max-w-3xl mx-auto">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>How long is the free trial?</AccordionTrigger>
+                <AccordionContent>
+                  Our free trial lasts 14 days and includes access to all
+                  features. No credit card required to start, and you can cancel
+                  anytime.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger>Can I change plans later?</AccordionTrigger>
+                <AccordionContent>
+                  Yes! You can upgrade or downgrade your plan at any time.
+                  Changes take effect immediately, and we'll prorate any billing
+                  adjustments.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-3">
+                <AccordionTrigger>Is my data secure?</AccordionTrigger>
+                <AccordionContent>
+                  Absolutely. We use enterprise-grade security with SOC 2 Type
+                  II compliance, end-to-end encryption, and regular security
+                  audits to keep your data safe.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-4">
+                <AccordionTrigger>
+                  Do you offer customer support?
+                </AccordionTrigger>
+                <AccordionContent>
+                  Yes! We provide email support for all plans, priority support
+                  for Professional plans, and dedicated support managers for
+                  Enterprise customers.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-5">
+                <AccordionTrigger>
+                  Can I import data from other tools?
+                </AccordionTrigger>
+                <AccordionContent>
+                  Yes, we support data import from popular project management
+                  tools like Asana, Trello, Monday.com, and more. Our team can
+                  help with the migration process.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-6">
+                <AccordionTrigger>Is there a mobile app?</AccordionTrigger>
+                <AccordionContent>
+                  Yes! FlowSync is available on iOS and Android. The mobile app
+                  includes all core features so you can manage projects on the
+                  go.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-muted-foreground mb-4">Still have questions?</p>
+            <Button variant="outline">Contact Support</Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="py-12 sm:py-16 md:py-20">
+        <div className="px-4 md:px-6">
+          <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+              Ready to sync your team's workflow?
+            </h2>
+            <p className="text-lg sm:text-xl text-muted-foreground px-4">
+              Join thousands of teams who have already improved their
+              productivity with FlowSync. Start your free trial today and
+              experience the difference.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md sm:max-w-none mx-auto">
+              <Button size="lg" className="w-full sm:w-auto">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline">
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto bg-transparent"
+              >
                 Schedule Demo
               </Button>
             </div>
-            <div className="flex items-center justify-center space-x-8 text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-8 text-sm text-muted-foreground">
               <div className="flex items-center space-x-2">
-                <Check className="h-4 w-4 text-emerald-600" />
+                <Check className="h-4 w-4 text-primary" />
                 <span>14-day free trial</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Check className="h-4 w-4 text-emerald-600" />
+                <Check className="h-4 w-4 text-primary" />
                 <span>No credit card required</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Check className="h-4 w-4 text-emerald-600" />
+                <Check className="h-4 w-4 text-primary" />
                 <span>Cancel anytime</span>
               </div>
             </div>
           </div>
         </div>
       </section>
-      <footer id="contact">
-        <div>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-4">
+
+      {/* Footer */}
+      <footer id="contact" className="border-t bg-muted/50 py-12 sm:py-16">
+        <div className="px-4 md:px-6">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-4 sm:col-span-2 lg:col-span-1">
               <div className="flex items-center space-x-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600">
-                  <Zap className="h-5 w-5 text-white" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                  <Workflow className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="text-xl font-bold">StreamLine</span>
+                <span className="text-xl font-bold">FlowSync</span>
               </div>
-              <p className="text-gray-400">
-                Streamline your workflow and boost productivity with our
-                powerful automation platform.
+              <p className="text-muted-foreground text-sm sm:text-base">
+                Sync your team's workflow and boost productivity with our
+                intuitive project management platform.
               </p>
               <div className="flex space-x-4">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="text-gray-400 hover:text-white"
-                >
+                <Button size="icon" variant="ghost">
                   <Twitter className="h-4 w-4" />
                 </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="text-gray-400 hover:text-white"
-                >
+                <Button size="icon" variant="ghost">
                   <Linkedin className="h-4 w-4" />
                 </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="text-gray-400 hover:text-white"
-                >
+                <Button size="icon" variant="ghost">
                   <Github className="h-4 w-4" />
                 </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="text-gray-400 hover:text-white"
-                >
+                <Button size="icon" variant="ghost">
                   <Mail className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Product</h3>
-              <div className="space-y-2">
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Features
-                </Link>
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Pricing
-                </Link>
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Integrations
-                </Link>
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  API
-                </Link>
-              </div>
+              <h3 className="text-base sm:text-lg font-semibold">Product</h3>
+              <ul className="space-y-2 text-muted-foreground text-sm sm:text-base">
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Features
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Integrations
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    API
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Security
+                  </Link>
+                </li>
+              </ul>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Company</h3>
-              <div className="space-y-2">
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  About
-                </Link>
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Blog
-                </Link>
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Careers
-                </Link>
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Contact
-                </Link>
-              </div>
+              <h3 className="text-base sm:text-lg font-semibold">Company</h3>
+              <ul className="space-y-2 text-muted-foreground text-sm sm:text-base">
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Careers
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Press
+                  </Link>
+                </li>
+              </ul>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Support</h3>
-              <div className="space-y-2">
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Help Center
-                </Link>
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Documentation
-                </Link>
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Status
-                </Link>
-                <Link
-                  href="#"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Security
-                </Link>
-              </div>
+              <h3 className="text-base sm:text-lg font-semibold">Support</h3>
+              <ul className="space-y-2 text-muted-foreground text-sm sm:text-base">
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Help Center
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Documentation
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Status
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Privacy Policy
+                  </Link>
+                </li>
+              </ul>
             </div>
           </div>
 
-          <div className="mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">
-              © {new Date().getFullYear()} StreamLine. All rights reserved.
+          <div className="border-t mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-muted-foreground text-sm sm:text-base">
+            <p>
+              &copy; {new Date().getFullYear()} FlowSync. All rights reserved.
             </p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link
-                href="#"
-                className="text-gray-400 hover:text-white text-sm transition-colors"
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                href="#"
-                className="text-gray-400 hover:text-white text-sm transition-colors"
-              >
-                Terms of Service
-              </Link>
-              <Link
-                href="#"
-                className="text-gray-400 hover:text-white text-sm transition-colors"
-              >
-                Cookie Policy
-              </Link>
-            </div>
           </div>
         </div>
       </footer>
