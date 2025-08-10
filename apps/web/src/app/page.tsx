@@ -36,6 +36,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+import placeholderImage from "../../public/placeholder.png";
+import { ModeToggle } from "../components/theme/mode-toggle";
+
 function TestimonialCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -129,7 +132,7 @@ function TestimonialCarousel() {
                     ))}
                   </div>
                   <CardDescription className="text-base sm:text-lg lg:text-xl text-center leading-relaxed px-2 sm:px-4">
-                    "{testimonial.content}"
+                    &quot;{testimonial.content}&quot;
                   </CardDescription>
                 </CardHeader>
                 <CardFooter className="justify-center pt-2 sm:pt-4">
@@ -274,6 +277,7 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center space-x-4">
+            <ModeToggle />
             <Button variant="ghost" className="hidden md:inline-flex">
               Sign In
             </Button>
@@ -347,7 +351,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-32">
+      <section className="p-8">
         <div className="px-4 md:px-6">
           <div className="grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16 items-center">
             <div className="space-y-6 sm:space-y-8 text-center lg:text-left">
@@ -356,13 +360,13 @@ export default function LandingPage() {
                   🚀 New: Real-time Collaboration
                 </Badge>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight">
-                  Sync Your Team's
+                  Sync Your Team&apos;s
                   <span className="text-primary"> Workflow</span>
                 </h1>
                 <p className="text-lg sm:text-xl text-muted-foreground max-w-[600px] mx-auto lg:mx-0">
                   Streamline project management, enhance team collaboration, and
-                  boost productivity with FlowSync's intuitive platform designed
-                  for modern teams.
+                  boost productivity with FlowSync&apos;s intuitive platform
+                  designed for modern teams.
                 </p>
               </div>
 
@@ -392,9 +396,9 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="relative order-first lg:order-last">
+            <div className="relative">
               <Image
-                src="/placeholder.svg?height=600&width=800&text=FlowSync Dashboard"
+                src={placeholderImage}
                 alt="FlowSync Dashboard Preview"
                 width={800}
                 height={600}
@@ -406,7 +410,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-12 sm:py-16 md:py-20 bg-muted/50">
+      <section id="features" className="p-8 bg-muted/50">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-12 sm:mb-16">
             <Badge variant="secondary">Features</Badge>
@@ -461,7 +465,7 @@ export default function LandingPage() {
               </div>
               <div className="relative order-first lg:order-last">
                 <Image
-                  src="/placeholder.svg?height=400&width=600&text=Task Management Dashboard"
+                  src={placeholderImage}
                   alt="Task Management Dashboard showing organized project boards"
                   width={600}
                   height={400}
@@ -474,7 +478,7 @@ export default function LandingPage() {
             <div className="grid gap-8 lg:grid-cols-2 items-center">
               <div className="relative">
                 <Image
-                  src="/placeholder.svg?height=400&width=600&text=Team Collaboration Tools"
+                  src={placeholderImage}
                   alt="Team collaboration interface with real-time chat and file sharing"
                   width={600}
                   height={400}
@@ -533,7 +537,7 @@ export default function LandingPage() {
                   Make data-driven decisions with powerful insights
                 </p>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Get deep insights into your team's performance with
+                  Get deep insights into your team&apos;s performance with
                   customizable dashboards and detailed reports. Track
                   productivity trends, identify bottlenecks, and optimize your
                   workflows for maximum efficiency.
@@ -561,7 +565,7 @@ export default function LandingPage() {
               </div>
               <div className="relative order-first lg:order-last">
                 <Image
-                  src="/placeholder.svg?height=400&width=600&text=Analytics Dashboard"
+                  src={placeholderImage}
                   alt="Analytics dashboard showing project performance metrics and charts"
                   width={600}
                   height={400}
@@ -574,7 +578,7 @@ export default function LandingPage() {
             <div className="grid gap-8 lg:grid-cols-2 items-center">
               <div className="relative">
                 <Image
-                  src="/placeholder.svg?height=400&width=600&text=Security Features"
+                  src={placeholderImage}
                   alt="Enterprise security dashboard with access controls and compliance features"
                   width={600}
                   height={400}
@@ -624,7 +628,7 @@ export default function LandingPage() {
       </section>
 
       {/* Integrations Section */}
-      <section id="integrations" className="py-12 sm:py-16 md:py-20">
+      <section id="integrations" className="p-8">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-12 sm:mb-16">
             <Badge variant="secondary">Integrations</Badge>
@@ -640,7 +644,7 @@ export default function LandingPage() {
           <div className="grid gap-4 sm:gap-6 lg:gap-8 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 mb-8 sm:mb-12">
             <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
               <Image
-                src="/placeholder.svg?height=60&width=60&text=Slack"
+                src={placeholderImage}
                 alt="Slack integration"
                 width={60}
                 height={60}
@@ -654,7 +658,7 @@ export default function LandingPage() {
 
             <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
               <Image
-                src="/placeholder.svg?height=60&width=60&text=GitHub"
+                src={placeholderImage}
                 alt="GitHub integration"
                 width={60}
                 height={60}
@@ -670,7 +674,7 @@ export default function LandingPage() {
 
             <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
               <Image
-                src="/placeholder.svg?height=60&width=60&text=Google"
+                src={placeholderImage}
                 alt="Google Workspace integration"
                 width={60}
                 height={60}
@@ -686,7 +690,7 @@ export default function LandingPage() {
 
             <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
               <Image
-                src="/placeholder.svg?height=60&width=60&text=Figma"
+                src={placeholderImage}
                 alt="Figma integration"
                 width={60}
                 height={60}
@@ -700,7 +704,7 @@ export default function LandingPage() {
 
             <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
               <Image
-                src="/placeholder.svg?height=60&width=60&text=Zoom"
+                src={placeholderImage}
                 alt="Zoom integration"
                 width={60}
                 height={60}
@@ -714,7 +718,7 @@ export default function LandingPage() {
 
             <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
               <Image
-                src="/placeholder.svg?height=60&width=60&text=Jira"
+                src={placeholderImage}
                 alt="Jira integration"
                 width={60}
                 height={60}
@@ -728,7 +732,7 @@ export default function LandingPage() {
 
             <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
               <Image
-                src="/placeholder.svg?height=60&width=60&text=Salesforce"
+                src={placeholderImage}
                 alt="Salesforce integration"
                 width={60}
                 height={60}
@@ -744,7 +748,7 @@ export default function LandingPage() {
 
             <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
               <Image
-                src="/placeholder.svg?height=60&width=60&text=API"
+                src={placeholderImage}
                 alt="Custom API integration"
                 width={60}
                 height={60}
@@ -761,7 +765,8 @@ export default function LandingPage() {
 
           <div className="text-center">
             <p className="text-muted-foreground mb-4 text-sm sm:text-base">
-              Don't see your tool? We're always adding new integrations.
+              Don&apos;t see your tool? We&apos;re always adding new
+              integrations.
             </p>
             <Button
               variant="outline"
@@ -774,7 +779,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-20">
+      <section id="testimonials" className="p-8">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-16">
             <Badge variant="secondary">Testimonials</Badge>
@@ -782,17 +787,16 @@ export default function LandingPage() {
               Trusted by teams worldwide
             </h2>
             <p className="text-xl text-muted-foreground max-w-[800px] mx-auto">
-              See what our customers have to say about FlowSync and how it's
-              improved their team productivity.
+              See what our customers have to say about FlowSync and how
+              it&apos;s improved their team productivity.
             </p>
           </div>
-
           <TestimonialCarousel />
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-12 sm:py-16 md:py-20 bg-muted/50">
+      <section id="pricing" className="p-8 bg-muted/50">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-12 sm:mb-16">
             <Badge variant="secondary">Pricing</Badge>
@@ -960,7 +964,7 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 bg-muted/50">
+      <section id="faq" className="p-8 bg-muted/50">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-16">
             <Badge variant="secondary">FAQ</Badge>
@@ -968,8 +972,8 @@ export default function LandingPage() {
               Frequently asked questions
             </h2>
             <p className="text-xl text-muted-foreground max-w-[800px] mx-auto">
-              Got questions? We've got answers. Here are some of the most common
-              questions about FlowSync.
+              Got questions? We&apos;ve got answers. Here are some of the most
+              common questions about FlowSync.
             </p>
           </div>
 
@@ -987,8 +991,8 @@ export default function LandingPage() {
                 <AccordionTrigger>Can I change plans later?</AccordionTrigger>
                 <AccordionContent>
                   Yes! You can upgrade or downgrade your plan at any time.
-                  Changes take effect immediately, and we'll prorate any billing
-                  adjustments.
+                  Changes take effect immediately, and we&apos;ll prorate any
+                  billing adjustments.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
@@ -1038,11 +1042,11 @@ export default function LandingPage() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-12 sm:py-16 md:py-20">
+      <section className="p-8">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-              Ready to sync your team's workflow?
+              Ready to sync your team&apos;s workflow?
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground px-4">
               Join thousands of teams who have already improved their
@@ -1081,7 +1085,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer id="contact" className="border-t bg-muted/50 py-12 sm:py-16">
+      <footer id="contact" className="border-t bg-muted/50 p-8">
         <div className="px-4 md:px-6">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-4 sm:col-span-2 lg:col-span-1">
@@ -1092,7 +1096,7 @@ export default function LandingPage() {
                 <span className="text-xl font-bold">FlowSync</span>
               </div>
               <p className="text-muted-foreground text-sm sm:text-base">
-                Sync your team's workflow and boost productivity with our
+                Sync your team&apos;s workflow and boost productivity with our
                 intuitive project management platform.
               </p>
               <div className="flex space-x-4">
