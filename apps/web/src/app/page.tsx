@@ -1,7 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import * as React from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,37 +16,106 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  Check,
-  Users,
-  Calendar,
-  BarChart3,
-  Shield,
   ArrowRight,
-  Star,
-  Menu,
-  Twitter,
-  Linkedin,
+  BarChart3,
+  Calendar,
+  Check,
   Github,
+  Linkedin,
   Mail,
+  Menu,
+  Shield,
+  Star,
+  Twitter,
+  Users,
   Workflow,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import * as React from "react";
+import { useState } from "react";
 
 import placeholderImage from "../../public/placeholder.png";
 import { ModeToggle } from "../components/theme/mode-toggle";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+
+const features = [
+  {
+    icon: "",
+    name: "Smart Task Management",
+    title: "Organize and prioritize tasks with ease",
+    description:
+      "Create, assign, and track tasks with our intuitive board interface. Set priorities, due dates, and dependencies to keep your projects moving forward. Our smart algorithms help you identify bottlenecks before they become problems.",
+    items: [
+      { icon: "", name: "Drag-and-drop task organization" },
+      { icon: "", name: "Automated priority suggestions" },
+      { icon: "", name: "Real-time progress tracking" },
+    ],
+  },
+  {
+    icon: "",
+    name: "Real-time Collaboration",
+    title: "Work together seamlessly, wherever you are",
+    description:
+      "Connect your team with real-time updates, instant messaging, and collaborative workspaces. Share files, leave comments, and get notifications when things change. No more endless email chains or missed updates.",
+    items: [
+      { icon: "", name: "Instant messaging and comments" },
+      { icon: "", name: "File sharing and version control" },
+      { icon: "", name: "Smart notification system" },
+    ],
+  },
+  {
+    icon: "",
+    name: "Advanced Analytics",
+    title: "Make data-driven decisions with powerful insights",
+    description:
+      "Get deep insights into your team's performance with customizable dashboards and detailed reports. Track productivity trends, identify bottlenecks, and optimize your workflows for maximum efficiency.",
+    items: [
+      { icon: "", name: "Customizable analytics dashboards" },
+      { icon: "", name: "Performance trend analysis" },
+      { icon: "", name: "Automated reporting" },
+    ],
+  },
+  {
+    icon: "",
+    name: "Enterprise Security",
+    title: "Keep your data safe with bank-level security",
+    description:
+      "Protect your sensitive project data with enterprise-grade security features. From SSO integration to granular permissions, we ensure your information stays secure while keeping your team productive.",
+    items: [
+      { icon: "", name: "SSO and SAML integration" },
+      { icon: "", name: "Granular access controls" },
+      { icon: "", name: "SOC 2 Type II compliance" },
+    ],
+  },
+];
+
+const integrations = [
+  {
+    image: placeholderImage,
+    name: "Slack",
+    description: "Get project updates directly in your Slack channels",
+  },
+  {
+    image: placeholderImage,
+    name: "Github",
+    description: "Link commits and pull requests to project tasks",
+  },
+  {
+    image: placeholderImage,
+    name: "Lineaer",
+    description: "Link commits and pull requests to project tasks",
+  },
+  {
+    image: placeholderImage,
+    name: "Custom API",
+    description: "Build custom integrations with our REST API",
+  },
+];
 
 function TestimonialCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   const testimonials = [
     {
@@ -83,36 +157,19 @@ function TestimonialCarousel() {
 
   // Auto-play functionality
   React.useEffect(() => {
-    if (!isAutoPlaying) return;
-
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
     }, 4000); // Change slide every 4 seconds
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, testimonials.length]);
-
-  const nextTestimonial = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
-  };
-
-  const prevTestimonial = () => {
-    setCurrentIndex(
-      (prevIndex) =>
-        (prevIndex - 1 + testimonials.length) % testimonials.length,
-    );
-  };
+  }, [testimonials.length]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
   };
 
   return (
-    <div
-      className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8"
-      onMouseEnter={() => setIsAutoPlaying(false)}
-      onMouseLeave={() => setIsAutoPlaying(true)}
-    >
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="overflow-hidden rounded-xl">
         <div
           className="flex transition-transform duration-500 ease-in-out"
@@ -120,13 +177,13 @@ function TestimonialCarousel() {
         >
           {testimonials.map((testimonial, index) => (
             <div key={index} className="w-full flex-shrink-0 px-2 sm:px-4">
-              <Card className="mx-auto max-w-3xl transform transition-all duration-300 hover:scale-105">
+              <Card className="mx-auto max-w-3xl transform transition-all duration-300">
                 <CardHeader className="pb-4 sm:pb-6">
                   <div className="flex items-center space-x-1 mb-4 justify-center">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className="h-3 w-3 sm:h-4 sm:w-4 fill-primary text-primary animate-pulse"
+                        className="h-3 w-3 sm:h-4 sm:w-4 fill-yellow-400 animate-pulse"
                         style={{ animationDelay: `${i * 0.1}s` }}
                       />
                     ))}
@@ -137,16 +194,13 @@ function TestimonialCarousel() {
                 </CardHeader>
                 <CardFooter className="justify-center pt-2 sm:pt-4">
                   <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <Image
-                        src={`/transparent_placeholder.png?height=50&width=50&text=${testimonial.avatar}`}
+                    <Avatar>
+                      <AvatarImage
+                        src={`../../public/placeholder.png`}
                         alt={testimonial.author}
-                        width={40}
-                        height={40}
-                        className="sm:w-[50px] sm:h-[50px] rounded-full transition-transform duration-300 hover:scale-110"
                       />
-                      <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping opacity-75"></div>
-                    </div>
+                      <AvatarFallback>{testimonial.author}</AvatarFallback>
+                    </Avatar>
                     <div className="text-center">
                       <p className="font-semibold text-sm sm:text-base">
                         {testimonial.author}
@@ -163,36 +217,6 @@ function TestimonialCarousel() {
         </div>
       </div>
 
-      {/* Navigation Buttons - Hidden on mobile, visible on tablet+ */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="hidden sm:flex absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-2 lg:-translate-x-4 bg-background/80 backdrop-blur-sm hover:bg-background hover:scale-110 transition-all duration-200 shadow-lg"
-        onClick={prevTestimonial}
-      >
-        <ArrowRight className="h-4 w-4 rotate-180" />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon"
-        className="hidden sm:flex absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-2 lg:translate-x-4 bg-background/80 backdrop-blur-sm hover:bg-background hover:scale-110 transition-all duration-200 shadow-lg"
-        onClick={nextTestimonial}
-      >
-        <ArrowRight className="h-4 w-4" />
-      </Button>
-
-      {/* Mobile Navigation Buttons */}
-      <div className="flex sm:hidden justify-between mt-4 px-4">
-        <Button variant="outline" size="sm" onClick={prevTestimonial}>
-          <ArrowRight className="h-3 w-3 rotate-180 mr-1" />
-          Previous
-        </Button>
-        <Button variant="outline" size="sm" onClick={nextTestimonial}>
-          Next
-          <ArrowRight className="h-3 w-3 ml-1" />
-        </Button>
-      </div>
-
       {/* Dots Indicator */}
       <div className="flex justify-center space-x-1 sm:space-x-2 mt-6 sm:mt-8">
         {testimonials.map((_, index) => (
@@ -207,23 +231,11 @@ function TestimonialCarousel() {
           />
         ))}
       </div>
-
-      {/* Auto-play indicator */}
-      <div className="flex justify-center mt-3 sm:mt-4">
-        <div className="text-xs text-muted-foreground flex items-center space-x-2">
-          <div
-            className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isAutoPlaying ? "bg-green-500 animate-pulse" : "bg-gray-400"}`}
-          ></div>
-          <span className="hidden sm:inline">
-            {isAutoPlaying ? "Auto-playing" : "Paused"}
-          </span>
-        </div>
-      </div>
     </div>
   );
 }
 
-export default function LandingPage() {
+export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background">
@@ -356,7 +368,10 @@ export default function LandingPage() {
           <div className="grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16 items-center">
             <div className="space-y-6 sm:space-y-8 text-center lg:text-left">
               <div className="space-y-4">
-                <Badge variant="secondary" className="text-xs sm:text-sm">
+                <Badge
+                  variant="outline"
+                  className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+                >
                   🚀 New: Real-time Collaboration
                 </Badge>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight">
@@ -399,10 +414,10 @@ export default function LandingPage() {
             <div className="relative">
               <Image
                 src={placeholderImage}
-                alt="FlowSync Dashboard Preview"
-                width={800}
-                height={600}
-                className="rounded-xl shadow-2xl border w-full h-auto"
+                alt="Team collaboration interface with real-time chat and file sharing"
+                width={600}
+                height={400}
+                className="rounded-xl shadow-lg border w-full h-auto"
               />
             </div>
           </div>
@@ -413,7 +428,12 @@ export default function LandingPage() {
       <section id="features" className="p-8 bg-muted/50">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-12 sm:mb-16">
-            <Badge variant="secondary">Features</Badge>
+            <Badge
+              variant="outline"
+              className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+            >
+              Features
+            </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
               Everything you need to manage projects
             </h2>
@@ -423,207 +443,55 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="space-y-16 sm:space-y-20 lg:space-y-24">
-            {/* Feature 1 - Text Left, Image Right */}
-            <div className="grid gap-8 lg:grid-cols-2 items-center">
-              <div className="space-y-4 text-center lg:text-left">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
-                  <Users className="h-6 w-6 text-primary" />
+          {features.map((feature, index) => {
+            return (
+              <div
+                key={`${feature.name}-${index}`}
+                className="grid gap-8 lg:grid-cols-2 items-center"
+              >
+                <div className="space-y-4 text-center lg:text-left">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
+                    <Users className="h-6 w-6 text-primary" />
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold">
+                    {feature.name}
+                  </h3>
+                  <p className="text-base sm:text-lg text-muted-foreground">
+                    {feature.title}
+                  </p>
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    {feature.description}
+                  </p>
+                  <ul className="space-y-2 text-left max-w-md mx-auto lg:mx-0">
+                    {feature.items.map((item, index) => {
+                      return (
+                        <li
+                          key={`${item.name}-${index}`}
+                          className="flex items-center space-x-2"
+                        >
+                          <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                          {item.icon}
+                          <span className="text-sm sm:text-base">
+                            {item.name}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold">
-                  Smart Task Management
-                </h3>
-                <p className="text-base sm:text-lg text-muted-foreground">
-                  Organize and prioritize tasks with ease
-                </p>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Create, assign, and track tasks with our intuitive board
-                  interface. Set priorities, due dates, and dependencies to keep
-                  your projects moving forward. Our smart algorithms help you
-                  identify bottlenecks before they become problems.
-                </p>
-                <ul className="space-y-2 text-left max-w-md mx-auto lg:mx-0">
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Drag-and-drop task organization
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Automated priority suggestions
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Real-time progress tracking
-                    </span>
-                  </li>
-                </ul>
-              </div>
-              <div className="relative order-first lg:order-last">
-                <Image
-                  src={placeholderImage}
-                  alt="Task Management Dashboard showing organized project boards"
-                  width={600}
-                  height={400}
-                  className="rounded-xl shadow-lg border w-full h-auto"
-                />
-              </div>
-            </div>
-
-            {/* Feature 2 - Image Left, Text Right */}
-            <div className="grid gap-8 lg:grid-cols-2 items-center">
-              <div className="relative">
-                <Image
-                  src={placeholderImage}
-                  alt="Team collaboration interface with real-time chat and file sharing"
-                  width={600}
-                  height={400}
-                  className="rounded-xl shadow-lg border w-full h-auto"
-                />
-              </div>
-              <div className="space-y-4 text-center lg:text-left">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
-                  <Calendar className="h-6 w-6 text-primary" />
+                <div className="relative order-first lg:order-last">
+                  <Image
+                    src={placeholderImage}
+                    alt="Task Management Dashboard showing organized project boards"
+                    width={600}
+                    height={400}
+                    className="rounded-xl shadow-lg border w-full h-auto"
+                  />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold">
-                  Real-time Collaboration
-                </h3>
-                <p className="text-base sm:text-lg text-muted-foreground">
-                  Work together seamlessly, wherever you are
-                </p>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Connect your team with real-time updates, instant messaging,
-                  and collaborative workspaces. Share files, leave comments, and
-                  get notifications when things change. No more endless email
-                  chains or missed updates.
-                </p>
-                <ul className="space-y-2 text-left max-w-md mx-auto lg:mx-0">
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Instant messaging and comments
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      File sharing and version control
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Smart notification system
-                    </span>
-                  </li>
-                </ul>
               </div>
-            </div>
-
-            {/* Feature 3 - Text Left, Image Right */}
-            <div className="grid gap-8 lg:grid-cols-2 items-center">
-              <div className="space-y-4 text-center lg:text-left">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
-                  <BarChart3 className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold">
-                  Advanced Analytics
-                </h3>
-                <p className="text-base sm:text-lg text-muted-foreground">
-                  Make data-driven decisions with powerful insights
-                </p>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Get deep insights into your team&apos;s performance with
-                  customizable dashboards and detailed reports. Track
-                  productivity trends, identify bottlenecks, and optimize your
-                  workflows for maximum efficiency.
-                </p>
-                <ul className="space-y-2 text-left max-w-md mx-auto lg:mx-0">
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Customizable analytics dashboards
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Performance trend analysis
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Automated reporting
-                    </span>
-                  </li>
-                </ul>
-              </div>
-              <div className="relative order-first lg:order-last">
-                <Image
-                  src={placeholderImage}
-                  alt="Analytics dashboard showing project performance metrics and charts"
-                  width={600}
-                  height={400}
-                  className="rounded-xl shadow-lg border w-full h-auto"
-                />
-              </div>
-            </div>
-
-            {/* Feature 4 - Image Left, Text Right */}
-            <div className="grid gap-8 lg:grid-cols-2 items-center">
-              <div className="relative">
-                <Image
-                  src={placeholderImage}
-                  alt="Enterprise security dashboard with access controls and compliance features"
-                  width={600}
-                  height={400}
-                  className="rounded-xl shadow-lg border w-full h-auto"
-                />
-              </div>
-              <div className="space-y-4 text-center lg:text-left">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
-                  <Shield className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold">
-                  Enterprise Security
-                </h3>
-                <p className="text-base sm:text-lg text-muted-foreground">
-                  Keep your data safe with bank-level security
-                </p>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Protect your sensitive project data with enterprise-grade
-                  security features. From SSO integration to granular
-                  permissions, we ensure your information stays secure while
-                  keeping your team productive.
-                </p>
-                <ul className="space-y-2 text-left max-w-md mx-auto lg:mx-0">
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      SSO and SAML integration
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Granular access controls
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      SOC 2 Type II compliance
-                    </span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </section>
 
@@ -631,7 +499,12 @@ export default function LandingPage() {
       <section id="integrations" className="p-8">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-12 sm:mb-16">
-            <Badge variant="secondary">Integrations</Badge>
+            <Badge
+              variant="outline"
+              className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+            >
+              Integrations
+            </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
               Connect with your favorite tools
             </h2>
@@ -642,13 +515,13 @@ export default function LandingPage() {
           </div>
 
           <div className="grid gap-4 sm:gap-6 lg:gap-8 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 mb-8 sm:mb-12">
-            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow shadow-secondary">
               <Image
                 src={placeholderImage}
                 alt="Slack integration"
                 width={60}
                 height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
               />
               <h3 className="font-semibold mb-2 text-sm sm:text-base">Slack</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">
@@ -662,7 +535,7 @@ export default function LandingPage() {
                 alt="GitHub integration"
                 width={60}
                 height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
               />
               <h3 className="font-semibold mb-2 text-sm sm:text-base">
                 GitHub
@@ -678,7 +551,7 @@ export default function LandingPage() {
                 alt="Google Workspace integration"
                 width={60}
                 height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
               />
               <h3 className="font-semibold mb-2 text-sm sm:text-base">
                 Google Workspace
@@ -694,7 +567,7 @@ export default function LandingPage() {
                 alt="Figma integration"
                 width={60}
                 height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
               />
               <h3 className="font-semibold mb-2 text-sm sm:text-base">Figma</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">
@@ -708,7 +581,7 @@ export default function LandingPage() {
                 alt="Zoom integration"
                 width={60}
                 height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
               />
               <h3 className="font-semibold mb-2 text-sm sm:text-base">Zoom</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">
@@ -722,7 +595,7 @@ export default function LandingPage() {
                 alt="Jira integration"
                 width={60}
                 height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
               />
               <h3 className="font-semibold mb-2 text-sm sm:text-base">Jira</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">
@@ -736,7 +609,7 @@ export default function LandingPage() {
                 alt="Salesforce integration"
                 width={60}
                 height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
               />
               <h3 className="font-semibold mb-2 text-sm sm:text-base">
                 Salesforce
@@ -752,7 +625,7 @@ export default function LandingPage() {
                 alt="Custom API integration"
                 width={60}
                 height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px]"
+                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
               />
               <h3 className="font-semibold mb-2 text-sm sm:text-base">
                 Custom API
@@ -782,7 +655,12 @@ export default function LandingPage() {
       <section id="testimonials" className="p-8">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-16">
-            <Badge variant="secondary">Testimonials</Badge>
+            <Badge
+              variant="outline"
+              className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+            >
+              Testimonials
+            </Badge>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
               Trusted by teams worldwide
             </h2>
@@ -799,7 +677,12 @@ export default function LandingPage() {
       <section id="pricing" className="p-8 bg-muted/50">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-12 sm:mb-16">
-            <Badge variant="secondary">Pricing</Badge>
+            <Badge
+              variant="outline"
+              className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+            >
+              Pricing
+            </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
               Choose your plan
             </h2>
@@ -967,7 +850,12 @@ export default function LandingPage() {
       <section id="faq" className="p-8 bg-muted/50">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-16">
-            <Badge variant="secondary">FAQ</Badge>
+            <Badge
+              variant="outline"
+              className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+            >
+              FAQ
+            </Badge>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
               Frequently asked questions
             </h2>
