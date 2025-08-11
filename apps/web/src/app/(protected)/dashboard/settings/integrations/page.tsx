@@ -54,6 +54,7 @@ import {
   Code,
   Users,
 } from "lucide-react";
+import DashboardHeaderComponent from "../../../../../components/dashboard/header.component";
 
 interface Integration {
   id: string;
@@ -418,248 +419,250 @@ export default function Page() {
   ];
 
   return (
-    <div className="mx-auto p-4 sm:p-6 max-w-7xl">
+    <>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Integrations</h1>
-        <p className="text-muted-foreground text-base sm:text-lg">
-          Connect your favorite tools and services to streamline your workflow
-        </p>
-      </div>
 
-      {/* Search and Filters */}
-      <div className="mb-6 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search Bar */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search integrations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+      <DashboardHeaderComponent
+        title={"Integrations"}
+        description={
+          "Connect your favorite tools and services to streamline your workflow"
+        }
+      />
+
+      <div>
+        {/* Search and Filters */}
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Search Bar */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search integrations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 "
+              />
+            </div>
+
+            {/* Request Custom Integration Button */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="whitespace-nowrap">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Request Integration
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Request Custom Integration</DialogTitle>
+                  <DialogDescription>
+                    Tell us about the integration you need and we'll get back to
+                    you.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="integration-name">Integration Name</Label>
+                    <Input
+                      id="integration-name"
+                      placeholder="e.g., Salesforce, HubSpot"
+                      value={customIntegrationRequest.name}
+                      onChange={(e) =>
+                        setCustomIntegrationRequest((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="integration-description">Description</Label>
+                    <Textarea
+                      id="integration-description"
+                      placeholder="Briefly describe what this integration should do..."
+                      value={customIntegrationRequest.description}
+                      onChange={(e) =>
+                        setCustomIntegrationRequest((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="use-case">Use Case</Label>
+                    <Textarea
+                      id="use-case"
+                      placeholder="How would you use this integration in your workflow?"
+                      value={customIntegrationRequest.useCase}
+                      onChange={(e) =>
+                        setCustomIntegrationRequest((prev) => ({
+                          ...prev,
+                          useCase: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="contact-email">Contact Email</Label>
+                    <Input
+                      id="contact-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={customIntegrationRequest.email}
+                      onChange={(e) =>
+                        setCustomIntegrationRequest((prev) => ({
+                          ...prev,
+                          email: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    onClick={handleCustomIntegrationSubmit}
+                    className="w-full"
+                  >
+                    Submit Request
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
-          {/* Request Custom Integration Button */}
-          <Dialog>
-            <DialogTrigger asChild>
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Filters:</span>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 flex-1">
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statuses.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      Sort by {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        {/* Results Summary */}
+        <div className="mb-6">
+          <p className="text-sm text-muted-foreground">
+            Showing {paginatedIntegrations.length} of{" "}
+            {filteredAndSortedIntegrations.length} integrations
+          </p>
+        </div>
+
+        {/* Integration Cards */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {paginatedIntegrations.map((integration) => (
+            <IntegrationCard
+              key={integration.id}
+              integration={integration}
+              onToggle={toggleIntegration}
+              getStatusIcon={getStatusIcon}
+              getStatusBadge={getStatusBadge}
+            />
+          ))}
+        </div>
+
+        {/* Empty State */}
+        {paginatedIntegrations.length === 0 && (
+          <div className="text-center py-12">
+            <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+              <Search className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">
+              No integrations found
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              Try adjusting your search terms or filters to find what you're
+              looking for.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedCategory("all");
+                setSelectedStatus("all");
+                setCurrentPage(1);
+              }}
+            >
+              Clear Filters
+            </Button>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-8">
+            <div className="text-sm text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex items-center space-x-2">
               <Button
                 variant="outline"
-                className="whitespace-nowrap bg-transparent"
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Request Integration
+                <ChevronLeft className="h-4 w-4" />
+                Previous
               </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Request Custom Integration</DialogTitle>
-                <DialogDescription>
-                  Tell us about the integration you need and we'll get back to
-                  you.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="integration-name">Integration Name</Label>
-                  <Input
-                    id="integration-name"
-                    placeholder="e.g., Salesforce, HubSpot"
-                    value={customIntegrationRequest.name}
-                    onChange={(e) =>
-                      setCustomIntegrationRequest((prev) => ({
-                        ...prev,
-                        name: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="integration-description">Description</Label>
-                  <Textarea
-                    id="integration-description"
-                    placeholder="Briefly describe what this integration should do..."
-                    value={customIntegrationRequest.description}
-                    onChange={(e) =>
-                      setCustomIntegrationRequest((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="use-case">Use Case</Label>
-                  <Textarea
-                    id="use-case"
-                    placeholder="How would you use this integration in your workflow?"
-                    value={customIntegrationRequest.useCase}
-                    onChange={(e) =>
-                      setCustomIntegrationRequest((prev) => ({
-                        ...prev,
-                        useCase: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contact-email">Contact Email</Label>
-                  <Input
-                    id="contact-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={customIntegrationRequest.email}
-                    onChange={(e) =>
-                      setCustomIntegrationRequest((prev) => ({
-                        ...prev,
-                        email: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={handleCustomIntegrationSubmit}
-                  className="w-full"
-                >
-                  Submit Request
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Filters:</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 flex-1">
-            <Select
-              value={selectedCategory}
-              onValueChange={setSelectedCategory}
-            >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category.value} value={category.value}>
-                    {category.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {statuses.map((status) => (
-                  <SelectItem key={status.value} value={status.value}>
-                    {status.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    Sort by {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        )}
       </div>
-
-      {/* Results Summary */}
-      <div className="mb-6">
-        <p className="text-sm text-muted-foreground">
-          Showing {paginatedIntegrations.length} of{" "}
-          {filteredAndSortedIntegrations.length} integrations
-        </p>
-      </div>
-
-      {/* Integration Cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {paginatedIntegrations.map((integration) => (
-          <IntegrationCard
-            key={integration.id}
-            integration={integration}
-            onToggle={toggleIntegration}
-            getStatusIcon={getStatusIcon}
-            getStatusBadge={getStatusBadge}
-          />
-        ))}
-      </div>
-
-      {/* Empty State */}
-      {paginatedIntegrations.length === 0 && (
-        <div className="text-center py-12">
-          <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-            <Search className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">No integrations found</h3>
-          <p className="text-muted-foreground mb-4">
-            Try adjusting your search terms or filters to find what you're
-            looking for.
-          </p>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setSearchQuery("");
-              setSelectedCategory("all");
-              setSelectedStatus("all");
-              setCurrentPage(1);
-            }}
-          >
-            Clear Filters
-          </Button>
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-8">
-          <div className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              disabled={currentPage === totalPages}
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
 
