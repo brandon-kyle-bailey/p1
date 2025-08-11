@@ -18,7 +18,11 @@ declare module "next-auth" {
     user: {
       id: string;
       provider: string;
+      providerType: string;
       providerAccountId: string;
+      providerAccessToken: string;
+      providerAccessTokenType: string;
+      providerAccessTokenScope: string;
     } & DefaultSession["user"];
   }
 }
@@ -26,7 +30,11 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     provider: string;
+    providerType: string;
     providerAccountId: string;
+    providerAccessToken: string;
+    providerAccessTokenType: string;
+    providerAccessTokenScope: string;
   }
 }
 
@@ -115,7 +123,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, account }) {
       if (account) {
         token.provider = account.provider;
+        token.providerType = account.type;
         token.providerAccountId = account.providerAccountId;
+        token.providerAccessToken = account.access_token || "";
+        token.providerAccessTokenType = account.token_type || "";
+        token.providerAccessTokenScope = account.scope || "";
       }
       return token;
     },
@@ -127,7 +139,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.name = token.name;
         session.user.image = token.picture;
         session.user.provider = token.provider;
+        session.user.providerType = token.providerType;
         session.user.providerAccountId = token.providerAccountId;
+        session.user.providerAccessToken = token.providerAccessToken;
+        session.user.providerAccessTokenType = token.providerAccessTokenType;
+        session.user.providerAccessTokenScope = token.providerAccessTokenScope;
       }
       return session;
     },

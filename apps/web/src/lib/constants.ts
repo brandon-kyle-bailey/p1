@@ -17,6 +17,8 @@ export enum WebRoutes {
   Projects = "/dashboard/projects",
   Repositories = "/dashboard/repositories",
   Tickets = "/dashboard/tickets",
+  PullRequests = "/dashboard/pull-requests",
+  Chats = "/dashboard/insights/chats",
 }
 
 export enum ApiRoutes {

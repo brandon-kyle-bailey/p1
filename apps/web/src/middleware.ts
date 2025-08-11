@@ -7,11 +7,9 @@ const ignoredRoutes = [
   WebRoutes.Tos,
   WebRoutes.PrivacyPolicy,
   WebRoutes.Login,
-  WebRoutes.Logout,
-  WebRoutes.ForgotPassword,
+  WebRoutes.ResetPassword,
   WebRoutes.Register,
   WebRoutes.Blog,
-  WebRoutes.PaymentsSuccess,
 ];
 
 export const config = {

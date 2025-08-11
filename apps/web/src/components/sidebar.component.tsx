@@ -2,6 +2,8 @@
 
 import {
   BadgeCheck,
+  ChartArea,
+  ChartAreaIcon,
   ChevronRight,
   ChevronsUpDown,
   Command,
@@ -51,6 +53,7 @@ import { Session, User } from "next-auth";
 import Link from "next/link";
 import { SignOutServerAction } from "@/actions/authentication/server/sign-out.action";
 import AvatarComponent from "@/components/avatar.component";
+import { toast } from "sonner";
 
 export const data = {
   teams: [
@@ -88,8 +91,24 @@ export const data = {
           url: WebRoutes.Repositories,
         },
         {
+          title: "Pull Requests",
+          url: WebRoutes.PullRequests,
+        },
+        {
           title: "Tickets",
           url: WebRoutes.Tickets,
+        },
+      ],
+    },
+    {
+      title: "Insights",
+      url: "#",
+      icon: ChartAreaIcon,
+      isActive: true,
+      items: [
+        {
+          title: "AI Chats",
+          url: WebRoutes.Chats,
         },
       ],
     },

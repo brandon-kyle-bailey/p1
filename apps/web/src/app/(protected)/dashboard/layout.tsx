@@ -21,9 +21,7 @@ export default async function Layout({
         <AppSidebar session={session!} />
         <SidebarInset className="p-2 bg-inherit">
           <NavbarComponent />
-          <main className="min-h-screen lg:p-8 flex flex-col gap-8">
-            {children}
-          </main>
+          <main className="lg:p-8 flex flex-col gap-8">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </SessionProvider>
