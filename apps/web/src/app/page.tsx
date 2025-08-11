@@ -37,12 +37,17 @@ import * as React from "react";
 import { useState } from "react";
 
 import placeholderImage from "../../public/placeholder.png";
+import stripeImage from "../../public/stripe.png";
+import githubImage from "../../public/github.png";
+import linearImage from "../../public/linear.png";
+import customApiImage from "../../public/customapi.png";
 import { ModeToggle } from "../components/theme/mode-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { WebRoutes } from "../lib/constants";
 
 const features = [
   {
-    icon: "",
+    icon: <Calendar className="h-6 w-6 text-primary" />,
     name: "Smart Task Management",
     title: "Organize and prioritize tasks with ease",
     description:
@@ -54,7 +59,7 @@ const features = [
     ],
   },
   {
-    icon: "",
+    icon: <Users className="h-6 w-6 text-primary" />,
     name: "Real-time Collaboration",
     title: "Work together seamlessly, wherever you are",
     description:
@@ -66,7 +71,7 @@ const features = [
     ],
   },
   {
-    icon: "",
+    icon: <BarChart3 className="h-6 w-6 text-primary" />,
     name: "Advanced Analytics",
     title: "Make data-driven decisions with powerful insights",
     description:
@@ -78,7 +83,7 @@ const features = [
     ],
   },
   {
-    icon: "",
+    icon: <Shield className="h-6 w-6 text-primary" />,
     name: "Enterprise Security",
     title: "Keep your data safe with bank-level security",
     description:
@@ -93,24 +98,123 @@ const features = [
 
 const integrations = [
   {
-    image: placeholderImage,
-    name: "Slack",
-    description: "Get project updates directly in your Slack channels",
+    image: stripeImage,
+    name: "Stripe",
+    description: "For billing and invoicing",
   },
   {
-    image: placeholderImage,
+    image: githubImage,
     name: "Github",
     description: "Link commits and pull requests to project tasks",
   },
   {
-    image: placeholderImage,
-    name: "Lineaer",
+    image: linearImage,
+    name: "Linear",
     description: "Link commits and pull requests to project tasks",
   },
   {
-    image: placeholderImage,
+    image: customApiImage,
     name: "Custom API",
     description: "Build custom integrations with our REST API",
+  },
+];
+
+const pricingPlans = [
+  {
+    priceId: "",
+    name: "Starter",
+    description: "Perfect for small teams getting started",
+    price: "12",
+    mostPopular: false,
+    features: [
+      {
+        name: "Up to 10 team members",
+      },
+      {
+        name: "Basic project management",
+      },
+      {
+        name: "Email support",
+      },
+      {
+        name: "5GB storage",
+      },
+    ],
+    buttonText: "Start Free Trial",
+  },
+  {
+    priceId: "",
+    name: "Professional",
+    description: "Best for growing teams and businesses",
+    price: "24",
+    mostPopular: true,
+    features: [
+      {
+        name: "Up to 50 team members",
+      },
+      {
+        name: "Advanced project features",
+      },
+      {
+        name: "Priority support",
+      },
+      {
+        name: "100GB storage",
+      },
+      {
+        name: "Advanced analytics",
+      },
+    ],
+    buttonText: "Start Free Trial",
+  },
+  {
+    priceId: "",
+    name: "Enterprise",
+    description: "For large organizations with advanced needs",
+    price: "Custom",
+    mostPopular: false,
+    features: [
+      { name: "Unlimited team members" },
+      { name: "Custom integrations" },
+      { name: "Dedicated support" },
+      { name: "Unlimited storage" },
+      { name: "Advanced security" },
+    ],
+
+    buttonText: "Contact Sales",
+  },
+];
+
+const faqs = [
+  {
+    question: "How long is the free trial?",
+    answer:
+      "Our free trial lasts 14 days and includes access to all features. No credit card required to start, and you can cancel anytime.",
+  },
+  {
+    question: "Can I change plans later?",
+    answer:
+      "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any billing adjustments.",
+  },
+  {
+    question: "Is my data secure?",
+    answer:
+      "Absolutely. We use enterprise-grade security with SOC 2 Type II compliance, end-to-end encryption, and regular security audits to keep your data safe.",
+  },
+  {
+    question: "Do you offer customer support?",
+    answer:
+      "Yes! We provide email support for all plans, priority support for Professional plans, and dedicated support managers for Enterprise customers.",
+  },
+  {
+    question: "Can I import data from other tools?",
+    answer:
+      "Yes, we support data import from popular project management tools like Asana, Trello, Monday.com, and more. Our team can help with the migration process.",
+  },
+  {
+    question: "Is there a mobile app?",
+    answer:
+      "Yes! FlowSync is available on iOS and Android. The mobile app includes all core features so you can manage projects on the go.",
   },
 ];
 
@@ -290,10 +394,14 @@ export default function Page() {
 
           <div className="flex items-center space-x-4">
             <ModeToggle />
-            <Button variant="ghost" className="hidden md:inline-flex">
-              Sign In
-            </Button>
-            <Button className="hidden md:inline-flex">Get Started</Button>
+            <Link href={WebRoutes.Login}>
+              <Button variant="ghost" className="hidden md:inline-flex">
+                Sign In
+              </Button>
+            </Link>
+            <Link href={WebRoutes.Register}>
+              <Button className="hidden md:inline-flex">Get Started</Button>
+            </Link>
             <Button
               variant="ghost"
               size="icon"
@@ -370,7 +478,7 @@ export default function Page() {
               <div className="space-y-4">
                 <Badge
                   variant="outline"
-                  className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+                  className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500  to-blue-500 border-0"
                 >
                   🚀 New: Real-time Collaboration
                 </Badge>
@@ -417,7 +525,7 @@ export default function Page() {
                 alt="Team collaboration interface with real-time chat and file sharing"
                 width={600}
                 height={400}
-                className="rounded-xl shadow-lg border w-full h-auto"
+                className="rounded-xl w-full h-auto"
               />
             </div>
           </div>
@@ -430,7 +538,7 @@ export default function Page() {
           <div className="text-center space-y-4 mb-12 sm:mb-16">
             <Badge
               variant="outline"
-              className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+              className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500  to-blue-500 border-0"
             >
               Features
             </Badge>
@@ -451,7 +559,6 @@ export default function Page() {
               >
                 <div className="space-y-4 text-center lg:text-left">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
-                    <Users className="h-6 w-6 text-primary" />
                     {feature.icon}
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold">
@@ -480,7 +587,9 @@ export default function Page() {
                     })}
                   </ul>
                 </div>
-                <div className="relative order-first lg:order-last">
+                <div
+                  className={`relative ${index % 2 !== 0 ? "order-first lg:order-last" : "order-last lg:order-first"}`}
+                >
                   <Image
                     src={placeholderImage}
                     alt="Task Management Dashboard showing organized project boards"
@@ -501,7 +610,7 @@ export default function Page() {
           <div className="text-center space-y-4 mb-12 sm:mb-16">
             <Badge
               variant="outline"
-              className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+              className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500  to-blue-500 border-0"
             >
               Integrations
             </Badge>
@@ -515,125 +624,28 @@ export default function Page() {
           </div>
 
           <div className="grid gap-4 sm:gap-6 lg:gap-8 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 mb-8 sm:mb-12">
-            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow shadow-secondary">
-              <Image
-                src={placeholderImage}
-                alt="Slack integration"
-                width={60}
-                height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
-              />
-              <h3 className="font-semibold mb-2 text-sm sm:text-base">Slack</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Get project updates directly in your Slack channels
-              </p>
-            </Card>
-
-            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
-              <Image
-                src={placeholderImage}
-                alt="GitHub integration"
-                width={60}
-                height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
-              />
-              <h3 className="font-semibold mb-2 text-sm sm:text-base">
-                GitHub
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Link commits and pull requests to project tasks
-              </p>
-            </Card>
-
-            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
-              <Image
-                src={placeholderImage}
-                alt="Google Workspace integration"
-                width={60}
-                height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
-              />
-              <h3 className="font-semibold mb-2 text-sm sm:text-base">
-                Google Workspace
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Sync with Google Calendar, Drive, and Gmail
-              </p>
-            </Card>
-
-            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
-              <Image
-                src={placeholderImage}
-                alt="Figma integration"
-                width={60}
-                height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
-              />
-              <h3 className="font-semibold mb-2 text-sm sm:text-base">Figma</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Embed design files and track design progress
-              </p>
-            </Card>
-
-            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
-              <Image
-                src={placeholderImage}
-                alt="Zoom integration"
-                width={60}
-                height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
-              />
-              <h3 className="font-semibold mb-2 text-sm sm:text-base">Zoom</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Schedule and join meetings directly from tasks
-              </p>
-            </Card>
-
-            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
-              <Image
-                src={placeholderImage}
-                alt="Jira integration"
-                width={60}
-                height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
-              />
-              <h3 className="font-semibold mb-2 text-sm sm:text-base">Jira</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Sync issues and track development progress
-              </p>
-            </Card>
-
-            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
-              <Image
-                src={placeholderImage}
-                alt="Salesforce integration"
-                width={60}
-                height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
-              />
-              <h3 className="font-semibold mb-2 text-sm sm:text-base">
-                Salesforce
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Connect customer data with project workflows
-              </p>
-            </Card>
-
-            <Card className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
-              <Image
-                src={placeholderImage}
-                alt="Custom API integration"
-                width={60}
-                height={60}
-                className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
-              />
-              <h3 className="font-semibold mb-2 text-sm sm:text-base">
-                Custom API
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Build custom integrations with our REST API
-              </p>
-            </Card>
+            {integrations.map((integration, index) => {
+              return (
+                <Card
+                  key={`${integration.name}-${index}`}
+                  className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow shadow-secondary"
+                >
+                  <Image
+                    src={integration.image}
+                    alt={integration.name}
+                    width={60}
+                    height={60}
+                    className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
+                  />
+                  <h3 className="font-semibold mb-2 text-sm sm:text-base">
+                    {integration.name}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    {integration.description}
+                  </p>
+                </Card>
+              );
+            })}
           </div>
 
           <div className="text-center">
@@ -657,7 +669,7 @@ export default function Page() {
           <div className="text-center space-y-4 mb-16">
             <Badge
               variant="outline"
-              className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+              className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500  to-blue-500 border-0"
             >
               Testimonials
             </Badge>
@@ -679,7 +691,7 @@ export default function Page() {
           <div className="text-center space-y-4 mb-12 sm:mb-16">
             <Badge
               variant="outline"
-              className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+              className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500  to-blue-500 border-0"
             >
               Pricing
             </Badge>
@@ -693,155 +705,60 @@ export default function Page() {
           </div>
 
           <div className="grid gap-6 sm:gap-8 lg:grid-cols-3 max-w-6xl mx-auto">
-            <Card className="relative">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg sm:text-xl">Starter</CardTitle>
-                <CardDescription className="text-sm sm:text-base">
-                  Perfect for small teams getting started
-                </CardDescription>
-                <div className="mt-4">
-                  <span className="text-2xl sm:text-3xl font-bold">$12</span>
-                  <span className="text-muted-foreground text-sm sm:text-base">
-                    /user/month
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-4">
-                <ul className="space-y-2 sm:space-y-3">
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Up to 10 team members
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Basic project management
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Email support</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">5GB storage</span>
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full bg-transparent" variant="outline">
-                  Start Free Trial
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card className="border-primary shadow-lg relative lg:scale-105">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="text-xs sm:text-sm">Most Popular</Badge>
-              </div>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg sm:text-xl">
-                  Professional
-                </CardTitle>
-                <CardDescription className="text-sm sm:text-base">
-                  Best for growing teams and businesses
-                </CardDescription>
-                <div className="mt-4">
-                  <span className="text-2xl sm:text-3xl font-bold">$24</span>
-                  <span className="text-muted-foreground text-sm sm:text-base">
-                    /user/month
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-4">
-                <ul className="space-y-2 sm:space-y-3">
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Up to 50 team members
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Advanced project features
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Priority support
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">100GB storage</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Advanced analytics
-                    </span>
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full">Start Free Trial</Button>
-              </CardFooter>
-            </Card>
-
-            <Card className="relative">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg sm:text-xl">Enterprise</CardTitle>
-                <CardDescription className="text-sm sm:text-base">
-                  For large organizations with advanced needs
-                </CardDescription>
-                <div className="mt-4">
-                  <span className="text-2xl sm:text-3xl font-bold">Custom</span>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-4">
-                <ul className="space-y-2 sm:space-y-3">
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Unlimited team members
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Custom integrations
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Dedicated support
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Unlimited storage
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      Advanced security
-                    </span>
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full bg-transparent" variant="outline">
-                  Contact Sales
-                </Button>
-              </CardFooter>
-            </Card>
+            {pricingPlans.map((plan, index) => {
+              return (
+                <Card
+                  key={`${plan.name}-${index}`}
+                  className={`relative ${plan.mostPopular ? "lg:scale-105 border-purple-500 shadow-lg shadow-purple-500" : ""}`}
+                >
+                  {plan.mostPopular && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-500  to-blue-500 rounded-md">
+                      <Badge className="text-xs sm:text-sm bg-transparent text-primary">
+                        Most Popular
+                      </Badge>
+                    </div>
+                  )}
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg sm:text-xl">
+                      {plan.name}
+                    </CardTitle>
+                    <CardDescription className="text-sm sm:text-base">
+                      {plan.description}
+                    </CardDescription>
+                    <div className="mt-4">
+                      <span className="text-2xl sm:text-3xl font-bold">
+                        {plan.price.toLocaleLowerCase() === "custom" ? "" : "$"}
+                        {plan.price}
+                      </span>
+                      <span className="text-muted-foreground text-sm sm:text-base">
+                        {" "}
+                        Per seat
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-4">
+                    <ul className="space-y-2 sm:space-y-3">
+                      {plan.features.map((feature, index) => {
+                        return (
+                          <li
+                            key={`${feature.name}-${index}`}
+                            className="flex items-center space-x-2"
+                          >
+                            <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="text-sm sm:text-base">
+                              {feature.name}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    <Button className="w-full">{plan.buttonText}</Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -852,7 +769,7 @@ export default function Page() {
           <div className="text-center space-y-4 mb-16">
             <Badge
               variant="outline"
-              className="text-secondary dark:text-primary text-sm bg-gradient-to-r via-purple-500 from-orange-500 to-blue-500 border-0"
+              className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500  to-blue-500 border-0"
             >
               FAQ
             </Badge>
@@ -867,58 +784,17 @@ export default function Page() {
 
           <div className="max-w-3xl mx-auto">
             <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>How long is the free trial?</AccordionTrigger>
-                <AccordionContent>
-                  Our free trial lasts 14 days and includes access to all
-                  features. No credit card required to start, and you can cancel
-                  anytime.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>Can I change plans later?</AccordionTrigger>
-                <AccordionContent>
-                  Yes! You can upgrade or downgrade your plan at any time.
-                  Changes take effect immediately, and we&apos;ll prorate any
-                  billing adjustments.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3">
-                <AccordionTrigger>Is my data secure?</AccordionTrigger>
-                <AccordionContent>
-                  Absolutely. We use enterprise-grade security with SOC 2 Type
-                  II compliance, end-to-end encryption, and regular security
-                  audits to keep your data safe.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-4">
-                <AccordionTrigger>
-                  Do you offer customer support?
-                </AccordionTrigger>
-                <AccordionContent>
-                  Yes! We provide email support for all plans, priority support
-                  for Professional plans, and dedicated support managers for
-                  Enterprise customers.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-5">
-                <AccordionTrigger>
-                  Can I import data from other tools?
-                </AccordionTrigger>
-                <AccordionContent>
-                  Yes, we support data import from popular project management
-                  tools like Asana, Trello, Monday.com, and more. Our team can
-                  help with the migration process.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-6">
-                <AccordionTrigger>Is there a mobile app?</AccordionTrigger>
-                <AccordionContent>
-                  Yes! FlowSync is available on iOS and Android. The mobile app
-                  includes all core features so you can manage projects on the
-                  go.
-                </AccordionContent>
-              </AccordionItem>
+              {faqs.map((item, index) => {
+                return (
+                  <AccordionItem
+                    key={`${item.question}-${index}`}
+                    value={`item-${index + 1}`}
+                  >
+                    <AccordionTrigger>{item.question}</AccordionTrigger>
+                    <AccordionContent>{item.answer}</AccordionContent>
+                  </AccordionItem>
+                );
+              })}
             </Accordion>
           </div>
 
