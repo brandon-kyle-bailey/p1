@@ -74,6 +74,22 @@ const data = {
       ],
     },
     {
+      title: "Integrations",
+      url: "#",
+      icon: Settings2,
+      isActive: true,
+      items: [
+        {
+          title: "Account",
+          url: WebRoutes.Dashboard,
+        },
+        {
+          title: "Integrations",
+          url: WebRoutes.Dashboard,
+        },
+      ],
+    },
+    {
       title: "Settings",
       url: "#",
       icon: Settings2,

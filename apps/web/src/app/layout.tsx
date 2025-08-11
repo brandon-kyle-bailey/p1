@@ -15,35 +15,35 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FlowSync - Sync Your Team's Workflow | Project Management Software",
+  title: "Lumino – Make Your Impact Evident | Developer Contribution Tracking",
   description:
-    "Streamline project management, enhance team collaboration, and boost productivity with FlowSync's intuitive platform designed for modern teams. Start your free trial today.",
+    "Lumino automatically tracks and visualizes your contributions across GitHub, Linear, and more. Showcase your impact to teams, projects, and organizations with clarity and confidence.",
   keywords:
-    "project management, team collaboration, workflow, productivity, task management, team sync",
-  authors: [{ name: "FlowSync Team" }],
-  creator: "FlowSync",
-  publisher: "FlowSync",
+    "developer impact tracking, contribution tracking, github analytics, engineering metrics, team productivity, project contributions, developer portfolio",
+  authors: [{ name: "Lumino Team" }],
+  creator: "Lumino",
+  publisher: "Lumino",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://flowsync.com"),
+  metadataBase: new URL("https://lumino.com"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "FlowSync - Sync Your Team's Workflow",
+    title: "Lumino – Make Your Impact Evident",
     description:
-      "Streamline project management and boost team productivity with FlowSync's intuitive platform.",
-    url: "https://flowsync.com",
-    siteName: "FlowSync",
+      "Track and visualize your contributions automatically. Lumino connects with GitHub, Linear, and more to showcase your value.",
+    url: "https://lumino.com",
+    siteName: "Lumino",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "FlowSync - Project Management Platform",
+        alt: "Lumino – Developer Impact Tracking Dashboard",
       },
     ],
     locale: "en_US",
@@ -51,11 +51,11 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "FlowSync - Sync Your Team's Workflow",
+    title: "Lumino – Make Your Impact Evident",
     description:
-      "Streamline project management and boost team productivity with FlowSync's intuitive platform.",
+      "Lumino automatically tracks and visualizes your contributions across GitHub, Linear, and more.",
     images: ["/og-image.jpg"],
-    creator: "@flowsync",
+    creator: "@lumino",
   },
   robots: {
     index: true,
