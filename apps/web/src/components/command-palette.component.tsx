@@ -1,11 +1,5 @@
-import {
-  Calendar,
-  Smile,
-  Calculator,
-  UserIcon,
-  CreditCard,
-  Settings,
-} from "lucide-react";
+"use client";
+
 import {
   CommandDialog,
   CommandEmpty,
@@ -13,49 +7,46 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandShortcut,
 } from "@/components/ui/command";
+import { Code2 } from "lucide-react";
+import { useRouter } from "next/navigation"; // Next 13+ useRouter
+import { WebRoutes } from "../lib/constants";
+import { data } from "@/components/sidebar.component";
 
 export default function CommandPalleteComponent(props: {
   open: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setOpen: any;
+  setOpen: (open: boolean) => void;
 }) {
+  const router = useRouter();
+
+  function handleSelect(url: string) {
+    props.setOpen(false); // close dialog
+    router.push(url); // navigate
+  }
+
   return (
     <CommandDialog open={props.open} onOpenChange={props.setOpen}>
       <CommandInput placeholder="Type a command or search..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Suggestions">
-          <CommandItem>
-            <Calendar className="mr-2 h-4 w-4" />
-            <span>Calendar</span>
-          </CommandItem>
-          <CommandItem>
-            <Smile className="mr-2 h-4 w-4" />
-            <span>Search Emoji</span>
-          </CommandItem>
-          <CommandItem disabled>
-            <Calculator className="mr-2 h-4 w-4" />
-            <span>Calculator</span>
+          <CommandItem onSelect={() => handleSelect(WebRoutes.Dashboard)}>
+            <Code2 className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
           </CommandItem>
         </CommandGroup>
-        <CommandGroup heading="Settings">
-          <CommandItem>
-            <UserIcon className="mr-2 h-4 w-4" />
-            <span>Profile</span>
-            <CommandShortcut>⌘P</CommandShortcut>
-          </CommandItem>
-          <CommandItem>
-            <CreditCard className="mr-2 h-4 w-4" />
-            <span>Billing</span>
-            <CommandShortcut>⌘B</CommandShortcut>
-          </CommandItem>
-          <CommandItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-            <CommandShortcut>⌘S</CommandShortcut>
-          </CommandItem>
+        <CommandGroup heading="Links">
+          {data.navMain.map((nav, navIndex) =>
+            nav.items.map((item, itemIndex) => (
+              <CommandItem
+                key={`${navIndex}-${itemIndex}`}
+                onSelect={() => handleSelect(item.url)}
+              >
+                <nav.icon className="mr-2 h-4 w-4" />
+                <span>{item.title}</span>
+              </CommandItem>
+            )),
+          )}
         </CommandGroup>
       </CommandList>
     </CommandDialog>

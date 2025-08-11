@@ -21,26 +21,18 @@ import {
   BarChart3,
   Calendar,
   Check,
-  Github,
-  Linkedin,
-  Mail,
   Shield,
-  Star,
-  Twitter,
   Users,
-  Workflow,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
-import * as React from "react";
-import { useState } from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import customApiImage from "../../../public/customapi.png";
 import githubImage from "../../../public/github.png";
 import linearImage from "../../../public/linear.png";
 import placeholderImage from "../../../public/placeholder.png";
-import TestimonialsComponent from "../../components/landing-page/testimonials.components";
+import jiraImage from "../../../public/jira.png";
+import slackImage from "../../../public/slack.png";
+import TestimonialsComponent from "@/components/landing-page/testimonials.components";
 
 const features = [
   {
@@ -107,13 +99,13 @@ const integrations = [
       "Sync issues, cycles, and status updates to connect code changes with tracked work items.",
   },
   {
-    image: githubImage,
+    image: jiraImage,
     name: "Jira",
     description:
       "Link tickets and sprints to developer contributions for full project visibility.",
   },
   {
-    image: githubImage,
+    image: slackImage,
     name: "Slack",
     description:
       "Get contribution highlights and impact summaries delivered directly to your team channels.",

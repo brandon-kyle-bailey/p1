@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/custom/app-sidebar";
+import { AppSidebar } from "@/components/sidebar.component";
 import { NavbarComponent } from "@/components/navbar.component";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import getCookiesStore from "@/hooks/get-cookies-store.hook";

@@ -10,6 +10,13 @@ export enum WebRoutes {
   PrivacyPolicy = "/privacy-policy",
   Tos = "/terms-of-service",
   Home = "/",
+  Account = "/dashboard/settings/account",
+  Integrations = "/dashboard/settings/integrations",
+  Organizations = "/dashboard/organizations",
+  Teams = "/dashboard/teams",
+  Projects = "/dashboard/projects",
+  Repositories = "/dashboard/repositories",
+  Tickets = "/dashboard/tickets",
 }
 
 export enum ApiRoutes {
