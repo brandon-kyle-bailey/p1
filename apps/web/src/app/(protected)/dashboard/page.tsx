@@ -38,6 +38,7 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import { mockPullRequests } from "../../../lib/mock-data";
+import Link from "next/link";
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -135,6 +136,7 @@ export default function Dashboard() {
 
   const recentPullRequests = paginatedPullRequests.map((pr) => ({
     id: pr.external_id,
+    url: pr.url,
     title: pr.title,
     author: pr.author,
     state: pr.state,
@@ -395,9 +397,11 @@ export default function Dashboard() {
             {recentPullRequests.length > 0 ? (
               <>
                 {recentPullRequests.map((pr) => (
-                  <div
+                  <Link
+                    href={pr.url}
                     key={pr.id}
-                    className="flex items-center space-x-4 rounded-lg border p-4"
+                    target="_blank"
+                    className="flex items-center space-x-4 rounded-lg border p-4 hover:b-g-accent hover:shadow-md transition"
                   >
                     <div className="flex-shrink-0">
                       {getStateIcon(pr.state)}
@@ -431,7 +435,7 @@ export default function Dashboard() {
                         <span>{pr.duration}</span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between pt-4">
