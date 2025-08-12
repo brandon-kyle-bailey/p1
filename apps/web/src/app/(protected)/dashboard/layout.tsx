@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/sidebar.component";
+import { AppSidebar } from "@/components/sidebar/sidebar.component";
 import { NavbarComponent } from "@/components/navbar.component";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import getCookiesStore from "@/hooks/get-cookies-store.hook";
@@ -20,7 +20,7 @@ export default async function Layout({
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar session={session!} />
         <SidebarInset className="p-2 bg-inherit">
-          <NavbarComponent />
+          <NavbarComponent session={session!} />
           <main className="lg:p-8 flex flex-col gap-8">{children}</main>
         </SidebarInset>
       </SidebarProvider>

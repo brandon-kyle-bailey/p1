@@ -9,9 +9,9 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Code2 } from "lucide-react";
-import { useRouter } from "next/navigation"; // Next 13+ useRouter
+import { useRouter } from "next/navigation";
 import { WebRoutes } from "../lib/constants";
-import { data } from "@/components/sidebar.component";
+import { data } from "@/components/sidebar/sidebar.component";
 
 export default function CommandPalleteComponent(props: {
   open: boolean;
@@ -36,17 +36,15 @@ export default function CommandPalleteComponent(props: {
           </CommandItem>
         </CommandGroup>
         <CommandGroup heading="Links">
-          {data.navMain.map((nav, navIndex) =>
-            nav.items.map((item, itemIndex) => (
-              <CommandItem
-                key={`${navIndex}-${itemIndex}`}
-                onSelect={() => handleSelect(item.url)}
-              >
-                <nav.icon className="mr-2 h-4 w-4" />
-                <span>{item.title}</span>
-              </CommandItem>
-            )),
-          )}
+          {data.navMain.map((nav, navIndex) => (
+            <CommandItem
+              key={`${navIndex}-${navIndex}`}
+              onSelect={() => handleSelect(nav.url)}
+            >
+              <nav.icon className="mr-2 h-4 w-4" />
+              <span>{nav.title}</span>
+            </CommandItem>
+          ))}
         </CommandGroup>
       </CommandList>
     </CommandDialog>

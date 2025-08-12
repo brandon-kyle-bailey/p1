@@ -1,13 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useSession } from "next-auth/react";
+import { User } from "next-auth";
 
-export default function AvatarComponent() {
-  const { data: session } = useSession();
-  if (!session) return null;
+export default function AvatarComponent({ user }: { user: User }) {
   return (
     <Avatar>
-      <AvatarImage src={session.user.image!} alt={session.user.name!} />
-      <AvatarFallback>SN</AvatarFallback>
+      <AvatarImage src={user.image!} alt={user.name!} />
+      <AvatarFallback>AV</AvatarFallback>
     </Avatar>
   );
 }

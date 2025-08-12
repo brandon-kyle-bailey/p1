@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useEffect, useState } from "react";
-import AvatarComponent from "@/components/avatar.component";
+import AvatarDropdownComponent from "./avatar-dropdown.component";
 import { ModeToggle } from "./theme/mode-toggle";
+import { Session } from "next-auth";
 
-export function NavbarComponent() {
+export function NavbarComponent({ session }: { session: Session }) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -52,7 +53,7 @@ export function NavbarComponent() {
 
           <div className="flex items-center gap-2">
             <ModeToggle />
-            <AvatarComponent />
+            <AvatarDropdownComponent isMobile={true} user={session.user} />
           </div>
         </div>
       </header>
