@@ -40,7 +40,7 @@ import {
 import { mockPullRequests } from "../../../lib/mock-data";
 import Link from "next/link";
 
-export default function Dashboard() {
+export default function Page() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [repositoryFilter, setRepositoryFilter] = useState("all");
