@@ -16,14 +16,14 @@ export default function TestimonialsComponent() {
   const testimonials = [
     {
       content:
-        "Lumino has completely changed how we showcase developer impact. Automatic tracking from GitHub and Linear means we finally have a clear, real-time view of our team’s contributions.",
+        "The-startup has completely changed how we showcase developer impact. Automatic tracking from GitHub and Linear means we finally have a clear, real-time view of our team’s contributions.",
       author: "Sarah Chen",
       role: "Engineering Director, TechCorp",
       avatar: "SC",
     },
     {
       content:
-        "Our remote engineers feel more connected than ever. Lumino highlights each person’s work across projects, which has been a huge boost for recognition and morale.",
+        "Our remote engineers feel more connected than ever. The-startup highlights each person’s work across projects, which has been a huge boost for recognition and morale.",
       author: "Michael Rodriguez",
       role: "Team Lead, StartupXYZ",
       avatar: "MR",
@@ -37,14 +37,14 @@ export default function TestimonialsComponent() {
     },
     {
       content:
-        "Setup was effortless, and the Lumino team guided us through every step. Within days, we were seeing data that helped us improve delivery times and collaboration.",
+        "Setup was effortless, and the The-startup team guided us through every step. Within days, we were seeing data that helped us improve delivery times and collaboration.",
       author: "David Park",
       role: "Engineering Manager, DevCorp",
       avatar: "DP",
     },
     {
       content:
-        "The integrations with our existing tools made adoption painless. Lumino slides right into our workflow and starts delivering insights immediately.",
+        "The integrations with our existing tools made adoption painless. The-startup slides right into our workflow and starts delivering insights immediately.",
       author: "Lisa Thompson",
       role: "Product Manager, InnovateCo",
       avatar: "LT",

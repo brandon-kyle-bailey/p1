@@ -13,7 +13,7 @@ import SidebarFooterComponent from "./sidebar-footer.component";
 
 export const data = {
   team: {
-    name: "Lumino",
+    name: "The-startup",
     logo: Command,
     plan: "Free",
   },

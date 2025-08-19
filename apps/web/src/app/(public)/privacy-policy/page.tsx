@@ -10,7 +10,7 @@ export default function Page() {
       </p>
 
       <p className="mb-6 leading-relaxed text-base text-muted-foreground">
-        Lumino (“we,” “us,” or “our”) values your privacy and is committed to
+        The-startup (“we,” “us,” or “our”) values your privacy and is committed to
         protecting your personal information. This Privacy Policy explains how
         we collect, use, and disclose information when you use our website,
         services, and applications (collectively, the “Services”).
@@ -24,7 +24,7 @@ export default function Page() {
         Personal Information
       </h3>
       <p className="mb-4 leading-relaxed text-muted-foreground">
-        When you sign up or use Lumino, we may collect personal information
+        When you sign up or use The-startup, we may collect personal information
         including but not limited to:
       </p>
       <ul className="list-disc list-inside space-y-1 text-muted-foreground mb-6">
@@ -60,7 +60,7 @@ export default function Page() {
         We use the information we collect to:
       </p>
       <ul className="list-disc list-inside space-y-1 text-muted-foreground mb-6">
-        <li>Provide, maintain, and improve Lumino</li>
+        <li>Provide, maintain, and improve The-startup</li>
         <li>Authenticate and manage your account</li>
         <li>Process payments and billing</li>
         <li>Communicate with you about updates, support, and marketing</li>
@@ -176,13 +176,13 @@ export default function Page() {
       <address className="not-italic mb-4 text-muted-foreground">
         <strong>Email:</strong>{" "}
         <a
-          href="mailto:support@lumino.com"
+          href="mailto:support@the-startup.com"
           className="text-primary hover:underline"
         >
-          support@lumino.com
+          support@the-startup.com
         </a>
         <br />
-        <strong>Address:</strong> Lumino Inc., 123 Software Lane, Tech City, USA
+        <strong>Address:</strong> The-startup Inc., 123 Software Lane, Tech City, USA
       </address>
     </section>
   );

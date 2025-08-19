@@ -4,21 +4,11 @@ export enum WebRoutes {
   Register = "/register",
   ResetPassword = "/reset-password",
   Dashboard = "/dashboard",
-  Onboarding = "/onboarding",
   Blog = "/blog",
   Contact = "/contact",
   PrivacyPolicy = "/privacy-policy",
   Tos = "/terms-of-service",
   Home = "/",
-  Account = "/dashboard/settings/account",
-  Integrations = "/dashboard/settings/integrations",
-  Organizations = "/dashboard/organizations",
-  Teams = "/dashboard/teams",
-  Projects = "/dashboard/projects",
-  Repositories = "/dashboard/repositories",
-  Tickets = "/dashboard/tickets",
-  PullRequests = "/dashboard/pull-requests",
-  Chats = "/dashboard/insights/chats",
 }
 
 export enum ApiRoutes {
@@ -38,8 +28,8 @@ export enum SignInModes {
 }
 
 export interface SignInActionOptions {
-  mode?: SignInModes;
   redirect: boolean;
+  mode?: SignInModes;
   redirectTo?: WebRoutes;
 }
 

@@ -40,7 +40,7 @@ const features = [
     name: "Automatic Contribution Tracking",
     title: "Effortlessly capture every code and task contribution",
     description:
-      "Lumino integrates seamlessly with GitHub, Linear, Jira, and more to automatically log commits, pull requests, code reviews, and issue updates. No manual entry needed — keep your impact history accurate and up-to-date.",
+      "The-startup integrates seamlessly with GitHub, Linear, Jira, and more to automatically log commits, pull requests, code reviews, and issue updates. No manual entry needed — keep your impact history accurate and up-to-date.",
     items: [
       { icon: "", name: "Real-time sync with developer tools" },
       { icon: "", name: "Detailed commit and PR mapping" },
@@ -52,7 +52,7 @@ const features = [
     name: "Team Impact Visibility",
     title: "Recognize contributions and boost team morale",
     description:
-      "Lumino surfaces individual and team contributions through dynamic dashboards and personalized reports. Celebrate wins, identify hidden contributors, and foster a culture of recognition and accountability.",
+      "The-startup surfaces individual and team contributions through dynamic dashboards and personalized reports. Celebrate wins, identify hidden contributors, and foster a culture of recognition and accountability.",
     items: [
       { icon: "", name: "Personal and team contribution dashboards" },
       { icon: "", name: "Automated impact highlights and summaries" },
@@ -76,7 +76,7 @@ const features = [
     name: "Enterprise-Grade Security",
     title: "Protect your sensitive contribution and project data",
     description:
-      "Lumino ensures your data is safe with SOC 2 Type II compliance, SSO/SAML integration, and granular permissions. Enjoy peace of mind while enabling seamless team collaboration and visibility.",
+      "The-startup ensures your data is safe with SOC 2 Type II compliance, SSO/SAML integration, and granular permissions. Enjoy peace of mind while enabling seamless team collaboration and visibility.",
     items: [
       { icon: "", name: "SSO and SAML support" },
       { icon: "", name: "Granular access control and permissions" },
@@ -114,7 +114,7 @@ const integrations = [
     image: customApiImage,
     name: "Custom API",
     description:
-      "Use our REST API to integrate Lumino with any internal tools or workflows you use.",
+      "Use our REST API to integrate The-startup with any internal tools or workflows you use.",
   },
 ];
 
@@ -172,7 +172,7 @@ const faqs = [
   {
     question: "How long is the free trial?",
     answer:
-      "Lumino’s free trial lasts 14 days with full access to every feature — including all integrations and analytics. No credit card required, and you can cancel anytime.",
+      "The-startup’s free trial lasts 14 days with full access to every feature — including all integrations and analytics. No credit card required, and you can cancel anytime.",
   },
   {
     question: "Can I change plans later?",
@@ -182,7 +182,7 @@ const faqs = [
   {
     question: "Is my data secure?",
     answer:
-      "Yes. Lumino uses enterprise-grade security, including SOC 2 Type II compliance, end-to-end encryption, and regular security audits to keep your contribution data safe.",
+      "Yes. The-startup uses enterprise-grade security, including SOC 2 Type II compliance, end-to-end encryption, and regular security audits to keep your contribution data safe.",
   },
   {
     question: "Do you offer customer support?",
@@ -192,7 +192,7 @@ const faqs = [
   {
     question: "Can I integrate with my existing tools?",
     answer:
-      "Yes. Lumino connects seamlessly with GitHub, Linear, Jira, and other developer tools. Our team can assist with setup and ensure all historical data is imported.",
+      "Yes. The-startup connects seamlessly with GitHub, Linear, Jira, and other developer tools. Our team can assist with setup and ensure all historical data is imported.",
   },
   {
     question: "Is there a mobile app?",
@@ -221,7 +221,7 @@ export default function Page() {
                 </h1>
                 <p className="text-lg sm:text-xl text-muted-foreground max-w-[600px] mx-auto lg:mx-0">
                   Automatically track and visualize your team’s code, tasks, and
-                  project contributions with Lumino. Connect GitHub, Linear,
+                  project contributions with The-startup. Connect GitHub, Linear,
                   Jira, and more for real-time insights that boost productivity
                   and recognition.
                 </p>
@@ -352,10 +352,10 @@ export default function Page() {
               Integrations
             </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-              Connect Lumino with Your Developer Tools
+              Connect The-startup with Your Developer Tools
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-[800px] mx-auto px-4">
-              Lumino seamlessly integrates with the tools your engineering team
+              The-startup seamlessly integrates with the tools your engineering team
               already loves — from GitHub and Linear to Slack and Jira. Keep
               your workflow intact while unlocking deep contribution insights.
             </p>
@@ -414,7 +414,7 @@ export default function Page() {
               Trusted by Developer Teams Worldwide
             </h2>
             <p className="text-xl text-muted-foreground max-w-[800px] mx-auto">
-              Hear from engineering teams how Lumino has helped them capture
+              Hear from engineering teams how The-startup has helped them capture
               their contributions, boost recognition, and improve collaboration.
             </p>
           </div>
@@ -520,7 +520,7 @@ export default function Page() {
               Frequently Asked Questions
             </h2>
             <p className="text-xl text-muted-foreground max-w-[800px] mx-auto">
-              Have questions about Lumino? Here are answers to some of the most
+              Have questions about The-startup? Here are answers to some of the most
               common inquiries about how we help you track developer
               contributions and improve team impact.
             </p>
@@ -555,7 +555,7 @@ export default function Page() {
               Ready to capture your team&apos;s true impact?
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground px-4">
-              Join thousands of developer teams who trust Lumino to
+              Join thousands of developer teams who trust The-startup to
               automatically track contributions, improve collaboration, and
               boost recognition. Start your free trial today and see the
               difference.

@@ -92,14 +92,13 @@ const stripeWebhookHandlers = new Map<
 ]);
 
 export async function POST(req: NextRequest) {
-  const sig = req.headers.get("stripe-signature");
-  const rawBody = await req.text();
-
   let event: Stripe.Event;
   try {
+    const signature = req.headers.get("stripe-signature");
+    const bodyText = await req.text();
     event = stripe.webhooks.constructEvent(
-      rawBody,
-      sig!,
+      bodyText,
+      signature!,
       process.env.STRIPE_WEBHOOK_SECRET!,
     );
   } catch (err) {

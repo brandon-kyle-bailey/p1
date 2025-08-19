@@ -13,11 +13,11 @@ export default function LandingPageFooterComponent() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <Workflow className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">Lumino</span>
+              <span className="text-xl font-bold">The-startup</span>
             </div>
             <p className="text-muted-foreground text-sm sm:text-base">
               Automatically track developer contributions and amplify team
-              impact with Lumino.
+              impact with The-startup.
             </p>
             <div className="flex space-x-4">
               <Button size="icon" variant="ghost" aria-label="Twitter">
@@ -151,7 +151,7 @@ export default function LandingPageFooterComponent() {
         </div>
 
         <div className="border-t mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-muted-foreground text-sm sm:text-base">
-          <p>&copy; {new Date().getFullYear()} Lumino. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} The-startup. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -15,7 +15,7 @@ export default function LandingPageHeaderComponent() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Workflow className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold">Lumino</span>
+          <span className="text-xl font-bold">The-startup</span>
         </div>
 
         <nav className="hidden md:flex items-center space-x-8">

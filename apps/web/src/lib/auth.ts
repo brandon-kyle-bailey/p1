@@ -4,6 +4,7 @@ import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { CredentialsSignin } from "next-auth";
+import { SignInModes } from "./constants";
 
 class UserExistsError extends CredentialsSignin {
   code = "user_exists";
@@ -50,7 +51,12 @@ const users: Record<string, string>[] = [
 export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/login",
-    error: "/login",
+    error: "/error",
+  },
+  secret: process.env.AUTH_SECRET,
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 60 * 24 * 7,
   },
   providers: [
     GitHub({
@@ -81,7 +87,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           setTimeout(res, Math.floor(100 + Math.random() * 100)),
         );
 
-        if (mode === "register") {
+        if (mode === SignInModes.Register) {
           const existingUser = users.find((user) => user.email === email);
           if (existingUser) throw new UserExistsError("User already exists");
 
@@ -109,6 +115,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    // async redirect({ url, baseUrl }) {
+    //   if (url.startsWith(baseUrl)) return url;
+    //   return baseUrl;
+    // },
     async signIn({ user, account, profile, email, credentials }) {
       // console.log("SignIn callback:", {
       //   user,
