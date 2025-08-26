@@ -29,7 +29,7 @@ import Image from "next/image";
 import customApiImage from "../../../public/customapi.png";
 import githubImage from "../../../public/github.png";
 import linearImage from "../../../public/linear.png";
-import placeholderImage from "../../../public/placeholder.png";
+import heroImage from "../../../public/hero.png";
 import jiraImage from "../../../public/jira.png";
 import slackImage from "../../../public/slack.png";
 import TestimonialsComponent from "@/components/landing-page/testimonials.components";
@@ -204,11 +204,11 @@ export default function Page() {
   return (
     <>
       {/* Hero Section */}
-      <section className="p-8">
+      <section className="p-8 lg:mt-56">
         <div className="px-4 md:px-6">
-          <div className="grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-            <div className="space-y-6 sm:space-y-8 text-center lg:text-left">
-              <div className="space-y-4">
+          <div className="grid gap-8 items-center">
+            <div className="space-y-6 sm:space-y-8 text-center">
+              <div className="space-y-4 flex flex-col items-center">
                 <Badge
                   variant="outline"
                   className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500 to-blue-500 border-0"
@@ -219,15 +219,15 @@ export default function Page() {
                   Make Your Developer
                   <span className="text-primary"> Impact Evident</span>
                 </h1>
-                <p className="text-lg sm:text-xl text-muted-foreground max-w-[600px] mx-auto lg:mx-0">
+                <p className="text-lg sm:text-xl text-muted-foreground lg:w-1/2">
                   Automatically track and visualize your team’s code, tasks, and
-                  project contributions with The-startup. Connect GitHub, Linear,
-                  Jira, and more for real-time insights that boost productivity
-                  and recognition.
+                  project contributions with The-startup. Connect GitHub,
+                  Linear, Jira, and more for real-time insights that boost
+                  productivity and recognition.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <Button size="lg" className="w-full sm:w-auto">
                   Start Free Trial
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -241,7 +241,7 @@ export default function Page() {
                 </Button>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-2 sm:space-y-0 sm:space-x-8 text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-8 text-sm text-muted-foreground">
                 <div className="flex items-center space-x-2">
                   <Check className="h-4 w-4 text-primary" />
                   <span>14-day free trial</span>
@@ -253,13 +253,13 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="relative">
+            <div className="lg:p-18">
               <Image
-                src={placeholderImage}
+                src={heroImage}
                 alt="Developer dashboard showing contribution metrics and team impact insights"
-                width={600}
-                height={400}
-                className="rounded-xl w-full h-auto"
+                width={1920}
+                height={1080}
+                className="rounded-xl shadow-lg border w-full h-auto"
               />
             </div>
           </div>
@@ -290,9 +290,9 @@ export default function Page() {
             return (
               <div
                 key={`${feature.name}-${index}`}
-                className="grid gap-8 lg:grid-cols-2 items-center"
+                className="grid gap-8 lg:grid-cols-2 items-center my-16 lg:my-56"
               >
-                <div className="space-y-4 text-center lg:text-left">
+                <div className="space-y-4 text-start">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
                     {feature.icon}
                   </div>
@@ -321,14 +321,12 @@ export default function Page() {
                   </ul>
                 </div>
                 <div
-                  className={`relative ${
-                    index % 2 !== 0
-                      ? "order-first lg:order-last"
-                      : "order-last lg:order-first"
+                  className={`relative order-first ${
+                    index % 2 !== 0 ? "lg:order-last" : "lg:order-first"
                   }`}
                 >
                   <Image
-                    src={placeholderImage}
+                    src={heroImage}
                     alt={`${feature.name} dashboard showing detailed contribution metrics and developer insights`}
                     width={600}
                     height={400}
@@ -355,13 +353,14 @@ export default function Page() {
               Connect The-startup with Your Developer Tools
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-[800px] mx-auto px-4">
-              The-startup seamlessly integrates with the tools your engineering team
-              already loves — from GitHub and Linear to Slack and Jira. Keep
-              your workflow intact while unlocking deep contribution insights.
+              The-startup seamlessly integrates with the tools your engineering
+              team already loves — from GitHub and Linear to Slack and Jira.
+              Keep your workflow intact while unlocking deep contribution
+              insights.
             </p>
           </div>
 
-          <div className="grid gap-4 sm:gap-6 lg:gap-8 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 mb-8 sm:mb-12">
+          <div className="grid gap-4 sm:gap-6 lg:gap-8 grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 mb-8 sm:mb-12">
             {integrations.map((integration, index) => (
               <Card
                 key={`${integration.name}-${index}`}
@@ -414,8 +413,9 @@ export default function Page() {
               Trusted by Developer Teams Worldwide
             </h2>
             <p className="text-xl text-muted-foreground max-w-[800px] mx-auto">
-              Hear from engineering teams how The-startup has helped them capture
-              their contributions, boost recognition, and improve collaboration.
+              Hear from engineering teams how The-startup has helped them
+              capture their contributions, boost recognition, and improve
+              collaboration.
             </p>
           </div>
           <TestimonialsComponent />
@@ -520,8 +520,8 @@ export default function Page() {
               Frequently Asked Questions
             </h2>
             <p className="text-xl text-muted-foreground max-w-[800px] mx-auto">
-              Have questions about The-startup? Here are answers to some of the most
-              common inquiries about how we help you track developer
+              Have questions about The-startup? Here are answers to some of the
+              most common inquiries about how we help you track developer
               contributions and improve team impact.
             </p>
           </div>
