@@ -22,6 +22,7 @@ import {
   Calendar,
   Check,
   Shield,
+  Star,
   Users,
 } from "lucide-react";
 import Image from "next/image";
@@ -33,6 +34,8 @@ import heroImage from "../../../public/hero.png";
 import jiraImage from "../../../public/jira.png";
 import slackImage from "../../../public/slack.png";
 import TestimonialsComponent from "@/components/landing-page/testimonials.components";
+import Link from "next/link";
+import { WebRoutes } from "@/lib/constants";
 
 const features = [
   {
@@ -204,148 +207,134 @@ export default function Page() {
   return (
     <>
       {/* Hero Section */}
-      <section className="p-8 lg:mt-56">
-        <div className="px-4 md:px-6">
-          <div className="grid gap-8 items-center">
-            <div className="space-y-6 sm:space-y-8 text-center">
-              <div className="space-y-4 flex flex-col items-center">
-                <Badge
-                  variant="outline"
-                  className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500 to-blue-500 border-0"
-                >
-                  🚀 New: Real-Time Contribution Insights
-                </Badge>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight">
-                  Make Your Developer
-                  <span className="text-primary"> Impact Evident</span>
-                </h1>
-                <p className="text-lg sm:text-xl text-muted-foreground lg:w-1/2">
-                  Automatically track and visualize your team’s code, tasks, and
-                  project contributions with The-startup. Connect GitHub,
-                  Linear, Jira, and more for real-time insights that boost
-                  productivity and recognition.
-                </p>
-              </div>
+      <section className="p-8 bg-background flex flex-col justify-center items-center gap-8 min-h-screen">
+        <div className="flex flex-col justify-center gap-8 md:w-2/3">
+          <Badge className="rounded-full px-3 py-1 bg-primary text-secondary">
+            🚀 New: Real-Time Contribution Insights
+          </Badge>
+          <h1 className="text-7xl font-bold tracking-tight">
+            Make Your Developer
+            <span className="text-primary"> Impact Evident</span>
+          </h1>
+          <p className="text-lg text-muted-foreground w-2/3">
+            Automatically track and visualize your team’s code, tasks, and
+            project contributions with The-startup. Connect GitHub, Linear,
+            Jira, and more for real-time insights that boost productivity and
+            recognition.
+          </p>
+          <div className="flex gap-4">
+            <Link href={WebRoutes.Register}>
+              <Button size={"lg"}>
+                Get Started
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                <Button size="lg" className="w-full sm:w-auto">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto bg-transparent"
-                >
-                  Watch Demo
-                </Button>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-8 text-sm text-muted-foreground">
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-primary" />
-                  <span>14-day free trial</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-primary" />
-                  <span>No credit card required</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:p-18">
-              <Image
-                src={heroImage}
-                alt="Developer dashboard showing contribution metrics and team impact insights"
-                width={1920}
-                height={1080}
-                className="rounded-xl shadow-lg border w-full h-auto"
-              />
-            </div>
+            <Link href={WebRoutes.Demo}>
+              <Button size={"lg"} variant={"outline"}>
+                Watch Demo
+              </Button>
+            </Link>
           </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                />
+              ))}
+            </div>
+            <span>
+              No credit card required • Free trial • Money-back guarantee
+            </span>
+          </div>
+        </div>
+        <div className="flex flex-col justify-center w-3/4">
+          <Image
+            src={heroImage}
+            alt="Developer dashboard showing contribution metrics and team impact insights"
+            width={1920}
+            height={1080}
+            className="rounded-xl shadow-lg shadow-primary border border-primary"
+          />
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="p-8 bg-muted/50">
-        <div className="px-4 md:px-6">
-          <div className="text-center space-y-4 mb-12 sm:mb-16">
-            <Badge
-              variant="outline"
-              className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500 to-blue-500 border-0"
-            >
-              Features
-            </Badge>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-              Everything You Need to Showcase Developer Impact
-            </h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-[800px] mx-auto px-4">
-              Powerful tools designed to automatically track contributions,
-              surface insights, and help your team grow through recognition and
-              data-driven decisions.
-            </p>
-          </div>
-
-          {features.map((feature, index) => {
-            return (
-              <div
-                key={`${feature.name}-${index}`}
-                className="grid gap-8 lg:grid-cols-2 items-center my-16 lg:my-56"
-              >
-                <div className="space-y-4 text-start">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto lg:mx-0">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-bold">
-                    {feature.name}
-                  </h3>
-                  <p className="text-base sm:text-lg text-muted-foreground">
-                    {feature.title}
-                  </p>
-                  <p className="text-sm sm:text-base text-muted-foreground">
-                    {feature.description}
-                  </p>
-                  <ul className="space-y-2 text-left max-w-md mx-auto lg:mx-0">
-                    {feature.items.map((item, idx) => (
-                      <li
-                        key={`${item.name}-${idx}`}
-                        className="flex items-center space-x-2"
-                      >
-                        <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                        {item.icon}
-                        <span className="text-sm sm:text-base">
-                          {item.name}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div
-                  className={`relative order-first ${
-                    index % 2 !== 0 ? "lg:order-last" : "lg:order-first"
-                  }`}
-                >
-                  <Image
-                    src={heroImage}
-                    alt={`${feature.name} dashboard showing detailed contribution metrics and developer insights`}
-                    width={600}
-                    height={400}
-                    className="rounded-xl shadow-lg border w-full h-auto"
-                  />
-                </div>
-              </div>
-            );
-          })}
+      <section
+        id="features"
+        className="p-8 flex flex-col justify-center items-center gap-32"
+      >
+        <div className="flex flex-col justify-center items-center gap-8">
+          <Badge
+            variant="outline"
+            className="rounded-full px-3 py-1 bg-primary text-secondary"
+          >
+            Features
+          </Badge>
+          <h2 className="text-5xl font-bold tracking-tight">
+            Everything You Need to Showcase Developer Impact
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-[800px] mx-auto px-4">
+            Powerful tools designed to automatically track contributions,
+            surface insights, and help your team grow through recognition and
+            data-driven decisions.
+          </p>
         </div>
+
+        {features.map((feature, index) => {
+          return (
+            <div
+              key={`${feature.name}-${index}`}
+              className="flex flex-col justify-between items-center gap-8"
+            >
+              <div className="flex flex-col justify-center items-start gap-8">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-bold">{feature.name}</h3>
+                <p className="text-basetext-muted-foreground">
+                  {feature.title}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {feature.description}
+                </p>
+                <ul className="flex flex-col gap-4">
+                  {feature.items.map((item, idx) => (
+                    <li key={`${item.name}-${idx}`} className="flex gap-2">
+                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                      {item.icon}
+                      <span className="text-sm">{item.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div
+                className={`relative order-first ${
+                  index % 2 !== 0 ? "lg:order-last" : "lg:order-first"
+                }`}
+              >
+                <Image
+                  src={heroImage}
+                  alt={`${feature.name} dashboard showing detailed contribution metrics and developer insights`}
+                  width={1920}
+                  height={1080}
+                  className="rounded-xl shadow-lg border w-full h-auto"
+                />
+              </div>
+            </div>
+          );
+        })}
       </section>
 
       {/* Integrations Section */}
-      <section id="integrations" className="p-8">
+      <section id="integrations" className="p-8 bg-background">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-12 sm:mb-16">
             <Badge
               variant="outline"
-              className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500 to-blue-500 border-0"
+              className="rounded-full px-3 py-1 bg-primary text-secondary"
             >
               Integrations
             </Badge>
@@ -360,7 +349,7 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:gap-6 lg:gap-8 grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 mb-8 sm:mb-12">
+          <div className="mb-8 flex flex-wrap gap-4">
             {integrations.map((integration, index) => (
               <Card
                 key={`${integration.name}-${index}`}
@@ -369,9 +358,9 @@ export default function Page() {
                 <Image
                   src={integration.image}
                   alt={integration.name}
-                  width={60}
-                  height={60}
-                  className="mx-auto mb-3 sm:mb-4 w-10 h-10 sm:w-[60px] sm:h-[60px] rounded-lg"
+                  width={1920}
+                  height={1080}
+                  className="mx-auto mb-3 sm:mb-4 w-25 rounded-lg"
                 />
                 <h3 className="font-semibold mb-2 text-sm sm:text-base">
                   {integration.name}
@@ -405,7 +394,7 @@ export default function Page() {
           <div className="text-center space-y-4 mb-16">
             <Badge
               variant="outline"
-              className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500 to-blue-500 border-0"
+              className="rounded-full px-3 py-1 bg-primary text-secondary"
             >
               Testimonials
             </Badge>
@@ -423,12 +412,12 @@ export default function Page() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="p-8 bg-muted/50">
+      <section id="pricing" className="p-8">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-12 sm:mb-16">
             <Badge
               variant="outline"
-              className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500 to-blue-500 border-0"
+              className="rounded-full px-3 py-1 bg-primary text-secondary"
             >
               Pricing
             </Badge>
@@ -447,13 +436,16 @@ export default function Page() {
                 key={`${plan.name}-${index}`}
                 className={`relative ${
                   plan.mostPopular
-                    ? "lg:scale-105 border-purple-500 shadow-lg shadow-purple-500"
+                    ? "lg:scale-105 border border-primary shadow-lg shadow-primary"
                     : ""
                 }`}
               >
                 {plan.mostPopular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-md px-3 py-1">
-                    <Badge className="text-xs sm:text-sm bg-transparent text-primary">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 rounded-md px-3 py-1">
+                    <Badge
+                      variant="outline"
+                      className="rounded-full px-3 py-1 bg-primary text-secondary"
+                    >
                       Most Popular
                     </Badge>
                   </div>
@@ -507,12 +499,12 @@ export default function Page() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="p-8 bg-muted/50">
+      <section id="faq" className="p-8 bg-background">
         <div className="px-4 md:px-6">
           <div className="text-center space-y-4 mb-16">
             <Badge
               variant="outline"
-              className="text-secondary dark:text-primary text-sm bg-gradient-to-r from-purple-500 to-blue-500 border-0"
+              className="rounded-full px-3 py-1 bg-primary text-secondary"
             >
               FAQ
             </Badge>

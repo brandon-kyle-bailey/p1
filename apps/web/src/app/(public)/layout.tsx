@@ -7,8 +7,7 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
+    <div>
       <LandingPageHeaderComponent />
       {children}
       <LandingPageFooterComponent />

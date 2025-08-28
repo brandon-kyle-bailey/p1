@@ -9,6 +9,7 @@ export enum WebRoutes {
   PrivacyPolicy = "/privacy-policy",
   Tos = "/terms-of-service",
   Home = "/",
+  Demo = "/demo",
 }
 
 export enum ApiRoutes {

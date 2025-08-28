@@ -6,6 +6,15 @@ import { WebRoutes } from "../../lib/constants";
 import { Button } from "../ui/button";
 import { useState } from "react";
 
+const navigationLinks = [
+  { url: "/#features", name: "Features" },
+  { url: "/#integrations", name: "integrations" },
+  { url: "/#testimonials", name: "Testimonials" },
+  { url: "/#pricing", name: "Pricing" },
+  { url: "/#faq", name: "FAQ" },
+  { url: "/#contact", name: "Contact" },
+];
+
 export default function LandingPageHeaderComponent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   return (
@@ -19,48 +28,21 @@ export default function LandingPageHeaderComponent() {
             The-startup
           </Link>
         </div>
-
         <nav className="hidden md:flex items-center space-x-8">
-          <Link
-            href="/#features"
-            className="text-sm font-medium hover:text-primary transition-colors"
-          >
-            Features
-          </Link>
-          <Link
-            href="/#integrations"
-            className="text-sm font-medium hover:text-primary transition-colors"
-          >
-            Integrations
-          </Link>
-          <Link
-            href="/#testimonials"
-            className="text-sm font-medium hover:text-primary transition-colors"
-          >
-            Testimonials
-          </Link>
-          <Link
-            href="/#pricing"
-            className="text-sm font-medium hover:text-primary transition-colors"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="/#faq"
-            className="text-sm font-medium hover:text-primary transition-colors"
-          >
-            FAQ
-          </Link>
-          <Link
-            href="/#contact"
-            className="text-sm font-medium hover:text-primary transition-colors"
-          >
-            Contact
-          </Link>
+          {navigationLinks.map((link) => (
+            <Link
+              key={link.name}
+              href={link.url}
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              {link.name}
+            </Link>
+          ))}
         </nav>
-
         <div className="flex items-center space-x-4">
-          <ModeToggle />
+          <div className="hidden md:inline-flex">
+            <ModeToggle />
+          </div>
           <Link href={WebRoutes.Login}>
             <Button variant="ghost" className="hidden md:inline-flex">
               Sign In
@@ -80,58 +62,29 @@ export default function LandingPageHeaderComponent() {
           </Button>
         </div>
       </div>
-
-      {/* Mobile Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-background">
+        <div className="md:hidden border-t">
           <nav className="px-4 py-4 space-y-4">
-            <Link
-              href="/#features"
-              className="block text-sm font-medium hover:text-primary transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Features
-            </Link>
-            <Link
-              href="/#integrations"
-              className="block text-sm font-medium hover:text-primary transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Integrations
-            </Link>
-            <Link
-              href="/#testimonials"
-              className="block text-sm font-medium hover:text-primary transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Testimonials
-            </Link>
-            <Link
-              href="/#pricing"
-              className="block text-sm font-medium hover:text-primary transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/#faq"
-              className="block text-sm font-medium hover:text-primary transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              FAQ
-            </Link>
-            <Link
-              href="/#contact"
-              className="block text-sm font-medium hover:text-primary transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            <div className="pt-4 border-t space-y-2">
-              <Button variant="ghost" className="w-full justify-start">
-                Sign In
-              </Button>
-              <Button className="w-full">Get Started</Button>
+            {navigationLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.url}
+                className="block text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
+            <div className="pt-4 border-t flex flex-col w-full gap-2">
+              <ModeToggle />
+              <Link href={WebRoutes.Login}>
+                <Button variant="ghost" className="w-full">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href={WebRoutes.Register}>
+                <Button className="w-full">Get Started</Button>
+              </Link>
             </div>
           </nav>
         </div>
