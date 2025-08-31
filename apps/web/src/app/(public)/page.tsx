@@ -380,7 +380,7 @@ export default function Page() {
               </div>
               <div
                 className={`relative order-first lg:w-1/2 ${
-                  index % 2 !== 0 ? "lg:order-last" : "lg:order-first"
+                  index % 2 !== 0 ? "md:order-last" : "md:order-first"
                 }`}
               >
                 <Image
