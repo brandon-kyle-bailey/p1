@@ -31,7 +31,7 @@ const footerLinks = {
 export default function LandingPageFooterComponent() {
   return (
     <footer id="contact" className="border-t p-8 bg-background">
-      <div className="flex flex-col justify-between gap-4">
+      <div className="flex flex-col md:flex-row justify-between gap-4">
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">

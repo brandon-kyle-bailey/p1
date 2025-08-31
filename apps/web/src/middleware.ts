@@ -10,7 +10,6 @@ const ignoredRoutes = [
   WebRoutes.ResetPassword,
   WebRoutes.Register,
   WebRoutes.Blog,
-  "/test",
 ];
 
 export const config = {

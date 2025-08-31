@@ -16,7 +16,7 @@ export default async function Layout({
   const defaultOpen = getCookie(Cookies.SidebarState) === "true";
 
   return (
-    <SessionProvider session={session}>
+    <SessionProvider session={session} refetchOnWindowFocus={false}>
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar session={session!} />
         <SidebarInset className="p-2 bg-inherit">

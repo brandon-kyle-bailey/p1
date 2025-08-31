@@ -1,5 +1,7 @@
 "use client";
 
+import Autoplay from "embla-carousel-autoplay";
+
 import {
   Accordion,
   AccordionContent,
@@ -36,6 +38,11 @@ import slackImage from "../../../public/slack.png";
 import TestimonialsComponent from "@/components/landing-page/testimonials.components";
 import Link from "next/link";
 import { WebRoutes } from "@/lib/constants";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 
 const features = [
   {
@@ -203,11 +210,22 @@ const faqs = [
   },
 ];
 
+const defaultCompanies = [
+  { name: "Acme Inc." },
+  { name: "Acme Inc." },
+  { name: "Acme Inc." },
+  { name: "Acme Inc." },
+  { name: "Acme Inc." },
+  { name: "Acme Inc." },
+  { name: "Acme Inc." },
+  { name: "Acme Inc." },
+];
+
 export default function Page() {
   return (
     <>
       {/* Hero Section */}
-      <section className="p-8 bg-background flex flex-col justify-center items-center gap-8 min-h-screen">
+      <section className="p-8 bg-background flex flex-col md:flex-row justify-center items-center gap-8 lg:pt-28">
         <div className="flex flex-col justify-center gap-8 md:w-2/3">
           <Badge className="rounded-full px-3 py-1 bg-primary text-secondary">
             🚀 New: Real-Time Contribution Insights
@@ -236,12 +254,12 @@ export default function Page() {
               </Button>
             </Link>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex flex-col gap-2 text-sm text-muted-foreground">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                  className="w-5 h-5 fill-yellow-400 text-yellow-400"
                 />
               ))}
             </div>
@@ -261,10 +279,60 @@ export default function Page() {
         </div>
       </section>
 
+      <section
+        id="company-carousel"
+        className="p-8 flex flex-col justify-center items-center gap-56 bg-background"
+      >
+        <div className="text-center w-full">
+          <h2 className="text-sm text-muted-foreground mb-8">
+            Trusted by innovative companies worldwide
+          </h2>
+
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            plugins={[
+              Autoplay({
+                delay: 2000,
+              }),
+            ]}
+            className="w-full"
+          >
+            <CarouselContent className="">
+              {[...defaultCompanies, ...defaultCompanies].map(
+                (company, index) => (
+                  <CarouselItem
+                    key={`${company.name}-${index}`}
+                    className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/5"
+                  >
+                    <div className="flex items-center justify-center gap-2 text-muted-foreground p-4">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        className="text-muted-foreground"
+                      >
+                        <path d="M8 2L14 14H2L8 2Z" fill="currentColor" />
+                      </svg>
+                      <span className="text-base font-medium">
+                        {company.name}
+                      </span>
+                    </div>
+                  </CarouselItem>
+                ),
+              )}
+            </CarouselContent>
+          </Carousel>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section
         id="features"
-        className="p-8 flex flex-col justify-center items-center gap-32"
+        className="p-8 flex flex-col justify-center items-center gap-56"
       >
         <div className="flex flex-col justify-center items-center gap-8">
           <Badge
@@ -287,31 +355,31 @@ export default function Page() {
           return (
             <div
               key={`${feature.name}-${index}`}
-              className="flex flex-col justify-between items-center gap-8"
+              className="flex flex-col md:flex-row justify-between items-center gap-8"
             >
-              <div className="flex flex-col justify-center items-start gap-8">
+              <div className="flex flex-col justify-center items-start gap-8 lg:w-1/2">
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-bold">{feature.name}</h3>
-                <p className="text-basetext-muted-foreground">
+                <h3 className="text-5xl font-bold tracking-tight">
+                  {feature.name}
+                </h3>
+                <p className="text-basetext-muted-foreground text-xl">
                   {feature.title}
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  {feature.description}
-                </p>
+                <p className="text-muted-foreground">{feature.description}</p>
                 <ul className="flex flex-col gap-4">
                   {feature.items.map((item, idx) => (
                     <li key={`${item.name}-${idx}`} className="flex gap-2">
                       <Check className="h-4 w-4 text-primary flex-shrink-0" />
                       {item.icon}
-                      <span className="text-sm">{item.name}</span>
+                      <span className="">{item.name}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               <div
-                className={`relative order-first ${
+                className={`relative order-first lg:w-1/2 ${
                   index % 2 !== 0 ? "lg:order-last" : "lg:order-first"
                 }`}
               >
@@ -320,7 +388,7 @@ export default function Page() {
                   alt={`${feature.name} dashboard showing detailed contribution metrics and developer insights`}
                   width={1920}
                   height={1080}
-                  className="rounded-xl shadow-lg border w-full h-auto"
+                  className="rounded-xl shadow-lg border w-full h-auto border-primary shadow-primary"
                 />
               </div>
             </div>
@@ -349,11 +417,11 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="mb-8 flex flex-wrap gap-4">
+          <div className="pb-8 flex flex-col md:flex-row flex-wrap gap-8 w-full justify-center">
             {integrations.map((integration, index) => (
               <Card
                 key={`${integration.name}-${index}`}
-                className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow shadow-secondary"
+                className="p-4 sm:p-6 text-center hover:shadow-lg transition-shadow shadow-secondary md:w-1/3"
               >
                 <Image
                   src={integration.image}
@@ -542,8 +610,8 @@ export default function Page() {
       {/* Final CTA Section */}
       <section className="p-8">
         <div className="px-4 md:px-6">
-          <div className="text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+          <div className="text-center space-y-16 max-w-4xl mx-auto">
+            <h2 className="text-5xl font-bold tracking-tight">
               Ready to capture your team&apos;s true impact?
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground px-4">
