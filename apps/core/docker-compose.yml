@@ -1,0 +1,46 @@
+services:
+  db:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: dockerfiles/db.Dockerfile
+    container_name: nestjs-db
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      retries: 10
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  cache:
+    build:
+      context: .
+      dockerfile: dockerfiles/cache.Dockerfile
+    container_name: nestjs-cache
+    ports:
+      - '6378:6379'
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  api:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: dockerfiles/service.Dockerfile
+    container_name: nestjs-service
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+      - cache
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  redis-data:
