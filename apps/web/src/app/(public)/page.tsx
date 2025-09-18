@@ -23,26 +23,25 @@ import {
   BarChart3,
   Calendar,
   Check,
-  Shield,
   Star,
   Users,
 } from "lucide-react";
 import Image from "next/image";
 
-import customApiImage from "../../../public/customapi.png";
-import githubImage from "../../../public/github.png";
-import linearImage from "../../../public/linear.png";
-import heroImage from "../../../public/hero.png";
-import jiraImage from "../../../public/jira.png";
-import slackImage from "../../../public/slack.png";
 import TestimonialsComponent from "@/components/landing-page/testimonials.components";
-import Link from "next/link";
-import { WebRoutes } from "@/lib/constants";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { WebRoutes } from "@/lib/constants";
+import Link from "next/link";
+import customApiImage from "../../../public/customapi.png";
+import githubImage from "../../../public/github.png";
+import heroImage from "../../../public/hero.png";
+import jiraImage from "../../../public/jira.png";
+import linearImage from "../../../public/linear.png";
+import slackImage from "../../../public/slack.png";
 
 const features = [
   {
@@ -79,18 +78,6 @@ const features = [
       { icon: "", name: "Customizable analytics dashboards" },
       { icon: "", name: "Trend analysis for commits and issues" },
       { icon: "", name: "Automated impact reports and alerts" },
-    ],
-  },
-  {
-    icon: <Shield className="h-6 w-6 text-primary" />,
-    name: "Enterprise-Grade Security",
-    title: "Protect your sensitive contribution and project data",
-    description:
-      "The-startup ensures your data is safe with SOC 2 Type II compliance, SSO/SAML integration, and granular permissions. Enjoy peace of mind while enabling seamless team collaboration and visibility.",
-    items: [
-      { icon: "", name: "SSO and SAML support" },
-      { icon: "", name: "Granular access control and permissions" },
-      { icon: "", name: "SOC 2 Type II certified infrastructure" },
     ],
   },
 ];
@@ -290,12 +277,11 @@ export default function Page() {
 
           <Carousel
             opts={{
-              align: "start",
               loop: true,
             }}
             plugins={[
               Autoplay({
-                delay: 2000,
+                delay: 1000,
               }),
             ]}
             className="w-full"
@@ -332,7 +318,7 @@ export default function Page() {
       {/* Features Section */}
       <section
         id="features"
-        className="p-8 flex flex-col justify-center items-center gap-56"
+        className="p-8 flex flex-col justify-center items-center gap-8"
       >
         <div className="flex flex-col justify-center items-center gap-8">
           <Badge
@@ -344,7 +330,7 @@ export default function Page() {
           <h2 className="text-5xl font-bold tracking-tight">
             Everything You Need to Showcase Developer Impact
           </h2>
-          <p className="text-lg text-muted-foreground max-w-[800px] mx-auto px-4">
+          <p className="text-lg text-muted-foreground max-w-[800px] mx-auto px-4 text-center">
             Powerful tools designed to automatically track contributions,
             surface insights, and help your team grow through recognition and
             data-driven decisions.
