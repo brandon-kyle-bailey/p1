@@ -1,5 +1,4 @@
 import { LoggingModule } from '@app/logging';
-import KeyvRedis from '@keyv/redis';
 import { HttpModule } from '@nestjs/axios';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
@@ -9,8 +8,15 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import Keyv from 'keyv';
+import { AccountModule } from './account/account.module';
+import { Account } from './account/entities/account.model';
 import { HealthModule } from './health/health.module';
+
+import KeyvRedis from '@keyv/redis';
+import { APP_GUARD } from '@nestjs/core';
+import { CacheableMemory } from 'cacheable';
+import { Keyv } from 'keyv';
+import { LoggingThrottlerGuard } from 'src/guards/logging-thottler.guard';
 
 @Module({
   imports: [
@@ -22,53 +28,53 @@ import { HealthModule } from './health/health.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
-        host: config.get<string>('POSTGRES_HOST', 'localhost'),
-        port: config.get<number>('POSTGRES_PORT', 5432),
-        username: config.get<string>('POSTGRES_USER', 'postgres'),
-        password: config.get<string>('POSTGRES_PASSWORD', 'postgres'),
-        database: config.get<string>('POSTGRES_DB', 'database'),
+        host: config.get<string>('DB_HOST', 'db'),
+        port: Number(config.get<string>('DB_PORT', '5432')),
+        username: config.get<string>('DB_USER', 'postgres'),
+        password: config.get<string>('DB_PASS', 'postgres'),
+        database: config.get<string>('DB_NAME', 'p1'),
+        entities: [Account],
         synchronize: true,
-        entities: [AccountModel, UserModel],
         autoLoadEntities: true,
         retryAttempts: 10,
         retryDelay: 5000,
       }),
     }),
-    ScheduleModule.forRoot(),
-    EventEmitterModule.forRoot(),
     CacheModule.registerAsync({
       isGlobal: true,
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        const redisUrl = config.get<string>(
+      // eslint-disable-next-line @typescript-eslint/require-await
+      useFactory: async (configService: ConfigService) => {
+        const redisUrl = configService.get<string>(
           'REDIS_URL',
           'redis://localhost:6379',
         );
-        const keyv = new Keyv({
-          store: new KeyvRedis(redisUrl),
-        });
-
         return {
-          store: {
-            get: (key: string) => keyv.get(key),
-            set: (key: string, value: any, ttl?: number) =>
-              keyv.set(key, value, ttl ? ttl * 1000 : undefined),
-            del: (key: string) => keyv.delete(key),
-          },
+          stores: [
+            new KeyvRedis(redisUrl),
+            new Keyv({
+              store: new CacheableMemory({ ttl: 60000, lruSize: 5000 }),
+            }),
+          ],
         };
       },
     }),
+    ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
     CqrsModule.forRoot(),
     ThrottlerModule.forRoot({
       throttlers: [
         {
-          ttl: 60,
           limit: 10,
+          ttl: 6000,
         },
       ],
     }),
     HttpModule,
     HealthModule,
+    AccountModule,
+    LoggingModule,
   ],
+  providers: [{ provide: APP_GUARD, useClass: LoggingThrottlerGuard }],
 })
 export class AppModule {}

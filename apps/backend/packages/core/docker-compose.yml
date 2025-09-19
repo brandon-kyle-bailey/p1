@@ -1,0 +1,48 @@
+version: '3.9'
+# docker-compose.yml (drop the "version" line if Docker warned you)
+services:
+  db:
+    image: postgres:17-alpine
+    env_file:
+      - .env
+    environment:
+      # map the DB_* vars you already use in .env into what Postgres expects
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
+      POSTGRES_DB: ${DB_NAME:-p1}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-postgres}']
+      interval: 5s
+      retries: 10
+    ports:
+      - '5432:5432' # host:container (ok to keep)
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  cache:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379' # if you need host access; remove this line to keep Redis internal-only
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  api:
+    image: node:22-alpine
+    working_dir: /app
+    env_file:
+      - .env
+    volumes:
+      - .:/app:cached
+    command: sh -c "npm install && npm run start:dev"
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+      - cache
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  redis-data:
