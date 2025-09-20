@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  IsStrongPassword,
   IsUUID,
   MinLength,
 } from 'class-validator';
@@ -21,6 +22,7 @@ export class CreateUserDto {
   @ApiProperty({ description: 'The password of the user' })
   @IsString()
   @MinLength(8)
+  @IsStrongPassword()
   password: string;
 
   @ApiProperty({ description: 'The name of the user' })

@@ -1,26 +1,33 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Inject, Injectable } from '@nestjs/common';
+import { LoginDto } from './dto/login.dto';
+import { LoggingService } from '@app/logging';
+import { RegisterDto } from './dto/register.dto';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    @Inject(LoggingService) private readonly logger: LoggingService,
+    @Inject(HttpService) private readonly httpService: HttpService,
+  ) {}
+  async login(
+    loginDto: LoginDto,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    this.logger.debug(`${this.constructor.name}.${this.login.name}`, {
+      correlationId: 'a858f469-1368-4fa2-a238-e139b491526e',
+      loginDto: JSON.stringify(loginDto),
+    });
+    await new Promise((res) => res(true));
+    return { access_token: '', refresh_token: '' };
   }
-
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async register(
+    registerDto: RegisterDto,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    this.logger.debug(`${this.constructor.name}.${this.register.name}`, {
+      correlationId: '4f54024e-6d09-4ca3-ab83-6bd2af6a59d1',
+      loginDto: JSON.stringify(registerDto),
+    });
+    await new Promise((res) => res(true));
+    return { access_token: '', refresh_token: '' };
   }
 }
