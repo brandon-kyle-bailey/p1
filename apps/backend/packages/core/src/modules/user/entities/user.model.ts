@@ -46,6 +46,12 @@ export class User {
   @DeleteDateColumn()
   deletedAt?: Date;
 
+  @Column()
+  createdBy: string;
+
+  @Column()
+  updatedBy: string;
+
   @Column({ nullable: true })
   deletedBy?: string;
 }

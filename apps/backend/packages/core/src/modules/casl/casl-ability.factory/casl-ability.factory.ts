@@ -3,10 +3,10 @@ import { Role, User } from 'src/modules/user/entities/user.entity';
 
 import {
   AbilityBuilder,
-  InferSubjects,
   createMongoAbility,
-  MongoAbility,
   ExtractSubjectType,
+  InferSubjects,
+  MongoAbility,
 } from '@casl/ability';
 import { Account } from 'src/modules/account/entities/account.entity';
 
@@ -28,18 +28,19 @@ export class CaslAbilityFactory {
     const { can, cannot, build } = new AbilityBuilder(createMongoAbility);
 
     if ([Role.Owner, Role.Admin].includes(user.role)) {
-      can(Action.Manage, 'all'); // read-write access to everything
+      can(Action.Manage, 'all');
     } else {
-      can(Action.Read, 'all'); // read-only access to everything
+      can(Action.Read, 'all');
     }
 
     can(Action.Update, Account, { createdBy: user.id });
-    cannot(Action.Delete, Account, { isPublished: true });
+    can(Action.Update, User, { id: user.id });
+    cannot(Action.Delete, Account);
+    cannot(Action.Delete, User);
 
     return build({
-      // Read https://casl.js.org/v6/en/guide/subject-type-detection#use-classes-as-subject-types for details
       detectSubjectType: (item) =>
         item.constructor as ExtractSubjectType<Subjects>,
-    });
+    }) as AppAbility;
   }
 }

@@ -25,8 +25,14 @@ export class Account {
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column()
+  createdBy: string;
+
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column()
+  updatedBy: string;
 
   @DeleteDateColumn()
   deletedAt?: Date;

@@ -297,6 +297,60 @@ exports.LoggingThrottlerGuard = LoggingThrottlerGuard = __decorate([
 
 /***/ }),
 
+/***/ "./src/guards/policies.guard.ts":
+/*!**************************************!*\
+  !*** ./src/guards/policies.guard.ts ***!
+  \**************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PoliciesGuard = exports.CheckPolicies = exports.CHECK_POLICIES_KEY = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
+const casl_ability_factory_1 = __webpack_require__(/*! src/modules/casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
+exports.CHECK_POLICIES_KEY = 'check_policy';
+const CheckPolicies = (...handlers) => (0, common_1.SetMetadata)(exports.CHECK_POLICIES_KEY, handlers);
+exports.CheckPolicies = CheckPolicies;
+let PoliciesGuard = class PoliciesGuard {
+    reflector;
+    caslAbilityFactory;
+    constructor(reflector, caslAbilityFactory) {
+        this.reflector = reflector;
+        this.caslAbilityFactory = caslAbilityFactory;
+    }
+    canActivate(context) {
+        const policyHandlers = this.reflector.get(exports.CHECK_POLICIES_KEY, context.getHandler()) || [];
+        const { user } = context.switchToHttp().getRequest();
+        const ability = this.caslAbilityFactory.createForUser(user);
+        return policyHandlers.every((handler) => this.execPolicyHandler(handler, ability));
+    }
+    execPolicyHandler(handler, ability) {
+        if (typeof handler === 'function') {
+            return handler(ability);
+        }
+        return handler.handle(ability);
+    }
+};
+exports.PoliciesGuard = PoliciesGuard;
+exports.PoliciesGuard = PoliciesGuard = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object, typeof (_b = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _b : Object])
+], PoliciesGuard);
+
+
+/***/ }),
+
 /***/ "./src/interceptors/logging-cache.interceptor.ts":
 /*!*******************************************************!*\
   !*** ./src/interceptors/logging-cache.interceptor.ts ***!
@@ -535,12 +589,13 @@ const account_model_1 = __webpack_require__(/*! ./entities/account.model */ "./s
 const account_created_handler_1 = __webpack_require__(/*! ./handlers/account-created.handler */ "./src/modules/account/handlers/account-created.handler.ts");
 const account_removed_handler_1 = __webpack_require__(/*! ./handlers/account-removed.handler */ "./src/modules/account/handlers/account-removed.handler.ts");
 const account_updated_handler_1 = __webpack_require__(/*! ./handlers/account-updated.handler */ "./src/modules/account/handlers/account-updated.handler.ts");
+const casl_module_1 = __webpack_require__(/*! ../casl/casl.module */ "./src/modules/casl/casl.module.ts");
 let AccountModule = class AccountModule {
 };
 exports.AccountModule = AccountModule;
 exports.AccountModule = AccountModule = __decorate([
     (0, common_1.Module)({
-        imports: [logging_1.LoggingModule, typeorm_1.TypeOrmModule.forFeature([account_model_1.Account])],
+        imports: [logging_1.LoggingModule, typeorm_1.TypeOrmModule.forFeature([account_model_1.Account]), casl_module_1.CaslModule],
         controllers: [account_controller_1.AccountController],
         providers: [
             account_mapper_1.AccountMapper,
@@ -845,6 +900,12 @@ class Account {
     get deletedAt() {
         return this.props.deletedAt;
     }
+    get createdBy() {
+        return this.props.createdBy;
+    }
+    get updatedBy() {
+        return this.props.updatedBy;
+    }
     get deletedBy() {
         return this.props.deletedBy;
     }
@@ -897,7 +958,9 @@ let Account = class Account {
     name;
     users;
     createdAt;
+    createdBy;
     updatedAt;
+    updatedBy;
     deletedAt;
     deletedBy;
 };
@@ -921,9 +984,17 @@ __decorate([
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
 ], Account.prototype, "createdAt", void 0);
 __decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Account.prototype, "createdBy", void 0);
+__decorate([
     (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], Account.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Account.prototype, "updatedBy", void 0);
 __decorate([
     (0, typeorm_1.DeleteDateColumn)(),
     __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
@@ -1134,6 +1205,7 @@ const logging_thottler_guard_1 = __webpack_require__(/*! src/guards/logging-thot
 const user_module_1 = __webpack_require__(/*! ./user/user.module */ "./src/modules/user/user.module.ts");
 const auth_module_1 = __webpack_require__(/*! ./auth/auth.module */ "./src/modules/auth/auth.module.ts");
 const user_model_1 = __webpack_require__(/*! ./user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const casl_module_1 = __webpack_require__(/*! ./casl/casl.module */ "./src/modules/casl/casl.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -1192,6 +1264,7 @@ exports.AppModule = AppModule = __decorate([
             logging_1.LoggingModule,
             user_module_1.UserModule,
             auth_module_1.AuthModule,
+            casl_module_1.CaslModule,
         ],
         providers: [{ provide: core_1.APP_GUARD, useClass: logging_thottler_guard_1.LoggingThrottlerGuard }],
     })
@@ -1397,6 +1470,90 @@ exports.UpdateAuthDto = UpdateAuthDto;
 
 /***/ }),
 
+/***/ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts":
+/*!***********************************************************************!*\
+  !*** ./src/modules/casl/casl-ability.factory/casl-ability.factory.ts ***!
+  \***********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CaslAbilityFactory = exports.Action = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const user_entity_1 = __webpack_require__(/*! src/modules/user/entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
+const ability_1 = __webpack_require__(/*! @casl/ability */ "@casl/ability");
+const account_entity_1 = __webpack_require__(/*! src/modules/account/entities/account.entity */ "./src/modules/account/entities/account.entity.ts");
+var Action;
+(function (Action) {
+    Action["Manage"] = "manage";
+    Action["Create"] = "create";
+    Action["Read"] = "read";
+    Action["Update"] = "update";
+    Action["Delete"] = "delete";
+})(Action || (exports.Action = Action = {}));
+let CaslAbilityFactory = class CaslAbilityFactory {
+    createForUser(user) {
+        const { can, cannot, build } = new ability_1.AbilityBuilder(ability_1.createMongoAbility);
+        if ([user_entity_1.Role.Owner, user_entity_1.Role.Admin].includes(user.role)) {
+            can(Action.Manage, 'all');
+        }
+        else {
+            can(Action.Read, 'all');
+        }
+        can(Action.Update, account_entity_1.Account, { createdBy: user.id });
+        can(Action.Update, user_entity_1.User, { id: user.id });
+        cannot(Action.Delete, account_entity_1.Account);
+        cannot(Action.Delete, user_entity_1.User);
+        return build({
+            detectSubjectType: (item) => item.constructor,
+        });
+    }
+};
+exports.CaslAbilityFactory = CaslAbilityFactory;
+exports.CaslAbilityFactory = CaslAbilityFactory = __decorate([
+    (0, common_1.Injectable)()
+], CaslAbilityFactory);
+
+
+/***/ }),
+
+/***/ "./src/modules/casl/casl.module.ts":
+/*!*****************************************!*\
+  !*** ./src/modules/casl/casl.module.ts ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CaslModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const casl_ability_factory_1 = __webpack_require__(/*! ./casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
+const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
+let CaslModule = class CaslModule {
+};
+exports.CaslModule = CaslModule;
+exports.CaslModule = CaslModule = __decorate([
+    (0, common_1.Module)({
+        providers: [casl_ability_factory_1.CaslAbilityFactory, policies_guard_1.PoliciesGuard],
+        exports: [casl_ability_factory_1.CaslAbilityFactory, policies_guard_1.PoliciesGuard],
+    })
+], CaslModule);
+
+
+/***/ }),
+
 /***/ "./src/modules/health/health.module.ts":
 /*!*********************************************!*\
   !*** ./src/modules/health/health.module.ts ***!
@@ -1508,15 +1665,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateUserDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const user_entity_1 = __webpack_require__(/*! ../entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
 class CreateUserDto {
     accountId;
     email;
     password;
     name;
+    role;
 }
 exports.CreateUserDto = CreateUserDto;
 __decorate([
@@ -1541,6 +1701,12 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The role of the user' }),
+    (0, class_validator_1.IsEnum)(user_entity_1.Role),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof user_entity_1.Role !== "undefined" && user_entity_1.Role) === "function" ? _a : Object)
+], CreateUserDto.prototype, "role", void 0);
 
 
 /***/ }),
@@ -1577,7 +1743,6 @@ class UserMapper {
     static toDomain(user) {
         return new user_entity_1.User({
             ...user,
-            accountId: user.accountId,
         });
     }
     toDomain(user) {
@@ -1630,14 +1795,21 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.User = void 0;
+exports.User = exports.Role = void 0;
 const bcrypt = __importStar(__webpack_require__(/*! bcrypt */ "bcrypt"));
+var Role;
+(function (Role) {
+    Role["User"] = "user";
+    Role["Admin"] = "admin";
+    Role["Owner"] = "owner";
+})(Role || (exports.Role = Role = {}));
 class User {
     props;
     constructor(props) {
         this.props = {
             ...props,
             password: bcrypt.hashSync(props.password, 10),
+            role: props.role,
             createdAt: props.createdAt ?? new Date(),
             updatedAt: props.updatedAt ?? new Date(),
         };
@@ -1654,6 +1826,9 @@ class User {
     get password() {
         return this.props.password;
     }
+    get role() {
+        return this.props.role;
+    }
     get name() {
         return this.props.name;
     }
@@ -1665,6 +1840,12 @@ class User {
     }
     get deletedAt() {
         return this.props.deletedAt;
+    }
+    get createdBy() {
+        return this.props.createdBy;
+    }
+    get updatedBy() {
+        return this.props.updatedBy;
     }
     get deletedBy() {
         return this.props.deletedBy;
@@ -1716,21 +1897,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.User = void 0;
 const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const user_entity_1 = __webpack_require__(/*! ./user.entity */ "./src/modules/user/entities/user.entity.ts");
 let User = class User {
     id;
     accountId;
     account;
     email;
     password;
+    role;
     name;
     createdAt;
     updatedAt;
     deletedAt;
+    createdBy;
+    updatedBy;
     deletedBy;
 };
 exports.User = User;
@@ -1758,21 +1943,33 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "password", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'enum', enum: user_entity_1.Role, default: user_entity_1.Role.User }),
+    __metadata("design:type", typeof (_b = typeof user_entity_1.Role !== "undefined" && user_entity_1.Role) === "function" ? _b : Object)
+], User.prototype, "role", void 0);
+__decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "name", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
 ], User.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
-    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
 ], User.prototype, "updatedAt", void 0);
 __decorate([
     (0, typeorm_1.DeleteDateColumn)(),
-    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
 ], User.prototype, "deletedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], User.prototype, "createdBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], User.prototype, "updatedBy", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
@@ -1971,7 +2168,10 @@ const create_user_dto_1 = __webpack_require__(/*! ./dto/create-user.dto */ "./sr
 const update_user_dto_1 = __webpack_require__(/*! ./dto/update-user.dto */ "./src/modules/user/dto/update-user.dto.ts");
 const user_service_1 = __webpack_require__(/*! ./user.service */ "./src/modules/user/user.service.ts");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const user_entity_1 = __webpack_require__(/*! ./entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
 const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
+const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
+const casl_ability_factory_1 = __webpack_require__(/*! ../casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
 let UserController = class UserController {
     logger;
     service;
@@ -2009,6 +2209,8 @@ __decorate([
 ], UserController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, common_1.UseGuards)(policies_guard_1.PoliciesGuard),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, user_entity_1.User)),
     (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: Number }),
     (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: Number }),
     (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
@@ -2078,12 +2280,13 @@ const user_removed_handler_1 = __webpack_require__(/*! ./handlers/user-removed.h
 const user_updated_handler_1 = __webpack_require__(/*! ./handlers/user-updated.handler */ "./src/modules/user/handlers/user-updated.handler.ts");
 const user_controller_1 = __webpack_require__(/*! ./user.controller */ "./src/modules/user/user.controller.ts");
 const user_service_1 = __webpack_require__(/*! ./user.service */ "./src/modules/user/user.service.ts");
+const casl_module_1 = __webpack_require__(/*! ../casl/casl.module */ "./src/modules/casl/casl.module.ts");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
 exports.UserModule = UserModule = __decorate([
     (0, common_1.Module)({
-        imports: [logging_1.LoggingModule, typeorm_1.TypeOrmModule.forFeature([user_model_1.User])],
+        imports: [logging_1.LoggingModule, typeorm_1.TypeOrmModule.forFeature([user_model_1.User]), casl_module_1.CaslModule],
         controllers: [user_controller_1.UserController],
         providers: [
             user_mapper_1.UserMapper,
@@ -2207,6 +2410,16 @@ exports.UserService = UserService = __decorate([
     __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof user_mapper_1.UserMapper !== "undefined" && user_mapper_1.UserMapper) === "function" ? _c : Object])
 ], UserService);
 
+
+/***/ }),
+
+/***/ "@casl/ability":
+/*!********************************!*\
+  !*** external "@casl/ability" ***!
+  \********************************/
+/***/ ((module) => {
+
+module.exports = require("@casl/ability");
 
 /***/ }),
 

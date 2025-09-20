@@ -8,9 +8,10 @@ import { UserRemovedHandler } from './handlers/user-removed.handler';
 import { UserUpdatedHandler } from './handlers/user-updated.handler';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { CaslModule } from '../casl/casl.module';
 
 @Module({
-  imports: [LoggingModule, TypeOrmModule.forFeature([User])],
+  imports: [LoggingModule, TypeOrmModule.forFeature([User]), CaslModule],
   controllers: [UserController],
   providers: [
     UserMapper,

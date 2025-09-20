@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -20,6 +21,11 @@ import { UserService } from './user.service';
 import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { FindAllResponseDto } from '@app/dtos';
+import { CheckPolicies, PoliciesGuard } from 'src/guards/policies.guard';
+import {
+  Action,
+  AppAbility,
+} from '../casl/casl-ability.factory/casl-ability.factory';
 
 @Controller('users')
 @UseInterceptors(LoggingCacheInterceptor)
@@ -42,6 +48,8 @@ export class UserController {
   }
 
   @Get()
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, User))
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
   @ApiOkResponse({ type: FindAllResponseDto })

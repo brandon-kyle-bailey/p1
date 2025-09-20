@@ -4,6 +4,8 @@ export interface AccountProps {
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
+  createdBy: string;
+  updatedBy: string;
   deletedBy?: string;
 }
 
@@ -36,6 +38,14 @@ export class Account {
 
   get deletedAt() {
     return this.props.deletedAt;
+  }
+
+  get createdBy() {
+    return this.props.createdBy;
+  }
+
+  get updatedBy() {
+    return this.props.updatedBy;
   }
 
   get deletedBy() {
