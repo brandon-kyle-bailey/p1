@@ -5,7 +5,6 @@ export class UserMapper {
   static toDomain(user: UserModel): UserDomain {
     return new UserDomain({
       ...user,
-      accountId: user.accountId,
     });
   }
   toDomain(user: UserModel): UserDomain {

@@ -1,10 +1,17 @@
 import * as bcrypt from 'bcrypt';
 
+export enum Role {
+  User = 'user',
+  Admin = 'admin',
+  Owner = 'owner',
+}
+
 export interface UserProps {
   id: string;
   accountId: string;
   email: string;
   password: string;
+  role: Role;
   name?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -19,6 +26,7 @@ export class User {
     this.props = {
       ...props,
       password: bcrypt.hashSync(props.password, 10),
+      role: props.role,
       createdAt: props.createdAt ?? new Date(),
       updatedAt: props.updatedAt ?? new Date(),
     };
@@ -38,6 +46,10 @@ export class User {
 
   get password() {
     return this.props.password;
+  }
+
+  get role() {
+    return this.props.role;
   }
 
   get name() {

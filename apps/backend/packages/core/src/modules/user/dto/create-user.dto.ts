@@ -1,11 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
+  IsEnum,
   IsOptional,
   IsString,
   IsUUID,
   MinLength,
 } from 'class-validator';
+import { Role } from '../entities/user.entity';
 
 export class CreateUserDto {
   @ApiProperty({ description: 'The id of the account' })
@@ -25,4 +27,9 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   name?: string;
+
+  @ApiProperty({ description: 'The role of the user' })
+  @IsEnum(Role)
+  @IsOptional()
+  role?: Role;
 }

@@ -20,6 +20,7 @@ import { LoggingThrottlerGuard } from 'src/guards/logging-thottler.guard';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/entities/user.model';
+import { CaslModule } from './casl/casl.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { User } from './user/entities/user.model';
     LoggingModule,
     UserModule,
     AuthModule,
+    CaslModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: LoggingThrottlerGuard }],
 })
