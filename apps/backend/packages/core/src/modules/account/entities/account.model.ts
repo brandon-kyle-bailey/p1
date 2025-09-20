@@ -1,3 +1,4 @@
+import { User } from 'src/modules/user/entities/user.model';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -5,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 @Entity('accounts')
@@ -14,6 +16,11 @@ export class Account {
 
   @Column()
   name: string;
+
+  @OneToMany(() => User, (user) => user.account, {
+    cascade: true,
+  })
+  users?: User[];
 
   @CreateDateColumn()
   createdAt: Date;

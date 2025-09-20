@@ -1,17 +1,28 @@
+import { Account } from 'src/modules/account/entities/account.model';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
   DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { UserRole } from './user.entity';
 
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ nullable: false })
+  accountId: string;
+
+  @ManyToOne(() => Account, (account) => account.users, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'accountId' })
+  account: Account;
 
   @Column({ unique: true })
   email: string;
@@ -21,9 +32,6 @@ export class User {
 
   @Column({ nullable: true })
   name?: string;
-
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
-  role: UserRole;
 
   @CreateDateColumn()
   createdAt: Date;

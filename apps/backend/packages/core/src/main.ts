@@ -36,6 +36,7 @@ async function bootstrap() {
     .setDescription('The Core API.')
     .setVersion('1.0')
     .addTag('core')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);

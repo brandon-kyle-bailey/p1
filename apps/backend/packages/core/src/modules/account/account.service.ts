@@ -72,11 +72,11 @@ export class AccountService {
     }
   }
 
-  update(id: number, updateAccountDto: UpdateAccountDto) {
+  update(id: string, updateAccountDto: UpdateAccountDto) {
     return `This action updates a #${id} account with: ${JSON.stringify(updateAccountDto)}`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} account`;
   }
 }

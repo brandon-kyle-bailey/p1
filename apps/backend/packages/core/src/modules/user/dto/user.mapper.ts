@@ -1,8 +1,14 @@
-import { User as UserModel } from '../entities/user.model';
 import { User as UserDomain } from '../entities/user.entity';
+import { User as UserModel } from '../entities/user.model';
 
 export class UserMapper {
+  static toDomain(user: UserModel): UserDomain {
+    return new UserDomain({
+      ...user,
+      accountId: user.accountId,
+    });
+  }
   toDomain(user: UserModel): UserDomain {
-    return new UserDomain({ ...user });
+    return UserMapper.toDomain(user);
   }
 }

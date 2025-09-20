@@ -13,7 +13,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { LoggingCacheInterceptor } from 'src/interceptors/logging-cache.interceptor';
 import { AccountService } from './account.service';
@@ -24,6 +24,7 @@ import { Account } from './entities/account.entity';
 
 @Controller('accounts')
 @UseInterceptors(LoggingCacheInterceptor)
+@ApiBearerAuth()
 export class AccountController {
   constructor(
     @Inject(LoggingService)
@@ -44,7 +45,6 @@ export class AccountController {
   @Get()
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   @ApiOkResponse({ type: FindAllResponseDto })
   async findAll(
     @Query('skip') skip = 0,
@@ -61,12 +61,12 @@ export class AccountController {
   @Patch(':id')
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   update(@Param('id') id: string, @Body() updateAccountDto: UpdateAccountDto) {
-    return this.service.update(+id, updateAccountDto);
+    return this.service.update(id, updateAccountDto);
   }
 
   @Delete(':id')
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   remove(@Param('id') id: string) {
-    return this.service.remove(+id);
+    return this.service.remove(id);
   }
 }

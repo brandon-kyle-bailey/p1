@@ -18,7 +18,15 @@ export class UserService {
     private readonly mapper: UserMapper,
   ) {}
   async create(createUserDto: CreateUserDto) {
+    this.logger.debug('Creating new user', {
+      correlationId: '90f11fc2-e5e7-4d60-b472-4f1afdba7ca6',
+      payload: JSON.stringify(createUserDto),
+    });
     const entity = this.repo.create({ ...createUserDto });
+    this.logger.debug('Created user entity', {
+      correlationId: '42bbcd62-1ae1-4a06-8c63-52ce0250c1e0',
+      entity: JSON.stringify(entity),
+    });
     const result = await this.repo.save(entity);
     return this.mapper.toDomain(result);
   }
@@ -72,11 +80,11 @@ export class UserService {
     }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  update(id: string, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user with: ${JSON.stringify(updateUserDto)}`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} user`;
   }
 }

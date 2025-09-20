@@ -17,12 +17,13 @@ import { UserCreatedCommand } from './commands/user-created.command';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
-import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { FindAllResponseDto } from '@app/dtos';
 
 @Controller('users')
 @UseInterceptors(LoggingCacheInterceptor)
+@ApiBearerAuth()
 export class UserController {
   constructor(
     @Inject(LoggingService)
@@ -43,7 +44,6 @@ export class UserController {
   @Get()
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   @ApiOkResponse({ type: FindAllResponseDto })
   async findAll(
     @Query('skip') skip = 0,
@@ -59,11 +59,11 @@ export class UserController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.service.update(+id, updateUserDto);
+    return this.service.update(id, updateUserDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.service.remove(+id);
+    return this.service.remove(id);
   }
 }

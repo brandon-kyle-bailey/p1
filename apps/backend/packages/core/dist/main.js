@@ -383,6 +383,7 @@ async function bootstrap() {
         .setDescription('The Core API.')
         .setVersion('1.0')
         .addTag('core')
+        .addBearerAuth()
         .build();
     const documentFactory = () => swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup('api', app, documentFactory);
@@ -447,10 +448,10 @@ let AccountController = class AccountController {
         return this.service.findOne(id);
     }
     update(id, updateAccountDto) {
-        return this.service.update(+id, updateAccountDto);
+        return this.service.update(id, updateAccountDto);
     }
     remove(id) {
-        return this.service.remove(+id);
+        return this.service.remove(id);
     }
 };
 exports.AccountController = AccountController;
@@ -499,6 +500,7 @@ __decorate([
 exports.AccountController = AccountController = __decorate([
     (0, common_1.Controller)('accounts'),
     (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor),
+    (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(account_service_1.AccountService)),
     __param(2, (0, common_1.Inject)(cqrs_1.CommandBus)),
@@ -736,17 +738,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var AccountMapper_1;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountMapper = void 0;
-const account_entity_1 = __webpack_require__(/*! ../entities/account.entity */ "./src/modules/account/entities/account.entity.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-let AccountMapper = class AccountMapper {
+const account_entity_1 = __webpack_require__(/*! ../entities/account.entity */ "./src/modules/account/entities/account.entity.ts");
+let AccountMapper = AccountMapper_1 = class AccountMapper {
+    static toDomain(model) {
+        return new account_entity_1.Account({
+            ...model,
+        });
+    }
     toDomain(model) {
-        return new account_entity_1.Account(model);
+        return AccountMapper_1.toDomain(model);
     }
 };
 exports.AccountMapper = AccountMapper;
-exports.AccountMapper = AccountMapper = __decorate([
+exports.AccountMapper = AccountMapper = AccountMapper_1 = __decorate([
     (0, common_1.Injectable)()
 ], AccountMapper);
 
@@ -882,10 +890,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Account = void 0;
+const user_model_1 = __webpack_require__(/*! src/modules/user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let Account = class Account {
     id;
     name;
+    users;
     createdAt;
     updatedAt;
     deletedAt;
@@ -900,6 +910,12 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Account.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => user_model_1.User, (user) => user.account, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], Account.prototype, "users", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
@@ -1117,6 +1133,7 @@ const keyv_1 = __webpack_require__(/*! keyv */ "keyv");
 const logging_thottler_guard_1 = __webpack_require__(/*! src/guards/logging-thottler.guard */ "./src/guards/logging-thottler.guard.ts");
 const user_module_1 = __webpack_require__(/*! ./user/user.module */ "./src/modules/user/user.module.ts");
 const auth_module_1 = __webpack_require__(/*! ./auth/auth.module */ "./src/modules/auth/auth.module.ts");
+const user_model_1 = __webpack_require__(/*! ./user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -1136,7 +1153,7 @@ exports.AppModule = AppModule = __decorate([
                     username: config.get('DB_USER', 'postgres'),
                     password: config.get('DB_PASS', 'postgres'),
                     database: config.get('DB_NAME', 'p1'),
-                    entities: [account_model_1.Account],
+                    entities: [account_model_1.Account, user_model_1.User],
                     synchronize: true,
                     autoLoadEntities: true,
                     retryAttempts: 10,
@@ -1491,19 +1508,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateUserDto = void 0;
-const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
-const user_entity_1 = __webpack_require__(/*! ../entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 class CreateUserDto {
+    accountId;
     email;
     password;
     name;
-    role;
 }
 exports.CreateUserDto = CreateUserDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "accountId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The email address of the user' }),
     (0, class_validator_1.IsEmail)(),
@@ -1521,12 +1541,6 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "name", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'The role of the user' }),
-    (0, class_validator_1.IsEnum)(user_entity_1.UserRole),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", typeof (_a = typeof user_entity_1.UserRole !== "undefined" && user_entity_1.UserRole) === "function" ? _a : Object)
-], CreateUserDto.prototype, "role", void 0);
 
 
 /***/ }),
@@ -1560,8 +1574,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserMapper = void 0;
 const user_entity_1 = __webpack_require__(/*! ../entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
 class UserMapper {
+    static toDomain(user) {
+        return new user_entity_1.User({
+            ...user,
+            accountId: user.accountId,
+        });
+    }
     toDomain(user) {
-        return new user_entity_1.User({ ...user });
+        return UserMapper.toDomain(user);
     }
 }
 exports.UserMapper = UserMapper;
@@ -1573,29 +1593,60 @@ exports.UserMapper = UserMapper;
 /*!**************************************************!*\
   !*** ./src/modules/user/entities/user.entity.ts ***!
   \**************************************************/
-/***/ ((__unused_webpack_module, exports) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.User = exports.UserRole = void 0;
-var UserRole;
-(function (UserRole) {
-    UserRole["OWNER"] = "owner";
-    UserRole["ADMIN"] = "admin";
-    UserRole["USER"] = "user";
-})(UserRole || (exports.UserRole = UserRole = {}));
+exports.User = void 0;
+const bcrypt = __importStar(__webpack_require__(/*! bcrypt */ "bcrypt"));
 class User {
     props;
     constructor(props) {
         this.props = {
             ...props,
-            role: props.role ?? UserRole.USER,
+            password: bcrypt.hashSync(props.password, 10),
             createdAt: props.createdAt ?? new Date(),
             updatedAt: props.updatedAt ?? new Date(),
         };
     }
     get id() {
         return this.props.id;
+    }
+    get accountId() {
+        return this.props.accountId;
     }
     get email() {
         return this.props.email;
@@ -1605,9 +1656,6 @@ class User {
     }
     get name() {
         return this.props.name;
-    }
-    get role() {
-        return this.props.role;
     }
     get createdAt() {
         return this.props.createdAt;
@@ -1631,10 +1679,6 @@ class User {
     }
     updatePassword(newPassword) {
         this.props.password = newPassword;
-        this.touch();
-    }
-    updateRole(newRole) {
-        this.props.role = newRole;
         this.touch();
     }
     softDelete(byUserId) {
@@ -1675,14 +1719,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.User = void 0;
+const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-const user_entity_1 = __webpack_require__(/*! ./user.entity */ "./src/modules/user/entities/user.entity.ts");
 let User = class User {
     id;
+    accountId;
+    account;
     email;
     password;
     name;
-    role;
     createdAt;
     updatedAt;
     deletedAt;
@@ -1693,6 +1738,17 @@ __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
     __metadata("design:type", String)
 ], User.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], User.prototype, "accountId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.users, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'accountId' }),
+    __metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
+], User.prototype, "account", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
@@ -1705,10 +1761,6 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "name", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'enum', enum: user_entity_1.UserRole, default: user_entity_1.UserRole.USER }),
-    __metadata("design:type", typeof (_a = typeof user_entity_1.UserRole !== "undefined" && user_entity_1.UserRole) === "function" ? _a : Object)
-], User.prototype, "role", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
@@ -1941,10 +1993,10 @@ let UserController = class UserController {
         return this.service.findOne(id);
     }
     update(id, updateUserDto) {
-        return this.service.update(+id, updateUserDto);
+        return this.service.update(id, updateUserDto);
     }
     remove(id) {
-        return this.service.remove(+id);
+        return this.service.remove(id);
     }
 };
 exports.UserController = UserController;
@@ -1991,6 +2043,7 @@ __decorate([
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
     (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor),
+    (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(user_service_1.UserService)),
     __param(2, (0, common_1.Inject)(cqrs_1.CommandBus)),
@@ -2021,10 +2074,10 @@ const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
 const user_mapper_1 = __webpack_require__(/*! ./dto/user.mapper */ "./src/modules/user/dto/user.mapper.ts");
 const user_model_1 = __webpack_require__(/*! ./entities/user.model */ "./src/modules/user/entities/user.model.ts");
 const user_created_handler_1 = __webpack_require__(/*! ./handlers/user-created.handler */ "./src/modules/user/handlers/user-created.handler.ts");
+const user_removed_handler_1 = __webpack_require__(/*! ./handlers/user-removed.handler */ "./src/modules/user/handlers/user-removed.handler.ts");
+const user_updated_handler_1 = __webpack_require__(/*! ./handlers/user-updated.handler */ "./src/modules/user/handlers/user-updated.handler.ts");
 const user_controller_1 = __webpack_require__(/*! ./user.controller */ "./src/modules/user/user.controller.ts");
 const user_service_1 = __webpack_require__(/*! ./user.service */ "./src/modules/user/user.service.ts");
-const user_updated_handler_1 = __webpack_require__(/*! ./handlers/user-updated.handler */ "./src/modules/user/handlers/user-updated.handler.ts");
-const user_removed_handler_1 = __webpack_require__(/*! ./handlers/user-removed.handler */ "./src/modules/user/handlers/user-removed.handler.ts");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
@@ -2083,7 +2136,15 @@ let UserService = class UserService {
         this.mapper = mapper;
     }
     async create(createUserDto) {
+        this.logger.debug('Creating new user', {
+            correlationId: '90f11fc2-e5e7-4d60-b472-4f1afdba7ca6',
+            payload: JSON.stringify(createUserDto),
+        });
         const entity = this.repo.create({ ...createUserDto });
+        this.logger.debug('Created user entity', {
+            correlationId: '42bbcd62-1ae1-4a06-8c63-52ce0250c1e0',
+            entity: JSON.stringify(entity),
+        });
         const result = await this.repo.save(entity);
         return this.mapper.toDomain(result);
     }
@@ -2286,6 +2347,16 @@ module.exports = require("@nestjs/throttler");
 /***/ ((module) => {
 
 module.exports = require("@nestjs/typeorm");
+
+/***/ }),
+
+/***/ "bcrypt":
+/*!*************************!*\
+  !*** external "bcrypt" ***!
+  \*************************/
+/***/ ((module) => {
+
+module.exports = require("bcrypt");
 
 /***/ }),
 

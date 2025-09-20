@@ -1,14 +1,17 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsEnum,
   IsOptional,
   IsString,
+  IsUUID,
   MinLength,
 } from 'class-validator';
-import { UserRole } from '../entities/user.entity';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
+  @ApiProperty({ description: 'The id of the account' })
+  @IsUUID()
+  accountId: string;
+
   @ApiProperty({ description: 'The email address of the user' })
   @IsEmail()
   email: string;
@@ -22,9 +25,4 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   name?: string;
-
-  @ApiProperty({ description: 'The role of the user' })
-  @IsEnum(UserRole)
-  @IsOptional()
-  role?: UserRole;
 }

@@ -19,6 +19,7 @@ import { Keyv } from 'keyv';
 import { LoggingThrottlerGuard } from 'src/guards/logging-thottler.guard';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { User } from './user/entities/user.model';
 
 @Module({
   imports: [
@@ -35,7 +36,7 @@ import { AuthModule } from './auth/auth.module';
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'p1'),
-        entities: [Account],
+        entities: [Account, User],
         synchronize: true,
         autoLoadEntities: true,
         retryAttempts: 10,
