@@ -125,6 +125,7 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
+      "^@app/dtos(|/.*)$": "<rootDir>/libs/dtos/src/$1",
       "^@app/logging(|/.*)$": "<rootDir>/libs/logging/src/$1"
     }
   }

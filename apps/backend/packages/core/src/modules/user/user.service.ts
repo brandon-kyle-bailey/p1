@@ -1,24 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateAccountDto } from './dto/create-account.dto';
-import { UpdateAccountDto } from './dto/update-account.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Account } from './entities/account.model';
-import { Repository } from 'typeorm';
-import { AccountMapper } from './dto/account.mapper';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { LoggingService } from '@app/logging';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.model';
+import { Repository } from 'typeorm';
+import { UserMapper } from './dto/user.mapper';
 
 @Injectable()
-export class AccountService {
+export class UserService {
   constructor(
     @Inject(LoggingService)
     private readonly logger: LoggingService,
-    @InjectRepository(Account)
-    private readonly repo: Repository<Account>,
-    @Inject(AccountMapper)
-    private readonly mapper: AccountMapper,
+    @InjectRepository(User)
+    private readonly repo: Repository<User>,
+    @Inject(UserMapper)
+    private readonly mapper: UserMapper,
   ) {}
-  async create(createAccountDto: CreateAccountDto) {
-    const entity = this.repo.create({ ...createAccountDto });
+  async create(createUserDto: CreateUserDto) {
+    const entity = this.repo.create({ ...createUserDto });
     const result = await this.repo.save(entity);
     return this.mapper.toDomain(result);
   }
@@ -42,7 +42,7 @@ export class AccountService {
       this.logger.error(
         `${this.constructor.name}.${this.findAll.name} encountered an error`,
         {
-          correlationId: '56268dfa-a78d-4865-8d03-504515d8287c',
+          correlationId: 'eb9e90e0-6394-484c-a431-6a79eb56468e',
           err: JSON.stringify(err),
         },
       );
@@ -64,7 +64,7 @@ export class AccountService {
       this.logger.error(
         `${this.constructor.name}.${this.findOne.name} encountered an error`,
         {
-          correlationId: 'f64ea9bf-6aae-4b87-9629-d7fe14f6c1d8',
+          correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
           err: JSON.stringify(err),
         },
       );
@@ -72,11 +72,11 @@ export class AccountService {
     }
   }
 
-  update(id: number, updateAccountDto: UpdateAccountDto) {
-    return `This action updates a #${id} account with: ${JSON.stringify(updateAccountDto)}`;
+  update(id: number, updateUserDto: UpdateUserDto) {
+    return `This action updates a #${id} user with: ${JSON.stringify(updateUserDto)}`;
   }
 
   remove(id: number) {
-    return `This action removes a #${id} account`;
+    return `This action removes a #${id} user`;
   }
 }

@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { AppModule } from './modules/app.module';
 import { ConfigService } from '@nestjs/config';
 import { LoggingService } from '@app/logging';
+import { HttpService } from '@nestjs/axios';
 
 // const httpsOptions = {
 //   key: fs.readFileSync('./secrets/private-key.pem'),
@@ -18,11 +19,12 @@ async function bootstrap() {
     // httpsOptions
   });
   const configService = app.get<ConfigService>(ConfigService);
+  const httpService = app.get<HttpService>(HttpService);
   app.enableVersioning({
     type: VersioningType.URI,
   });
   app.setGlobalPrefix('api/core');
-  app.useLogger(new LoggingService({ prefix: 'core-service' }));
+  app.useLogger(new LoggingService('core-service', {}, httpService));
   app.use(compression());
   app.use(helmet());
   app.useGlobalPipes(new ValidationPipe());

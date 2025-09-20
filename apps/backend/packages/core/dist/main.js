@@ -2,6 +2,118 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./libs/dtos/src/find-all-response.dto.ts":
+/*!************************************************!*\
+  !*** ./libs/dtos/src/find-all-response.dto.ts ***!
+  \************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindAllResponseDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const pagination_meta_dto_1 = __webpack_require__(/*! ./pagination-meta.dto */ "./libs/dtos/src/pagination-meta.dto.ts");
+class FindAllResponseDto {
+    data;
+    pagination;
+}
+exports.FindAllResponseDto = FindAllResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ isArray: true }),
+    __metadata("design:type", Array)
+], FindAllResponseDto.prototype, "data", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: () => pagination_meta_dto_1.PaginationMetaDto }),
+    __metadata("design:type", typeof (_a = typeof pagination_meta_dto_1.PaginationMetaDto !== "undefined" && pagination_meta_dto_1.PaginationMetaDto) === "function" ? _a : Object)
+], FindAllResponseDto.prototype, "pagination", void 0);
+
+
+/***/ }),
+
+/***/ "./libs/dtos/src/index.ts":
+/*!********************************!*\
+  !*** ./libs/dtos/src/index.ts ***!
+  \********************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(/*! ./find-all-response.dto */ "./libs/dtos/src/find-all-response.dto.ts"), exports);
+__exportStar(__webpack_require__(/*! ./pagination-meta.dto */ "./libs/dtos/src/pagination-meta.dto.ts"), exports);
+
+
+/***/ }),
+
+/***/ "./libs/dtos/src/pagination-meta.dto.ts":
+/*!**********************************************!*\
+  !*** ./libs/dtos/src/pagination-meta.dto.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PaginationMetaDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class PaginationMetaDto {
+    total;
+    skip;
+    take;
+    hasNextPage;
+}
+exports.PaginationMetaDto = PaginationMetaDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], PaginationMetaDto.prototype, "total", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], PaginationMetaDto.prototype, "skip", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], PaginationMetaDto.prototype, "take", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Boolean)
+], PaginationMetaDto.prototype, "hasNextPage", void 0);
+
+
+/***/ }),
+
 /***/ "./libs/logging/src/index.ts":
 /*!***********************************!*\
   !*** ./libs/logging/src/index.ts ***!
@@ -47,11 +159,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LoggingModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const logging_service_1 = __webpack_require__(/*! ./logging.service */ "./libs/logging/src/logging.service.ts");
+const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
 let LoggingModule = class LoggingModule {
 };
 exports.LoggingModule = LoggingModule;
 exports.LoggingModule = LoggingModule = __decorate([
     (0, common_1.Module)({
+        imports: [axios_1.HttpModule],
         providers: [logging_service_1.LoggingService],
         exports: [logging_service_1.LoggingService],
     })
@@ -73,24 +187,54 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LoggingService = void 0;
+const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const rxjs_1 = __webpack_require__(/*! rxjs */ "rxjs");
 let LoggingService = class LoggingService extends common_1.ConsoleLogger {
+    httpService;
+    constructor(context, options, httpService) {
+        super(context, options);
+        this.httpService = httpService;
+    }
+    async shipLogs(message, ...optionalParams) {
+        try {
+            await (0, rxjs_1.lastValueFrom)(this.httpService.get('https://dummyjson.com/posts'));
+            this.log(`${this.constructor.name}.${this.shipLogs.name}`, message, ...optionalParams);
+        }
+        catch (err) {
+            this.error(`${this.constructor.name}.${this.shipLogs.name} caught an exception`, {
+                correlationId: '959e0817-023e-414c-98ee-252527126fba',
+                err: JSON.stringify(err),
+            });
+        }
+    }
     log(message, ...optionalParams) {
         super.log(message, ...optionalParams);
     }
     fatal(message, ...optionalParams) {
         super.fatal(message, ...optionalParams);
+        void this.shipLogs(message, optionalParams);
     }
     error(message, ...optionalParams) {
         super.error(message, ...optionalParams);
+        void this.shipLogs(message, optionalParams);
     }
     warn(message, ...optionalParams) {
         super.warn(message, ...optionalParams);
+        void this.shipLogs(message, optionalParams);
     }
     debug(message, ...optionalParams) {
         super.debug(message, ...optionalParams);
+        void this.shipLogs(message, optionalParams);
     }
     verbose(message, ...optionalParams) {
         super.verbose(message, ...optionalParams);
@@ -98,7 +242,9 @@ let LoggingService = class LoggingService extends common_1.ConsoleLogger {
 };
 exports.LoggingService = LoggingService;
 exports.LoggingService = LoggingService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __param(2, (0, common_1.Inject)(axios_1.HttpService)),
+    __metadata("design:paramtypes", [String, Object, typeof (_a = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _a : Object])
 ], LoggingService);
 
 
@@ -117,21 +263,83 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LoggingThrottlerGuard = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const throttler_1 = __webpack_require__(/*! @nestjs/throttler */ "@nestjs/throttler");
+const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
 let LoggingThrottlerGuard = class LoggingThrottlerGuard extends throttler_1.ThrottlerGuard {
+    logger;
+    constructor(options, storageService, reflector, logger) {
+        super(options, storageService, reflector);
+        this.logger = logger;
+    }
     async canActivate(context) {
         const allowed = await super.canActivate(context);
-        console.log('Throttler allowed:', allowed);
+        this.logger.debug(`${this.constructor.name}.${this.canActivate.name}`, {
+            correlationId: 'a4b5ece4-dcae-43f7-838b-e75b241b9e2e',
+            allowed,
+        });
         return allowed;
     }
 };
 exports.LoggingThrottlerGuard = LoggingThrottlerGuard;
 exports.LoggingThrottlerGuard = LoggingThrottlerGuard = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [Object, typeof (_a = typeof throttler_1.ThrottlerStorage !== "undefined" && throttler_1.ThrottlerStorage) === "function" ? _a : Object, typeof (_b = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _b : Object, typeof (_c = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _c : Object])
 ], LoggingThrottlerGuard);
+
+
+/***/ }),
+
+/***/ "./src/interceptors/logging-cache.interceptor.ts":
+/*!*******************************************************!*\
+  !*** ./src/interceptors/logging-cache.interceptor.ts ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.LoggingCacheInterceptor = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const cache_manager_1 = __webpack_require__(/*! @nestjs/cache-manager */ "@nestjs/cache-manager");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
+let LoggingCacheInterceptor = class LoggingCacheInterceptor extends cache_manager_1.CacheInterceptor {
+    logger;
+    constructor(cacheManager, reflector, logger) {
+        super(cacheManager, reflector);
+        this.logger = logger;
+    }
+    trackBy(context) {
+        const key = super.trackBy(context);
+        this.logger.debug(`${this.constructor.name}.${this.trackBy.name}`, {
+            correlationId: '159b8055-b731-46f3-88e8-0ede0576a2e8',
+            key,
+        });
+        return key;
+    }
+};
+exports.LoggingCacheInterceptor = LoggingCacheInterceptor;
+exports.LoggingCacheInterceptor = LoggingCacheInterceptor = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [Object, typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object, typeof (_b = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _b : Object])
+], LoggingCacheInterceptor);
 
 
 /***/ }),
@@ -155,14 +363,16 @@ const helmet_1 = __importDefault(__webpack_require__(/*! helmet */ "helmet"));
 const app_module_1 = __webpack_require__(/*! ./modules/app.module */ "./src/modules/app.module.ts");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {});
     const configService = app.get(config_1.ConfigService);
+    const httpService = app.get(axios_1.HttpService);
     app.enableVersioning({
         type: common_1.VersioningType.URI,
     });
     app.setGlobalPrefix('api/core');
-    app.useLogger(new logging_1.LoggingService({ prefix: 'core-service' }));
+    app.useLogger(new logging_1.LoggingService('core-service', {}, httpService));
     app.use((0, compression_1.default)());
     app.use((0, helmet_1.default)());
     app.useGlobalPipes(new common_1.ValidationPipe());
@@ -202,18 +412,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountController = void 0;
+const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
-const cache_manager_1 = __webpack_require__(/*! @nestjs/cache-manager */ "@nestjs/cache-manager");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const throttler_1 = __webpack_require__(/*! @nestjs/throttler */ "@nestjs/throttler");
+const logging_cache_interceptor_1 = __webpack_require__(/*! src/interceptors/logging-cache.interceptor */ "./src/interceptors/logging-cache.interceptor.ts");
 const account_service_1 = __webpack_require__(/*! ./account.service */ "./src/modules/account/account.service.ts");
 const account_created_command_1 = __webpack_require__(/*! ./commands/account-created.command */ "./src/modules/account/commands/account-created.command.ts");
 const create_account_dto_1 = __webpack_require__(/*! ./dto/create-account.dto */ "./src/modules/account/dto/create-account.dto.ts");
 const update_account_dto_1 = __webpack_require__(/*! ./dto/update-account.dto */ "./src/modules/account/dto/update-account.dto.ts");
-const throttler_1 = __webpack_require__(/*! @nestjs/throttler */ "@nestjs/throttler");
 let AccountController = class AccountController {
     logger;
     service;
@@ -224,23 +436,15 @@ let AccountController = class AccountController {
         this.commandBus = commandBus;
     }
     async create(createAccountDto) {
-        this.logger.debug('Account create controller called', {
-            correlationId: '858c6084-0e8c-4d26-81a1-1f69ac5ae4e3',
-            body: JSON.stringify(createAccountDto),
-        });
         const result = await this.service.create(createAccountDto);
         await this.commandBus.execute(new account_created_command_1.AccountCreatedCommand(result));
         return result;
     }
-    async findAll() {
-        this.logger.debug('Account findAll controller called', {
-            correlationId: '1401d001-db0a-451d-aa5b-c8e4d6758f8f',
-        });
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        return this.service.findAll();
+    async findAll(skip = 0, take = 100) {
+        return await this.service.findAll(skip, take);
     }
     findOne(id) {
-        return this.service.findOne(+id);
+        return this.service.findOne(id);
     }
     update(id, updateAccountDto) {
         return this.service.update(+id, updateAccountDto);
@@ -252,18 +456,21 @@ let AccountController = class AccountController {
 exports.AccountController = AccountController;
 __decorate([
     (0, common_1.Post)(),
-    (0, throttler_1.Throttle)({ default: { limit: 10, ttl: 60000 } }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [typeof (_d = typeof create_account_dto_1.CreateAccountDto !== "undefined" && create_account_dto_1.CreateAccountDto) === "function" ? _d : Object]),
     __metadata("design:returntype", Promise)
 ], AccountController.prototype, "create", null);
 __decorate([
-    (0, cache_manager_1.CacheTTL)(60 * 1000),
     (0, common_1.Get)(),
+    (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: Number }),
+    (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
+    __param(0, (0, common_1.Query)('skip')),
+    __param(1, (0, common_1.Query)('take')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], AccountController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
@@ -278,7 +485,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_e = typeof update_account_dto_1.UpdateAccountDto !== "undefined" && update_account_dto_1.UpdateAccountDto) === "function" ? _e : Object]),
+    __metadata("design:paramtypes", [String, typeof (_f = typeof update_account_dto_1.UpdateAccountDto !== "undefined" && update_account_dto_1.UpdateAccountDto) === "function" ? _f : Object]),
     __metadata("design:returntype", void 0)
 ], AccountController.prototype, "update", null);
 __decorate([
@@ -291,7 +498,7 @@ __decorate([
 ], AccountController.prototype, "remove", null);
 exports.AccountController = AccountController = __decorate([
     (0, common_1.Controller)('accounts'),
-    (0, common_1.UseInterceptors)(cache_manager_1.CacheInterceptor),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(account_service_1.AccountService)),
     __param(2, (0, common_1.Inject)(cqrs_1.CommandBus)),
@@ -324,6 +531,8 @@ const account_service_1 = __webpack_require__(/*! ./account.service */ "./src/mo
 const account_mapper_1 = __webpack_require__(/*! ./dto/account.mapper */ "./src/modules/account/dto/account.mapper.ts");
 const account_model_1 = __webpack_require__(/*! ./entities/account.model */ "./src/modules/account/entities/account.model.ts");
 const account_created_handler_1 = __webpack_require__(/*! ./handlers/account-created.handler */ "./src/modules/account/handlers/account-created.handler.ts");
+const account_removed_handler_1 = __webpack_require__(/*! ./handlers/account-removed.handler */ "./src/modules/account/handlers/account-removed.handler.ts");
+const account_updated_handler_1 = __webpack_require__(/*! ./handlers/account-updated.handler */ "./src/modules/account/handlers/account-updated.handler.ts");
 let AccountModule = class AccountModule {
 };
 exports.AccountModule = AccountModule;
@@ -331,7 +540,13 @@ exports.AccountModule = AccountModule = __decorate([
     (0, common_1.Module)({
         imports: [logging_1.LoggingModule, typeorm_1.TypeOrmModule.forFeature([account_model_1.Account])],
         controllers: [account_controller_1.AccountController],
-        providers: [account_mapper_1.AccountMapper, account_service_1.AccountService, account_created_handler_1.AccountCreatedHandler],
+        providers: [
+            account_mapper_1.AccountMapper,
+            account_service_1.AccountService,
+            account_created_handler_1.AccountCreatedHandler,
+            account_updated_handler_1.AccountUpdatedHandler,
+            account_removed_handler_1.AccountRemovedHandler,
+        ],
     })
 ], AccountModule);
 
@@ -366,7 +581,6 @@ const account_model_1 = __webpack_require__(/*! ./entities/account.model */ "./s
 const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 const account_mapper_1 = __webpack_require__(/*! ./dto/account.mapper */ "./src/modules/account/dto/account.mapper.ts");
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
-const accounts = [];
 let AccountService = class AccountService {
     logger;
     repo;
@@ -377,25 +591,55 @@ let AccountService = class AccountService {
         this.mapper = mapper;
     }
     async create(createAccountDto) {
-        this.logger.debug('Create account service called', {
-            correlationId: 'f62ebb05-fc0e-4ed8-945b-f0a8b7acaef4',
-        });
-        const account = this.repo.create({ ...createAccountDto });
-        const result = await this.repo.save(account);
-        accounts.push(result);
+        const entity = this.repo.create({ ...createAccountDto });
+        const result = await this.repo.save(entity);
         return this.mapper.toDomain(result);
     }
-    findAll() {
-        this.logger.debug('Findall account service called', {
-            correlationId: 'a3b2ec3c-34c5-4026-989c-133ad55e87fd',
-        });
-        return accounts;
+    async findAll(skip = 0, take = 100) {
+        try {
+            const [entities, count] = await this.repo.findAndCount({
+                skip,
+                take,
+            });
+            return {
+                data: entities.map((entity) => this.mapper.toDomain(entity)),
+                pagination: {
+                    total: count,
+                    skip,
+                    take,
+                    hasNextPage: skip + take < count,
+                },
+            };
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findAll.name} encountered an error`, {
+                correlationId: '56268dfa-a78d-4865-8d03-504515d8287c',
+                err: JSON.stringify(err),
+            });
+            return {
+                data: [],
+                pagination: { total: 0, skip: 0, take, hasNextPage: false },
+            };
+        }
     }
-    findOne(id) {
-        return `This action returns a #${id} account`;
+    async findOne(id) {
+        try {
+            const entity = await this.repo.findOneBy({ id });
+            if (entity) {
+                return this.mapper.toDomain(entity);
+            }
+            return {};
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOne.name} encountered an error`, {
+                correlationId: 'f64ea9bf-6aae-4b87-9629-d7fe14f6c1d8',
+                err: JSON.stringify(err),
+            });
+            return {};
+        }
     }
-    update(id, _updateAccountDto) {
-        return `This action updates a #${id} account`;
+    update(id, updateAccountDto) {
+        return `This action updates a #${id} account with: ${JSON.stringify(updateAccountDto)}`;
     }
     remove(id) {
         return `This action removes a #${id} account`;
@@ -431,6 +675,50 @@ class AccountCreatedCommand extends cqrs_1.Command {
     }
 }
 exports.AccountCreatedCommand = AccountCreatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/account/commands/account-removed.command.ts":
+/*!*****************************************************************!*\
+  !*** ./src/modules/account/commands/account-removed.command.ts ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AccountRemovedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class AccountRemovedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.AccountRemovedCommand = AccountRemovedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/account/commands/account-updated.command.ts":
+/*!*****************************************************************!*\
+  !*** ./src/modules/account/commands/account-updated.command.ts ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AccountUpdatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class AccountUpdatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.AccountUpdatedCommand = AccountUpdatedCommand;
 
 
 /***/ }),
@@ -687,6 +975,110 @@ exports.AccountCreatedHandler = AccountCreatedHandler = __decorate([
 
 /***/ }),
 
+/***/ "./src/modules/account/handlers/account-removed.handler.ts":
+/*!*****************************************************************!*\
+  !*** ./src/modules/account/handlers/account-removed.handler.ts ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AccountRemovedHandler = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const account_removed_command_1 = __webpack_require__(/*! ../commands/account-removed.command */ "./src/modules/account/commands/account-removed.command.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+let AccountRemovedHandler = class AccountRemovedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Account removed handler called', {
+            correlationId: 'd1ebbe65-7f91-45f5-9085-0d4245428c5f',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.AccountRemovedHandler = AccountRemovedHandler;
+exports.AccountRemovedHandler = AccountRemovedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(account_removed_command_1.AccountRemovedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], AccountRemovedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/account/handlers/account-updated.handler.ts":
+/*!*****************************************************************!*\
+  !*** ./src/modules/account/handlers/account-updated.handler.ts ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AccountUpdatedHandler = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const account_updated_command_1 = __webpack_require__(/*! ../commands/account-updated.command */ "./src/modules/account/commands/account-updated.command.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+let AccountUpdatedHandler = class AccountUpdatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Account updated handler called', {
+            correlationId: 'd1ebbe65-7f91-45f5-9085-0d4245428c5f',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.AccountUpdatedHandler = AccountUpdatedHandler;
+exports.AccountUpdatedHandler = AccountUpdatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(account_updated_command_1.AccountUpdatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], AccountUpdatedHandler);
+
+
+/***/ }),
+
 /***/ "./src/modules/app.module.ts":
 /*!***********************************!*\
   !*** ./src/modules/app.module.ts ***!
@@ -723,6 +1115,8 @@ const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const cacheable_1 = __webpack_require__(/*! cacheable */ "cacheable");
 const keyv_1 = __webpack_require__(/*! keyv */ "keyv");
 const logging_thottler_guard_1 = __webpack_require__(/*! src/guards/logging-thottler.guard */ "./src/guards/logging-thottler.guard.ts");
+const user_module_1 = __webpack_require__(/*! ./user/user.module */ "./src/modules/user/user.module.ts");
+const auth_module_1 = __webpack_require__(/*! ./auth/auth.module */ "./src/modules/auth/auth.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -756,7 +1150,7 @@ exports.AppModule = AppModule = __decorate([
                     const redisUrl = configService.get('REDIS_URL', 'redis://localhost:6379');
                     return {
                         stores: [
-                            new redis_1.default(redisUrl),
+                            new keyv_1.Keyv({ store: new redis_1.default(redisUrl), ttl: 60_000 }),
                             new keyv_1.Keyv({
                                 store: new cacheable_1.CacheableMemory({ ttl: 60000, lruSize: 5000 }),
                             }),
@@ -779,10 +1173,209 @@ exports.AppModule = AppModule = __decorate([
             health_module_1.HealthModule,
             account_module_1.AccountModule,
             logging_1.LoggingModule,
+            user_module_1.UserModule,
+            auth_module_1.AuthModule,
         ],
         providers: [{ provide: core_1.APP_GUARD, useClass: logging_thottler_guard_1.LoggingThrottlerGuard }],
     })
 ], AppModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/auth/auth.controller.ts":
+/*!*********************************************!*\
+  !*** ./src/modules/auth/auth.controller.ts ***!
+  \*********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const auth_service_1 = __webpack_require__(/*! ./auth.service */ "./src/modules/auth/auth.service.ts");
+const create_auth_dto_1 = __webpack_require__(/*! ./dto/create-auth.dto */ "./src/modules/auth/dto/create-auth.dto.ts");
+const update_auth_dto_1 = __webpack_require__(/*! ./dto/update-auth.dto */ "./src/modules/auth/dto/update-auth.dto.ts");
+let AuthController = class AuthController {
+    authService;
+    constructor(authService) {
+        this.authService = authService;
+    }
+    create(createAuthDto) {
+        return this.authService.create(createAuthDto);
+    }
+    findAll() {
+        return this.authService.findAll();
+    }
+    findOne(id) {
+        return this.authService.findOne(+id);
+    }
+    update(id, updateAuthDto) {
+        return this.authService.update(+id, updateAuthDto);
+    }
+    remove(id) {
+        return this.authService.remove(+id);
+    }
+};
+exports.AuthController = AuthController;
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof create_auth_dto_1.CreateAuthDto !== "undefined" && create_auth_dto_1.CreateAuthDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_c = typeof update_auth_dto_1.UpdateAuthDto !== "undefined" && update_auth_dto_1.UpdateAuthDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "remove", null);
+exports.AuthController = AuthController = __decorate([
+    (0, common_1.Controller)('auth'),
+    __metadata("design:paramtypes", [typeof (_a = typeof auth_service_1.AuthService !== "undefined" && auth_service_1.AuthService) === "function" ? _a : Object])
+], AuthController);
+
+
+/***/ }),
+
+/***/ "./src/modules/auth/auth.module.ts":
+/*!*****************************************!*\
+  !*** ./src/modules/auth/auth.module.ts ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const auth_service_1 = __webpack_require__(/*! ./auth.service */ "./src/modules/auth/auth.service.ts");
+const auth_controller_1 = __webpack_require__(/*! ./auth.controller */ "./src/modules/auth/auth.controller.ts");
+let AuthModule = class AuthModule {
+};
+exports.AuthModule = AuthModule;
+exports.AuthModule = AuthModule = __decorate([
+    (0, common_1.Module)({
+        controllers: [auth_controller_1.AuthController],
+        providers: [auth_service_1.AuthService],
+    })
+], AuthModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/auth/auth.service.ts":
+/*!******************************************!*\
+  !*** ./src/modules/auth/auth.service.ts ***!
+  \******************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+let AuthService = class AuthService {
+    create(createAuthDto) {
+        return 'This action adds a new auth';
+    }
+    findAll() {
+        return `This action returns all auth`;
+    }
+    findOne(id) {
+        return `This action returns a #${id} auth`;
+    }
+    update(id, updateAuthDto) {
+        return `This action updates a #${id} auth`;
+    }
+    remove(id) {
+        return `This action removes a #${id} auth`;
+    }
+};
+exports.AuthService = AuthService;
+exports.AuthService = AuthService = __decorate([
+    (0, common_1.Injectable)()
+], AuthService);
+
+
+/***/ }),
+
+/***/ "./src/modules/auth/dto/create-auth.dto.ts":
+/*!*************************************************!*\
+  !*** ./src/modules/auth/dto/create-auth.dto.ts ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateAuthDto = void 0;
+class CreateAuthDto {
+}
+exports.CreateAuthDto = CreateAuthDto;
+
+
+/***/ }),
+
+/***/ "./src/modules/auth/dto/update-auth.dto.ts":
+/*!*************************************************!*\
+  !*** ./src/modules/auth/dto/update-auth.dto.ts ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateAuthDto = void 0;
+const mapped_types_1 = __webpack_require__(/*! @nestjs/mapped-types */ "@nestjs/mapped-types");
+const create_auth_dto_1 = __webpack_require__(/*! ./create-auth.dto */ "./src/modules/auth/dto/create-auth.dto.ts");
+class UpdateAuthDto extends (0, mapped_types_1.PartialType)(create_auth_dto_1.CreateAuthDto) {
+}
+exports.UpdateAuthDto = UpdateAuthDto;
 
 
 /***/ }),
@@ -812,6 +1405,746 @@ exports.HealthModule = HealthModule = __decorate([
         imports: [terminus_1.TerminusModule],
     })
 ], HealthModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/user/commands/user-created.command.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/user/commands/user-created.command.ts ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserCreatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class UserCreatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.UserCreatedCommand = UserCreatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/user/commands/user-removed.command.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/user/commands/user-removed.command.ts ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserRemovedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class UserRemovedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.UserRemovedCommand = UserRemovedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/user/commands/user-updated.command.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/user/commands/user-updated.command.ts ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserUpdatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class UserUpdatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.UserUpdatedCommand = UserUpdatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/user/dto/create-user.dto.ts":
+/*!*************************************************!*\
+  !*** ./src/modules/user/dto/create-user.dto.ts ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateUserDto = void 0;
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const user_entity_1 = __webpack_require__(/*! ../entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+class CreateUserDto {
+    email;
+    password;
+    name;
+    role;
+}
+exports.CreateUserDto = CreateUserDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The email address of the user' }),
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The password of the user' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(8),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "password", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The name of the user' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The role of the user' }),
+    (0, class_validator_1.IsEnum)(user_entity_1.UserRole),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof user_entity_1.UserRole !== "undefined" && user_entity_1.UserRole) === "function" ? _a : Object)
+], CreateUserDto.prototype, "role", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/user/dto/update-user.dto.ts":
+/*!*************************************************!*\
+  !*** ./src/modules/user/dto/update-user.dto.ts ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateUserDto = void 0;
+const mapped_types_1 = __webpack_require__(/*! @nestjs/mapped-types */ "@nestjs/mapped-types");
+const create_user_dto_1 = __webpack_require__(/*! ./create-user.dto */ "./src/modules/user/dto/create-user.dto.ts");
+class UpdateUserDto extends (0, mapped_types_1.PartialType)(create_user_dto_1.CreateUserDto) {
+}
+exports.UpdateUserDto = UpdateUserDto;
+
+
+/***/ }),
+
+/***/ "./src/modules/user/dto/user.mapper.ts":
+/*!*********************************************!*\
+  !*** ./src/modules/user/dto/user.mapper.ts ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserMapper = void 0;
+const user_entity_1 = __webpack_require__(/*! ../entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
+class UserMapper {
+    toDomain(user) {
+        return new user_entity_1.User({ ...user });
+    }
+}
+exports.UserMapper = UserMapper;
+
+
+/***/ }),
+
+/***/ "./src/modules/user/entities/user.entity.ts":
+/*!**************************************************!*\
+  !*** ./src/modules/user/entities/user.entity.ts ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.User = exports.UserRole = void 0;
+var UserRole;
+(function (UserRole) {
+    UserRole["OWNER"] = "owner";
+    UserRole["ADMIN"] = "admin";
+    UserRole["USER"] = "user";
+})(UserRole || (exports.UserRole = UserRole = {}));
+class User {
+    props;
+    constructor(props) {
+        this.props = {
+            ...props,
+            role: props.role ?? UserRole.USER,
+            createdAt: props.createdAt ?? new Date(),
+            updatedAt: props.updatedAt ?? new Date(),
+        };
+    }
+    get id() {
+        return this.props.id;
+    }
+    get email() {
+        return this.props.email;
+    }
+    get password() {
+        return this.props.password;
+    }
+    get name() {
+        return this.props.name;
+    }
+    get role() {
+        return this.props.role;
+    }
+    get createdAt() {
+        return this.props.createdAt;
+    }
+    get updatedAt() {
+        return this.props.updatedAt;
+    }
+    get deletedAt() {
+        return this.props.deletedAt;
+    }
+    get deletedBy() {
+        return this.props.deletedBy;
+    }
+    updateName(newName) {
+        this.props.name = newName;
+        this.touch();
+    }
+    updateEmail(newEmail) {
+        this.props.email = newEmail;
+        this.touch();
+    }
+    updatePassword(newPassword) {
+        this.props.password = newPassword;
+        this.touch();
+    }
+    updateRole(newRole) {
+        this.props.role = newRole;
+        this.touch();
+    }
+    softDelete(byUserId) {
+        this.props.deletedAt = new Date();
+        if (byUserId) {
+            this.props.deletedBy = byUserId;
+        }
+    }
+    restore() {
+        this.props.deletedAt = undefined;
+        this.props.deletedBy = undefined;
+    }
+    touch() {
+        this.props.updatedAt = new Date();
+    }
+}
+exports.User = User;
+
+
+/***/ }),
+
+/***/ "./src/modules/user/entities/user.model.ts":
+/*!*************************************************!*\
+  !*** ./src/modules/user/entities/user.model.ts ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.User = void 0;
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const user_entity_1 = __webpack_require__(/*! ./user.entity */ "./src/modules/user/entities/user.entity.ts");
+let User = class User {
+    id;
+    email;
+    password;
+    name;
+    role;
+    createdAt;
+    updatedAt;
+    deletedAt;
+    deletedBy;
+};
+exports.User = User;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], User.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ unique: true }),
+    __metadata("design:type", String)
+], User.prototype, "email", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], User.prototype, "password", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'enum', enum: user_entity_1.UserRole, default: user_entity_1.UserRole.USER }),
+    __metadata("design:type", typeof (_a = typeof user_entity_1.UserRole !== "undefined" && user_entity_1.UserRole) === "function" ? _a : Object)
+], User.prototype, "role", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], User.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], User.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], User.prototype, "deletedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "deletedBy", void 0);
+exports.User = User = __decorate([
+    (0, typeorm_1.Entity)('users')
+], User);
+
+
+/***/ }),
+
+/***/ "./src/modules/user/handlers/user-created.handler.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/user/handlers/user-created.handler.ts ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserCreatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const user_created_command_1 = __webpack_require__(/*! ../commands/user-created.command */ "./src/modules/user/commands/user-created.command.ts");
+let UserCreatedHandler = class UserCreatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('User created handler called', {
+            correlationId: '23b10edb-86ee-45fe-ba6c-43ff8200c57f',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.UserCreatedHandler = UserCreatedHandler;
+exports.UserCreatedHandler = UserCreatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(user_created_command_1.UserCreatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], UserCreatedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/user/handlers/user-removed.handler.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/user/handlers/user-removed.handler.ts ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserRemovedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const user_removed_command_1 = __webpack_require__(/*! ../commands/user-removed.command */ "./src/modules/user/commands/user-removed.command.ts");
+let UserRemovedHandler = class UserRemovedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('User removed handler called', {
+            correlationId: '020bea7d-6b78-46f9-a247-b792b5b16621',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.UserRemovedHandler = UserRemovedHandler;
+exports.UserRemovedHandler = UserRemovedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(user_removed_command_1.UserRemovedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], UserRemovedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/user/handlers/user-updated.handler.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/user/handlers/user-updated.handler.ts ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserUpdatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const user_updated_command_1 = __webpack_require__(/*! ../commands/user-updated.command */ "./src/modules/user/commands/user-updated.command.ts");
+let UserUpdatedHandler = class UserUpdatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('User updated handler called', {
+            correlationId: '3a5bd5b9-bb97-41b4-aa3e-d7d7e8cd88eb',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.UserUpdatedHandler = UserUpdatedHandler;
+exports.UserUpdatedHandler = UserUpdatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(user_updated_command_1.UserUpdatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], UserUpdatedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/user/user.controller.ts":
+/*!*********************************************!*\
+  !*** ./src/modules/user/user.controller.ts ***!
+  \*********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserController = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const logging_cache_interceptor_1 = __webpack_require__(/*! src/interceptors/logging-cache.interceptor */ "./src/interceptors/logging-cache.interceptor.ts");
+const user_created_command_1 = __webpack_require__(/*! ./commands/user-created.command */ "./src/modules/user/commands/user-created.command.ts");
+const create_user_dto_1 = __webpack_require__(/*! ./dto/create-user.dto */ "./src/modules/user/dto/create-user.dto.ts");
+const update_user_dto_1 = __webpack_require__(/*! ./dto/update-user.dto */ "./src/modules/user/dto/update-user.dto.ts");
+const user_service_1 = __webpack_require__(/*! ./user.service */ "./src/modules/user/user.service.ts");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
+let UserController = class UserController {
+    logger;
+    service;
+    commandBus;
+    constructor(logger, service, commandBus) {
+        this.logger = logger;
+        this.service = service;
+        this.commandBus = commandBus;
+    }
+    async create(createUserDto) {
+        const result = await this.service.create(createUserDto);
+        await this.commandBus.execute(new user_created_command_1.UserCreatedCommand(result));
+        return result;
+    }
+    async findAll(skip = 0, take = 100) {
+        return await this.service.findAll(skip, take);
+    }
+    findOne(id) {
+        return this.service.findOne(id);
+    }
+    update(id, updateUserDto) {
+        return this.service.update(+id, updateUserDto);
+    }
+    remove(id) {
+        return this.service.remove(+id);
+    }
+};
+exports.UserController = UserController;
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof create_user_dto_1.CreateUserDto !== "undefined" && create_user_dto_1.CreateUserDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: Number }),
+    (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
+    __param(0, (0, common_1.Query)('skip')),
+    __param(1, (0, common_1.Query)('take')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], UserController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_f = typeof update_user_dto_1.UpdateUserDto !== "undefined" && update_user_dto_1.UpdateUserDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "remove", null);
+exports.UserController = UserController = __decorate([
+    (0, common_1.Controller)('users'),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, common_1.Inject)(user_service_1.UserService)),
+    __param(2, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _b : Object, typeof (_c = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _c : Object])
+], UserController);
+
+
+/***/ }),
+
+/***/ "./src/modules/user/user.module.ts":
+/*!*****************************************!*\
+  !*** ./src/modules/user/user.module.ts ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserModule = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const user_mapper_1 = __webpack_require__(/*! ./dto/user.mapper */ "./src/modules/user/dto/user.mapper.ts");
+const user_model_1 = __webpack_require__(/*! ./entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const user_created_handler_1 = __webpack_require__(/*! ./handlers/user-created.handler */ "./src/modules/user/handlers/user-created.handler.ts");
+const user_controller_1 = __webpack_require__(/*! ./user.controller */ "./src/modules/user/user.controller.ts");
+const user_service_1 = __webpack_require__(/*! ./user.service */ "./src/modules/user/user.service.ts");
+const user_updated_handler_1 = __webpack_require__(/*! ./handlers/user-updated.handler */ "./src/modules/user/handlers/user-updated.handler.ts");
+const user_removed_handler_1 = __webpack_require__(/*! ./handlers/user-removed.handler */ "./src/modules/user/handlers/user-removed.handler.ts");
+let UserModule = class UserModule {
+};
+exports.UserModule = UserModule;
+exports.UserModule = UserModule = __decorate([
+    (0, common_1.Module)({
+        imports: [logging_1.LoggingModule, typeorm_1.TypeOrmModule.forFeature([user_model_1.User])],
+        controllers: [user_controller_1.UserController],
+        providers: [
+            user_mapper_1.UserMapper,
+            user_service_1.UserService,
+            user_created_handler_1.UserCreatedHandler,
+            user_updated_handler_1.UserUpdatedHandler,
+            user_removed_handler_1.UserRemovedHandler,
+        ],
+    })
+], UserModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/user/user.service.ts":
+/*!******************************************!*\
+  !*** ./src/modules/user/user.service.ts ***!
+  \******************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const user_model_1 = __webpack_require__(/*! ./entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const user_mapper_1 = __webpack_require__(/*! ./dto/user.mapper */ "./src/modules/user/dto/user.mapper.ts");
+let UserService = class UserService {
+    logger;
+    repo;
+    mapper;
+    constructor(logger, repo, mapper) {
+        this.logger = logger;
+        this.repo = repo;
+        this.mapper = mapper;
+    }
+    async create(createUserDto) {
+        const entity = this.repo.create({ ...createUserDto });
+        const result = await this.repo.save(entity);
+        return this.mapper.toDomain(result);
+    }
+    async findAll(skip = 0, take = 100) {
+        try {
+            const [entities, count] = await this.repo.findAndCount({
+                skip,
+                take,
+            });
+            return {
+                data: entities.map((entity) => this.mapper.toDomain(entity)),
+                pagination: {
+                    total: count,
+                    skip,
+                    take,
+                    hasNextPage: skip + take < count,
+                },
+            };
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findAll.name} encountered an error`, {
+                correlationId: 'eb9e90e0-6394-484c-a431-6a79eb56468e',
+                err: JSON.stringify(err),
+            });
+            return {
+                data: [],
+                pagination: { total: 0, skip: 0, take, hasNextPage: false },
+            };
+        }
+    }
+    async findOne(id) {
+        try {
+            const entity = await this.repo.findOneBy({ id });
+            if (entity) {
+                return this.mapper.toDomain(entity);
+            }
+            return {};
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOne.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            return {};
+        }
+    }
+    update(id, updateUserDto) {
+        return `This action updates a #${id} user with: ${JSON.stringify(updateUserDto)}`;
+    }
+    remove(id) {
+        return `This action removes a #${id} user`;
+    }
+};
+exports.UserService = UserService;
+exports.UserService = UserService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, typeorm_1.InjectRepository)(user_model_1.User)),
+    __param(2, (0, common_1.Inject)(user_mapper_1.UserMapper)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof user_mapper_1.UserMapper !== "undefined" && user_mapper_1.UserMapper) === "function" ? _c : Object])
+], UserService);
 
 
 /***/ }),
@@ -1003,6 +2336,16 @@ module.exports = require("helmet");
 /***/ ((module) => {
 
 module.exports = require("keyv");
+
+/***/ }),
+
+/***/ "rxjs":
+/*!***********************!*\
+  !*** external "rxjs" ***!
+  \***********************/
+/***/ ((module) => {
+
+module.exports = require("rxjs");
 
 /***/ }),
 

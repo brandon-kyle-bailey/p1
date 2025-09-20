@@ -17,6 +17,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { CacheableMemory } from 'cacheable';
 import { Keyv } from 'keyv';
 import { LoggingThrottlerGuard } from 'src/guards/logging-thottler.guard';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -51,7 +53,7 @@ import { LoggingThrottlerGuard } from 'src/guards/logging-thottler.guard';
         );
         return {
           stores: [
-            new KeyvRedis(redisUrl),
+            new Keyv({ store: new KeyvRedis(redisUrl), ttl: 60_000 }),
             new Keyv({
               store: new CacheableMemory({ ttl: 60000, lruSize: 5000 }),
             }),
@@ -74,6 +76,8 @@ import { LoggingThrottlerGuard } from 'src/guards/logging-thottler.guard';
     HealthModule,
     AccountModule,
     LoggingModule,
+    UserModule,
+    AuthModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: LoggingThrottlerGuard }],
 })

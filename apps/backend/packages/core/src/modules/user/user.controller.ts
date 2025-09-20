@@ -1,4 +1,3 @@
-import { FindAllResponseDto } from '@app/dtos';
 import { LoggingService } from '@app/logging';
 import {
   Body,
@@ -13,31 +12,31 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
 import { LoggingCacheInterceptor } from 'src/interceptors/logging-cache.interceptor';
-import { AccountService } from './account.service';
-import { AccountCreatedCommand } from './commands/account-created.command';
-import { CreateAccountDto } from './dto/create-account.dto';
-import { UpdateAccountDto } from './dto/update-account.dto';
-import { Account } from './entities/account.entity';
+import { UserCreatedCommand } from './commands/user-created.command';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserService } from './user.service';
+import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { User } from './entities/user.entity';
+import { FindAllResponseDto } from '@app/dtos';
 
-@Controller('accounts')
+@Controller('users')
 @UseInterceptors(LoggingCacheInterceptor)
-export class AccountController {
+export class UserController {
   constructor(
     @Inject(LoggingService)
     private readonly logger: LoggingService,
-    @Inject(AccountService)
-    private readonly service: AccountService,
+    @Inject(UserService)
+    private readonly service: UserService,
     @Inject(CommandBus)
     private readonly commandBus: CommandBus,
   ) {}
 
   @Post()
-  async create(@Body() createAccountDto: CreateAccountDto) {
-    const result = await this.service.create(createAccountDto);
-    await this.commandBus.execute(new AccountCreatedCommand(result));
+  async create(@Body() createUserDto: CreateUserDto) {
+    const result = await this.service.create(createUserDto);
+    await this.commandBus.execute(new UserCreatedCommand(result));
     return result;
   }
 
@@ -49,7 +48,7 @@ export class AccountController {
   async findAll(
     @Query('skip') skip = 0,
     @Query('take') take = 100,
-  ): Promise<FindAllResponseDto<Account>> {
+  ): Promise<FindAllResponseDto<User>> {
     return await this.service.findAll(skip, take);
   }
 
@@ -59,13 +58,11 @@ export class AccountController {
   }
 
   @Patch(':id')
-  @Throttle({ default: { limit: 10, ttl: 60000 } })
-  update(@Param('id') id: string, @Body() updateAccountDto: UpdateAccountDto) {
-    return this.service.update(+id, updateAccountDto);
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.service.update(+id, updateUserDto);
   }
 
   @Delete(':id')
-  @Throttle({ default: { limit: 10, ttl: 60000 } })
   remove(@Param('id') id: string) {
     return this.service.remove(+id);
   }
