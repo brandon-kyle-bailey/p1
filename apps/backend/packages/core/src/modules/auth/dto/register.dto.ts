@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
+  IsOptional,
   IsString,
   IsStrongPassword,
   MinLength,
@@ -40,9 +41,14 @@ export function MatchPasswords(validationOptions?: ValidationOptions) {
 }
 
 export class RegisterDto {
+  @ApiProperty({ description: 'The name of the user' })
+  @IsEmail()
+  @IsOptional()
+  name?: string;
+
   @ApiProperty({ description: 'The email address of the user' })
   @IsEmail()
-  email: string;
+  username: string;
 
   @ApiProperty({ description: 'The password of the user' })
   @IsString()

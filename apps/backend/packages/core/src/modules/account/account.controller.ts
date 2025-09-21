@@ -3,6 +3,7 @@ import { FindAllResponseDto } from '@app/dtos';
 import { LoggingService } from '@app/logging';
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -33,7 +34,7 @@ import {
 
 @Controller('accounts')
 @UseGuards(JwtAuthGuard, PoliciesGuard)
-@UseInterceptors(LoggingCacheInterceptor)
+@UseInterceptors(LoggingCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()
 export class AccountController {
   constructor(

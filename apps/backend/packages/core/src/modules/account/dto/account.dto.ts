@@ -1,7 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
-export class CreateAccountDto {
+export class AccountDto {
+  constructor(partial: Partial<AccountDto>) {
+    Object.assign(this, partial);
+  }
   @ApiProperty({ description: 'The name of the account' })
   @IsString()
   name: string;

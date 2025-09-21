@@ -2,6 +2,7 @@ import { FindAllResponseDto } from '@app/dtos';
 import { LoggingService } from '@app/logging';
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -34,7 +35,7 @@ import { UserService } from './user.service';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, PoliciesGuard)
-@UseInterceptors(LoggingCacheInterceptor)
+@UseInterceptors(LoggingCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()
 export class UserController {
   constructor(
@@ -60,7 +61,7 @@ export class UserController {
   ) {
     const result = await this.service.create(createUserDto, req.user.id);
     await this.commandBus.execute(new UserCreatedCommand(result));
-    return result;
+    return this.mapper.toInterface(result);
   }
 
   @Get()
@@ -87,7 +88,7 @@ export class UserController {
     if (!ability.can(Action.Read, user)) {
       throw new UnauthorizedException();
     }
-    return user;
+    return this.mapper.toInterface(user);
   }
 
   @Patch(':id')
@@ -105,7 +106,8 @@ export class UserController {
       this.logger.debug('failing because we got here....');
       throw new UnauthorizedException();
     }
-    return this.service.update(id, updateUserDto, req.user.id);
+    const updated = await this.service.update(id, updateUserDto, req.user.id);
+    return this.mapper.toInterface(updated);
   }
 
   @Delete(':id')
@@ -118,6 +120,7 @@ export class UserController {
     if (!ability.can(Action.Update, user)) {
       throw new UnauthorizedException();
     }
-    return this.service.remove(id, req.user.id);
+    await this.service.remove(id, req.user.id);
+    return user.id;
   }
 }

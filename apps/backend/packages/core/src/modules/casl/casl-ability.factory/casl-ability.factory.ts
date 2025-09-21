@@ -30,7 +30,7 @@ export class CaslAbilityFactory {
     const user = await this.userService.findOne(userId);
     const { can, cannot, build } = new AbilityBuilder(createMongoAbility);
 
-    if ([Role.Owner, Role.Admin].includes(user.role)) {
+    if ([Role.Admin].includes(user.role)) {
       can(Action.Manage, 'all');
     } else {
       can(Action.Create, User);

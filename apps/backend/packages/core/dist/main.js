@@ -1038,7 +1038,7 @@ __decorate([
 exports.AccountController = AccountController = __decorate([
     (0, common_1.Controller)('accounts'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
-    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor, common_1.ClassSerializerInterceptor),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(account_service_1.AccountService)),
@@ -1335,6 +1335,80 @@ exports.AccountUpdatedCommand = AccountUpdatedCommand;
 
 /***/ }),
 
+/***/ "./src/modules/account/dto/account.dto.ts":
+/*!************************************************!*\
+  !*** ./src/modules/account/dto/account.dto.ts ***!
+  \************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AccountDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class AccountDto {
+    constructor(partial) {
+        Object.assign(this, partial);
+    }
+    name;
+    createdBy;
+    updatedBy;
+    deletedBy;
+    createdAt;
+    updatedAt;
+    deletedAt;
+}
+exports.AccountDto = AccountDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The name of the account' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AccountDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], AccountDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], AccountDto.prototype, "updatedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], AccountDto.prototype, "deletedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], AccountDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], AccountDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], AccountDto.prototype, "deletedAt", void 0);
+
+
+/***/ }),
+
 /***/ "./src/modules/account/dto/account.mapper.ts":
 /*!***************************************************!*\
   !*** ./src/modules/account/dto/account.mapper.ts ***!
@@ -1354,11 +1428,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountMapper = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const account_entity_1 = __webpack_require__(/*! ../entities/account.entity */ "./src/modules/account/entities/account.entity.ts");
+const account_dto_1 = __webpack_require__(/*! ./account.dto */ "./src/modules/account/dto/account.dto.ts");
 let AccountMapper = AccountMapper_1 = class AccountMapper {
     static toInterface(entity) {
-        return {
-            ...entity.props,
-        };
+        return new account_dto_1.AccountDto(entity.props);
     }
     toInterface(entity) {
         return AccountMapper_1.toInterface(entity);
@@ -1405,6 +1478,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateAccountDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
@@ -1413,6 +1487,10 @@ class CreateAccountDto {
     name;
     createdBy;
     updatedBy;
+    deletedBy;
+    createdAt;
+    updatedAt;
+    deletedAt;
 }
 exports.CreateAccountDto = CreateAccountDto;
 __decorate([
@@ -1430,6 +1508,26 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateAccountDto.prototype, "updatedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateAccountDto.prototype, "deletedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], CreateAccountDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], CreateAccountDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], CreateAccountDto.prototype, "deletedAt", void 0);
 
 
 /***/ }),
@@ -1883,33 +1981,107 @@ exports.AppModule = AppModule = __decorate([
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthController = void 0;
+const bcrypt = __importStar(__webpack_require__(/*! bcrypt */ "bcrypt"));
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const auth_service_1 = __webpack_require__(/*! ./auth.service */ "./src/modules/auth/auth.service.ts");
 const local_auth_guard_1 = __webpack_require__(/*! src/guards/local-auth.guard */ "./src/guards/local-auth.guard.ts");
 const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const login_dto_1 = __webpack_require__(/*! ./dto/login.dto */ "./src/modules/auth/dto/login.dto.ts");
+const user_entity_1 = __webpack_require__(/*! ../user/entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const user_service_1 = __webpack_require__(/*! ../user/user.service */ "./src/modules/user/user.service.ts");
+const account_service_1 = __webpack_require__(/*! ../account/account.service */ "./src/modules/account/account.service.ts");
+const register_dto_1 = __webpack_require__(/*! ./dto/register.dto */ "./src/modules/auth/dto/register.dto.ts");
+const create_account_dto_1 = __webpack_require__(/*! ../account/dto/create-account.dto */ "./src/modules/account/dto/create-account.dto.ts");
+const create_user_dto_1 = __webpack_require__(/*! ../user/dto/create-user.dto */ "./src/modules/user/dto/create-user.dto.ts");
+const update_account_dto_1 = __webpack_require__(/*! ../account/dto/update-account.dto */ "./src/modules/account/dto/update-account.dto.ts");
 let AuthController = class AuthController {
+    logger;
+    userService;
+    accountService;
+    dataSource;
     authService;
-    constructor(authService) {
+    constructor(logger, userService, accountService, dataSource, authService) {
+        this.logger = logger;
+        this.userService = userService;
+        this.accountService = accountService;
+        this.dataSource = dataSource;
         this.authService = authService;
     }
     login(req, body) {
         return this.authService.login(req.user);
+    }
+    async register(body) {
+        if (body.password !== body.confirmPassword) {
+            throw new common_1.BadRequestException();
+        }
+        const user = await this.dataSource.transaction(async (manager) => {
+            const createAccountDto = new create_account_dto_1.CreateAccountDto();
+            createAccountDto.name = `${body.username}'s Account`;
+            const account = await this.accountService.createWithManager(createAccountDto, manager);
+            const createUserDto = new create_user_dto_1.CreateUserDto();
+            createUserDto.accountId = account.id;
+            createUserDto.name = body.name;
+            createUserDto.email = body.username;
+            createUserDto.password = bcrypt.hashSync(body.password, 10);
+            createUserDto.role = user_entity_1.Role.Owner;
+            const user = await this.userService.createWithManager(createUserDto, manager);
+            const updateAccountDto = new update_account_dto_1.UpdateAccountDto();
+            updateAccountDto.createdBy = user.id;
+            updateAccountDto.updatedBy = user.id;
+            await this.accountService.updateWithManager(account.id, updateAccountDto, manager);
+            return user;
+        });
+        return this.authService.login(user);
     }
 };
 exports.AuthController = AuthController;
@@ -1919,12 +2091,24 @@ __decorate([
     __param(0, (0, common_2.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, typeof (_b = typeof login_dto_1.LoginDto !== "undefined" && login_dto_1.LoginDto) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [Object, typeof (_f = typeof login_dto_1.LoginDto !== "undefined" && login_dto_1.LoginDto) === "function" ? _f : Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "login", null);
+__decorate([
+    (0, common_1.Post)('register'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_g = typeof register_dto_1.RegisterDto !== "undefined" && register_dto_1.RegisterDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "register", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
-    __metadata("design:paramtypes", [typeof (_a = typeof auth_service_1.AuthService !== "undefined" && auth_service_1.AuthService) === "function" ? _a : Object])
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, common_1.Inject)(user_service_1.UserService)),
+    __param(2, (0, common_1.Inject)(account_service_1.AccountService)),
+    __param(3, (0, common_1.Inject)(typeorm_1.DataSource)),
+    __param(4, (0, common_1.Inject)(auth_service_1.AuthService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _b : Object, typeof (_c = typeof account_service_1.AccountService !== "undefined" && account_service_1.AccountService) === "function" ? _c : Object, typeof (_d = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _d : Object, typeof (_e = typeof auth_service_1.AuthService !== "undefined" && auth_service_1.AuthService) === "function" ? _e : Object])
 ], AuthController);
 
 
@@ -2071,6 +2255,7 @@ let AuthService = class AuthService {
         };
         return {
             access_token: this.jwtService.sign(payload),
+            refresh_token: this.jwtService.sign(payload),
         };
     }
 };
@@ -2124,6 +2309,90 @@ __decorate([
     (0, class_validator_1.IsStrongPassword)(),
     __metadata("design:type", String)
 ], LoginDto.prototype, "password", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/auth/dto/register.dto.ts":
+/*!**********************************************!*\
+  !*** ./src/modules/auth/dto/register.dto.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RegisterDto = exports.MatchPasswordsConstraint = void 0;
+exports.MatchPasswords = MatchPasswords;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_validator_2 = __webpack_require__(/*! class-validator */ "class-validator");
+let MatchPasswordsConstraint = class MatchPasswordsConstraint {
+    validate(confirmPassword, args) {
+        const object = args.object;
+        return object.password === confirmPassword;
+    }
+    defaultMessage(args) {
+        return 'Password and confirmPassword do not match';
+    }
+};
+exports.MatchPasswordsConstraint = MatchPasswordsConstraint;
+exports.MatchPasswordsConstraint = MatchPasswordsConstraint = __decorate([
+    (0, class_validator_2.ValidatorConstraint)({ async: false })
+], MatchPasswordsConstraint);
+function MatchPasswords(validationOptions) {
+    return function (object, propertyName) {
+        (0, class_validator_2.registerDecorator)({
+            target: object.constructor,
+            propertyName,
+            options: validationOptions,
+            constraints: [],
+            validator: MatchPasswordsConstraint,
+        });
+    };
+}
+class RegisterDto {
+    name;
+    username;
+    password;
+    confirmPassword;
+}
+exports.RegisterDto = RegisterDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The name of the user' }),
+    (0, class_validator_1.IsEmail)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The email address of the user' }),
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "username", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The password of the user' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.IsStrongPassword)(),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "password", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Confirm password' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.IsStrongPassword)(),
+    MatchPasswords({ message: 'Passwords do not match' }),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "confirmPassword", void 0);
 
 
 /***/ }),
@@ -2266,7 +2535,7 @@ let CaslAbilityFactory = class CaslAbilityFactory {
     async createForUser(userId) {
         const user = await this.userService.findOne(userId);
         const { can, cannot, build } = new ability_1.AbilityBuilder(ability_1.createMongoAbility);
-        if ([user_entity_1.Role.Owner, user_entity_1.Role.Admin].includes(user.role)) {
+        if ([user_entity_1.Role.Admin].includes(user.role)) {
             can(Action.Manage, 'all');
         }
         else {
@@ -2533,6 +2802,117 @@ exports.UpdateUserDto = UpdateUserDto;
 
 /***/ }),
 
+/***/ "./src/modules/user/dto/user.dto.ts":
+/*!******************************************!*\
+  !*** ./src/modules/user/dto/user.dto.ts ***!
+  \******************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const user_entity_1 = __webpack_require__(/*! ../entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+class UserDto {
+    constructor(partial) {
+        Object.assign(this, partial);
+    }
+    accountId;
+    email;
+    password;
+    name;
+    refresh_token;
+    role;
+    createdBy;
+    updatedBy;
+    deletedBy;
+    createdAt;
+    updatedAt;
+    deletedAt;
+}
+exports.UserDto = UserDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], UserDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The email address of the user' }),
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], UserDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The password of the user' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.IsStrongPassword)(),
+    (0, class_transformer_1.Exclude)(),
+    __metadata("design:type", String)
+], UserDto.prototype, "password", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The name of the user' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UserDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UserDto.prototype, "refresh_token", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The role of the user' }),
+    (0, class_validator_1.IsEnum)(user_entity_1.Role),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof user_entity_1.Role !== "undefined" && user_entity_1.Role) === "function" ? _a : Object)
+], UserDto.prototype, "role", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UserDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UserDto.prototype, "updatedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UserDto.prototype, "deletedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], UserDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], UserDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], UserDto.prototype, "deletedAt", void 0);
+
+
+/***/ }),
+
 /***/ "./src/modules/user/dto/user.mapper.ts":
 /*!*********************************************!*\
   !*** ./src/modules/user/dto/user.mapper.ts ***!
@@ -2544,11 +2924,10 @@ exports.UpdateUserDto = UpdateUserDto;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserMapper = void 0;
 const user_entity_1 = __webpack_require__(/*! ../entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
+const user_dto_1 = __webpack_require__(/*! ./user.dto */ "./src/modules/user/dto/user.dto.ts");
 class UserMapper {
     static toInterface(user) {
-        return {
-            ...user.props,
-        };
+        return new user_dto_1.UserDto(user.props);
     }
     toInterface(user) {
         return UserMapper.toInterface(user);
@@ -3010,7 +3389,7 @@ let UserController = class UserController {
     async create(createUserDto, req) {
         const result = await this.service.create(createUserDto, req.user.id);
         await this.commandBus.execute(new user_created_command_1.UserCreatedCommand(result));
-        return result;
+        return this.mapper.toInterface(result);
     }
     async findAll(skip = 0, take = 100) {
         const result = await this.service.findAll(skip, take);
@@ -3025,7 +3404,7 @@ let UserController = class UserController {
         if (!ability.can(casl_ability_factory_1.Action.Read, user)) {
             throw new common_1.UnauthorizedException();
         }
-        return user;
+        return this.mapper.toInterface(user);
     }
     async update(id, updateUserDto, req) {
         const ability = await this.caslAbilityFactory.createForUser(req.user.id);
@@ -3034,7 +3413,8 @@ let UserController = class UserController {
             this.logger.debug('failing because we got here....');
             throw new common_1.UnauthorizedException();
         }
-        return this.service.update(id, updateUserDto, req.user.id);
+        const updated = await this.service.update(id, updateUserDto, req.user.id);
+        return this.mapper.toInterface(updated);
     }
     async remove(id, req) {
         const ability = await this.caslAbilityFactory.createForUser(req.user.id);
@@ -3042,7 +3422,8 @@ let UserController = class UserController {
         if (!ability.can(casl_ability_factory_1.Action.Update, user)) {
             throw new common_1.UnauthorizedException();
         }
-        return this.service.remove(id, req.user.id);
+        await this.service.remove(id, req.user.id);
+        return user.id;
     }
 };
 exports.UserController = UserController;
@@ -3098,7 +3479,7 @@ __decorate([
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
-    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor, common_1.ClassSerializerInterceptor),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(user_service_1.UserService)),
@@ -3571,6 +3952,17 @@ module.exports = require("bcrypt");
 
 "use strict";
 module.exports = require("cacheable");
+
+/***/ }),
+
+/***/ "class-transformer":
+/*!************************************!*\
+  !*** external "class-transformer" ***!
+  \************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("class-transformer");
 
 /***/ }),
 
