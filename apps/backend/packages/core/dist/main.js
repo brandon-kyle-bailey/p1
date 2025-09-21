@@ -250,6 +250,63 @@ exports.LoggingService = LoggingService = __decorate([
 
 /***/ }),
 
+/***/ "./src/guards/auth.guard.ts":
+/*!**********************************!*\
+  !*** ./src/guards/auth.guard.ts ***!
+  \**********************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthGuard = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
+let AuthGuard = class AuthGuard {
+    jwtService;
+    constructor(jwtService) {
+        this.jwtService = jwtService;
+    }
+    canActivate(context) {
+        const request = context.switchToHttp().getRequest();
+        const token = this.extractTokenFromHeader(request);
+        if (!token) {
+            throw new common_1.UnauthorizedException();
+        }
+        try {
+            const payload = this.jwtService.verify(token, {
+                secret: '7ac54472-4dcf-4fa1-be39-8967d47d02d6',
+            });
+            request['user'] = payload;
+        }
+        catch {
+            throw new common_1.UnauthorizedException();
+        }
+        return true;
+    }
+    extractTokenFromHeader(request) {
+        const [type, token] = request.headers.authorization?.split(' ') ?? [];
+        return type === 'Bearer' ? token : undefined;
+    }
+};
+exports.AuthGuard = AuthGuard;
+exports.AuthGuard = AuthGuard = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object])
+], AuthGuard);
+
+
+/***/ }),
+
 /***/ "./src/guards/logging-thottler.guard.ts":
 /*!**********************************************!*\
   !*** ./src/guards/logging-thottler.guard.ts ***!
@@ -313,9 +370,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PoliciesGuard = exports.CheckPolicies = exports.CHECK_POLICIES_KEY = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const casl_ability_factory_1 = __webpack_require__(/*! src/modules/casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
@@ -325,13 +386,19 @@ exports.CheckPolicies = CheckPolicies;
 let PoliciesGuard = class PoliciesGuard {
     reflector;
     caslAbilityFactory;
-    constructor(reflector, caslAbilityFactory) {
+    logger;
+    constructor(reflector, caslAbilityFactory, logger) {
         this.reflector = reflector;
         this.caslAbilityFactory = caslAbilityFactory;
+        this.logger = logger;
     }
     canActivate(context) {
         const policyHandlers = this.reflector.get(exports.CHECK_POLICIES_KEY, context.getHandler()) || [];
         const { user } = context.switchToHttp().getRequest();
+        this.logger.debug(`${this.constructor.name}.${this.canActivate.name}`, {
+            correlationId: '75be8396-f6b7-42fd-b413-67efae3d889c',
+            user: JSON.stringify(user),
+        });
         const ability = this.caslAbilityFactory.createForUser(user);
         return policyHandlers.every((handler) => this.execPolicyHandler(handler, ability));
     }
@@ -345,7 +412,8 @@ let PoliciesGuard = class PoliciesGuard {
 exports.PoliciesGuard = PoliciesGuard;
 exports.PoliciesGuard = PoliciesGuard = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object, typeof (_b = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _b : Object])
+    __param(2, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object, typeof (_b = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _b : Object, typeof (_c = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _c : Object])
 ], PoliciesGuard);
 
 
@@ -604,6 +672,7 @@ exports.AccountModule = AccountModule = __decorate([
             account_updated_handler_1.AccountUpdatedHandler,
             account_removed_handler_1.AccountRemovedHandler,
         ],
+        exports: [account_service_1.AccountService],
     })
 ], AccountModule);
 
@@ -646,6 +715,12 @@ let AccountService = class AccountService {
         this.logger = logger;
         this.repo = repo;
         this.mapper = mapper;
+    }
+    async createWithManager(createAccountDto, manager) {
+        const repo = manager.getRepository(account_model_1.Account);
+        const entity = repo.create({ ...createAccountDto });
+        const result = await repo.save(entity);
+        return this.mapper.toDomain(result);
     }
     async create(createAccountDto) {
         const entity = this.repo.create({ ...createAccountDto });
@@ -984,7 +1059,7 @@ __decorate([
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
 ], Account.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Account.prototype, "createdBy", void 0);
 __decorate([
@@ -992,7 +1067,7 @@ __decorate([
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], Account.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Account.prototype, "updatedBy", void 0);
 __decorate([
@@ -1297,65 +1372,37 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const auth_service_1 = __webpack_require__(/*! ./auth.service */ "./src/modules/auth/auth.service.ts");
-const create_auth_dto_1 = __webpack_require__(/*! ./dto/create-auth.dto */ "./src/modules/auth/dto/create-auth.dto.ts");
-const update_auth_dto_1 = __webpack_require__(/*! ./dto/update-auth.dto */ "./src/modules/auth/dto/update-auth.dto.ts");
+const login_dto_1 = __webpack_require__(/*! ./dto/login.dto */ "./src/modules/auth/dto/login.dto.ts");
+const register_dto_1 = __webpack_require__(/*! ./dto/register.dto */ "./src/modules/auth/dto/register.dto.ts");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
         this.authService = authService;
     }
-    create(createAuthDto) {
-        return this.authService.create(createAuthDto);
+    async login(loginDto) {
+        return await this.authService.login(loginDto);
     }
-    findAll() {
-        return this.authService.findAll();
-    }
-    findOne(id) {
-        return this.authService.findOne(+id);
-    }
-    update(id, updateAuthDto) {
-        return this.authService.update(+id, updateAuthDto);
-    }
-    remove(id) {
-        return this.authService.remove(+id);
+    async register(registerDto) {
+        return await this.authService.register(registerDto);
     }
 };
 exports.AuthController = AuthController;
 __decorate([
-    (0, common_1.Post)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Post)('login'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof create_auth_dto_1.CreateAuthDto !== "undefined" && create_auth_dto_1.CreateAuthDto) === "function" ? _b : Object]),
-    __metadata("design:returntype", void 0)
-], AuthController.prototype, "create", null);
+    __metadata("design:paramtypes", [typeof (_b = typeof login_dto_1.LoginDto !== "undefined" && login_dto_1.LoginDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "login", null);
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Post)('register'),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], AuthController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], AuthController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_c = typeof update_auth_dto_1.UpdateAuthDto !== "undefined" && update_auth_dto_1.UpdateAuthDto) === "function" ? _c : Object]),
-    __metadata("design:returntype", void 0)
-], AuthController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], AuthController.prototype, "remove", null);
+    __metadata("design:paramtypes", [typeof (_c = typeof register_dto_1.RegisterDto !== "undefined" && register_dto_1.RegisterDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "register", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [typeof (_a = typeof auth_service_1.AuthService !== "undefined" && auth_service_1.AuthService) === "function" ? _a : Object])
@@ -1379,16 +1426,35 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthModule = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const auth_service_1 = __webpack_require__(/*! ./auth.service */ "./src/modules/auth/auth.service.ts");
+const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
+const account_module_1 = __webpack_require__(/*! ../account/account.module */ "./src/modules/account/account.module.ts");
+const casl_module_1 = __webpack_require__(/*! ../casl/casl.module */ "./src/modules/casl/casl.module.ts");
+const user_module_1 = __webpack_require__(/*! ../user/user.module */ "./src/modules/user/user.module.ts");
 const auth_controller_1 = __webpack_require__(/*! ./auth.controller */ "./src/modules/auth/auth.controller.ts");
+const auth_service_1 = __webpack_require__(/*! ./auth.service */ "./src/modules/auth/auth.service.ts");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
+        imports: [
+            logging_1.LoggingModule,
+            casl_module_1.CaslModule,
+            axios_1.HttpModule,
+            account_module_1.AccountModule,
+            user_module_1.UserModule,
+            jwt_1.JwtModule.register({
+                global: true,
+                secret: '7ac54472-4dcf-4fa1-be39-8967d47d02d6',
+                signOptions: { expiresIn: '1h' },
+            }),
+        ],
         controllers: [auth_controller_1.AuthController],
         providers: [auth_service_1.AuthService],
+        exports: [auth_service_1.AuthService],
     })
 ], AuthModule);
 
@@ -1402,70 +1468,261 @@ exports.AuthModule = AuthModule = __decorate([
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthService = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
+const bcrypt = __importStar(__webpack_require__(/*! bcrypt */ "bcrypt"));
+const account_service_1 = __webpack_require__(/*! ../account/account.service */ "./src/modules/account/account.service.ts");
+const user_service_1 = __webpack_require__(/*! ../user/user.service */ "./src/modules/user/user.service.ts");
+const create_account_dto_1 = __webpack_require__(/*! ../account/dto/create-account.dto */ "./src/modules/account/dto/create-account.dto.ts");
+const create_user_dto_1 = __webpack_require__(/*! ../user/dto/create-user.dto */ "./src/modules/user/dto/create-user.dto.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const update_user_dto_1 = __webpack_require__(/*! ../user/dto/update-user.dto */ "./src/modules/user/dto/update-user.dto.ts");
 let AuthService = class AuthService {
-    create(createAuthDto) {
-        return 'This action adds a new auth';
+    logger;
+    dataSource;
+    httpService;
+    userService;
+    accountService;
+    jwtService;
+    constructor(logger, dataSource, httpService, userService, accountService, jwtService) {
+        this.logger = logger;
+        this.dataSource = dataSource;
+        this.httpService = httpService;
+        this.userService = userService;
+        this.accountService = accountService;
+        this.jwtService = jwtService;
     }
-    findAll() {
-        return `This action returns all auth`;
+    _generateToken(user) {
+        const payload = { sub: user.id, username: user.email, role: user.role };
+        const access_token = this.jwtService.sign(payload);
+        const refresh_token = this.jwtService.sign(payload);
+        return {
+            access_token,
+            refresh_token,
+        };
     }
-    findOne(id) {
-        return `This action returns a #${id} auth`;
+    async login(loginDto) {
+        this.logger.debug(`${this.constructor.name}.${this.login.name}`, {
+            correlationId: 'a858f469-1368-4fa2-a238-e139b491526e',
+            loginDto: JSON.stringify(loginDto),
+        });
+        const user = await this.userService.findOneByEmail(loginDto.email);
+        if (!user) {
+            throw new common_1.NotFoundException();
+        }
+        const isMatch = await bcrypt.compare(loginDto.password, user.password);
+        if (!isMatch) {
+            throw new common_1.BadRequestException();
+        }
+        const token = this._generateToken(user);
+        const updateUserDto = new update_user_dto_1.UpdateUserDto();
+        updateUserDto.refresh_token = token.refresh_token;
+        await this.userService.update(user.id, updateUserDto);
+        return token;
     }
-    update(id, updateAuthDto) {
-        return `This action updates a #${id} auth`;
-    }
-    remove(id) {
-        return `This action removes a #${id} auth`;
+    async register(registerDto) {
+        this.logger.debug(`${this.constructor.name}.${this.register.name}`, {
+            correlationId: '4f54024e-6d09-4ca3-ab83-6bd2af6a59d1',
+            loginDto: JSON.stringify(registerDto),
+        });
+        if (registerDto.password !== registerDto.confirmPassword) {
+            throw new common_1.BadRequestException();
+        }
+        return this.dataSource.transaction(async (manager) => {
+            const createAccountDto = new create_account_dto_1.CreateAccountDto();
+            createAccountDto.name = `${registerDto.email}'s Account`;
+            const account = await this.accountService.createWithManager(createAccountDto, manager);
+            const createUserDto = new create_user_dto_1.CreateUserDto();
+            createUserDto.accountId = account.id;
+            createUserDto.email = registerDto.email;
+            createUserDto.password = bcrypt.hashSync(registerDto.password, 10);
+            const user = await this.userService.createWithManager(createUserDto, manager);
+            const token = this._generateToken(user);
+            const updateUserDto = new update_user_dto_1.UpdateUserDto();
+            updateUserDto.refresh_token = token.refresh_token;
+            await this.userService.updateWithManager(user.id, updateUserDto, manager);
+            return token;
+        });
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, common_1.Inject)(typeorm_1.DataSource)),
+    __param(2, (0, common_1.Inject)(axios_1.HttpService)),
+    __param(3, (0, common_1.Inject)(user_service_1.UserService)),
+    __param(4, (0, common_1.Inject)(account_service_1.AccountService)),
+    __param(5, (0, common_1.Inject)(jwt_1.JwtService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _b : Object, typeof (_c = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _c : Object, typeof (_d = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _d : Object, typeof (_e = typeof account_service_1.AccountService !== "undefined" && account_service_1.AccountService) === "function" ? _e : Object, typeof (_f = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _f : Object])
 ], AuthService);
 
 
 /***/ }),
 
-/***/ "./src/modules/auth/dto/create-auth.dto.ts":
-/*!*************************************************!*\
-  !*** ./src/modules/auth/dto/create-auth.dto.ts ***!
-  \*************************************************/
-/***/ ((__unused_webpack_module, exports) => {
+/***/ "./src/modules/auth/dto/login.dto.ts":
+/*!*******************************************!*\
+  !*** ./src/modules/auth/dto/login.dto.ts ***!
+  \*******************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CreateAuthDto = void 0;
-class CreateAuthDto {
+exports.LoginDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class LoginDto {
+    email;
+    password;
 }
-exports.CreateAuthDto = CreateAuthDto;
+exports.LoginDto = LoginDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The email address of the user' }),
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], LoginDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The password of the user' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.IsStrongPassword)(),
+    __metadata("design:type", String)
+], LoginDto.prototype, "password", void 0);
 
 
 /***/ }),
 
-/***/ "./src/modules/auth/dto/update-auth.dto.ts":
-/*!*************************************************!*\
-  !*** ./src/modules/auth/dto/update-auth.dto.ts ***!
-  \*************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ "./src/modules/auth/dto/register.dto.ts":
+/*!**********************************************!*\
+  !*** ./src/modules/auth/dto/register.dto.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UpdateAuthDto = void 0;
-const mapped_types_1 = __webpack_require__(/*! @nestjs/mapped-types */ "@nestjs/mapped-types");
-const create_auth_dto_1 = __webpack_require__(/*! ./create-auth.dto */ "./src/modules/auth/dto/create-auth.dto.ts");
-class UpdateAuthDto extends (0, mapped_types_1.PartialType)(create_auth_dto_1.CreateAuthDto) {
+exports.RegisterDto = exports.MatchPasswordsConstraint = void 0;
+exports.MatchPasswords = MatchPasswords;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_validator_2 = __webpack_require__(/*! class-validator */ "class-validator");
+let MatchPasswordsConstraint = class MatchPasswordsConstraint {
+    validate(confirmPassword, args) {
+        const object = args.object;
+        return object.password === confirmPassword;
+    }
+    defaultMessage(args) {
+        return 'Password and confirmPassword do not match';
+    }
+};
+exports.MatchPasswordsConstraint = MatchPasswordsConstraint;
+exports.MatchPasswordsConstraint = MatchPasswordsConstraint = __decorate([
+    (0, class_validator_2.ValidatorConstraint)({ async: false })
+], MatchPasswordsConstraint);
+function MatchPasswords(validationOptions) {
+    return function (object, propertyName) {
+        (0, class_validator_2.registerDecorator)({
+            target: object.constructor,
+            propertyName,
+            options: validationOptions,
+            constraints: [],
+            validator: MatchPasswordsConstraint,
+        });
+    };
 }
-exports.UpdateAuthDto = UpdateAuthDto;
+class RegisterDto {
+    email;
+    password;
+    confirmPassword;
+}
+exports.RegisterDto = RegisterDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The email address of the user' }),
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The password of the user' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.IsStrongPassword)(),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "password", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Confirm password' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.IsStrongPassword)(),
+    MatchPasswords({ message: 'Passwords do not match' }),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "confirmPassword", void 0);
 
 
 /***/ }),
@@ -1541,11 +1798,13 @@ exports.CaslModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const casl_ability_factory_1 = __webpack_require__(/*! ./casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
 const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
 let CaslModule = class CaslModule {
 };
 exports.CaslModule = CaslModule;
 exports.CaslModule = CaslModule = __decorate([
     (0, common_1.Module)({
+        imports: [logging_1.LoggingModule],
         providers: [casl_ability_factory_1.CaslAbilityFactory, policies_guard_1.PoliciesGuard],
         exports: [casl_ability_factory_1.CaslAbilityFactory, policies_guard_1.PoliciesGuard],
     })
@@ -1676,6 +1935,7 @@ class CreateUserDto {
     email;
     password;
     name;
+    refresh_token;
     role;
 }
 exports.CreateUserDto = CreateUserDto;
@@ -1693,6 +1953,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The password of the user' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.IsStrongPassword)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "password", void 0);
 __decorate([
@@ -1701,6 +1962,11 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "refresh_token", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The role of the user' }),
     (0, class_validator_1.IsEnum)(user_entity_1.Role),
@@ -1740,6 +2006,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserMapper = void 0;
 const user_entity_1 = __webpack_require__(/*! ../entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
 class UserMapper {
+    static toInterface(user) {
+        return {
+            ...user.props,
+        };
+    }
+    toInterface(user) {
+        return UserMapper.toInterface(user);
+    }
     static toDomain(user) {
         return new user_entity_1.User({
             ...user,
@@ -1747,6 +2021,14 @@ class UserMapper {
     }
     toDomain(user) {
         return UserMapper.toDomain(user);
+    }
+    static toPersistence(user) {
+        return {
+            ...user.props,
+        };
+    }
+    toPersistence(user) {
+        return UserMapper.toPersistence(user);
     }
 }
 exports.UserMapper = UserMapper;
@@ -1758,45 +2040,11 @@ exports.UserMapper = UserMapper;
 /*!**************************************************!*\
   !*** ./src/modules/user/entities/user.entity.ts ***!
   \**************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ ((__unused_webpack_module, exports) => {
 
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.User = exports.Role = void 0;
-const bcrypt = __importStar(__webpack_require__(/*! bcrypt */ "bcrypt"));
 var Role;
 (function (Role) {
     Role["User"] = "user";
@@ -1808,8 +2056,6 @@ class User {
     constructor(props) {
         this.props = {
             ...props,
-            password: bcrypt.hashSync(props.password, 10),
-            role: props.role,
             createdAt: props.createdAt ?? new Date(),
             updatedAt: props.updatedAt ?? new Date(),
         };
@@ -1831,6 +2077,9 @@ class User {
     }
     get name() {
         return this.props.name;
+    }
+    get refreshToken() {
+        return this.props.refresh_token;
     }
     get createdAt() {
         return this.props.createdAt;
@@ -1856,6 +2105,14 @@ class User {
     }
     updateEmail(newEmail) {
         this.props.email = newEmail;
+        this.touch();
+    }
+    updateRefreshToken(newRefreshToken) {
+        this.props.refresh_token = newRefreshToken;
+        this.touch();
+    }
+    updateRole(newRole) {
+        this.props.role = newRole;
         this.touch();
     }
     updatePassword(newPassword) {
@@ -1911,6 +2168,7 @@ let User = class User {
     password;
     role;
     name;
+    refresh_token;
     createdAt;
     updatedAt;
     deletedAt;
@@ -1951,6 +2209,10 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "name", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "refresh_token", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
 ], User.prototype, "createdAt", void 0);
@@ -1963,11 +2225,11 @@ __decorate([
     __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
 ], User.prototype, "deletedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "createdBy", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "updatedBy", void 0);
 __decorate([
@@ -2156,7 +2418,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserController = void 0;
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
@@ -2172,13 +2434,17 @@ const user_entity_1 = __webpack_require__(/*! ./entities/user.entity */ "./src/m
 const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
 const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
 const casl_ability_factory_1 = __webpack_require__(/*! ../casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
+const auth_guard_1 = __webpack_require__(/*! src/guards/auth.guard */ "./src/guards/auth.guard.ts");
+const user_mapper_1 = __webpack_require__(/*! ./dto/user.mapper */ "./src/modules/user/dto/user.mapper.ts");
 let UserController = class UserController {
     logger;
     service;
+    mapper;
     commandBus;
-    constructor(logger, service, commandBus) {
+    constructor(logger, service, mapper, commandBus) {
         this.logger = logger;
         this.service = service;
+        this.mapper = mapper;
         this.commandBus = commandBus;
     }
     async create(createUserDto) {
@@ -2187,7 +2453,11 @@ let UserController = class UserController {
         return result;
     }
     async findAll(skip = 0, take = 100) {
-        return await this.service.findAll(skip, take);
+        const result = await this.service.findAll(skip, take);
+        return {
+            ...result,
+            data: result.data.map((user) => this.mapper.toInterface(user)),
+        };
     }
     findOne(id) {
         return this.service.findOne(id);
@@ -2202,14 +2472,14 @@ let UserController = class UserController {
 exports.UserController = UserController;
 __decorate([
     (0, common_1.Post)(),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Create, user_entity_1.User)),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof create_user_dto_1.CreateUserDto !== "undefined" && create_user_dto_1.CreateUserDto) === "function" ? _d : Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof create_user_dto_1.CreateUserDto !== "undefined" && create_user_dto_1.CreateUserDto) === "function" ? _e : Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, common_1.UseGuards)(policies_guard_1.PoliciesGuard),
     (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, user_entity_1.User)),
     (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: Number }),
     (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: Number }),
@@ -2218,10 +2488,11 @@ __decorate([
     __param(1, (0, common_1.Query)('take')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], UserController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, user_entity_1.User)),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -2229,14 +2500,16 @@ __decorate([
 ], UserController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Update, user_entity_1.User)),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_f = typeof update_user_dto_1.UpdateUserDto !== "undefined" && update_user_dto_1.UpdateUserDto) === "function" ? _f : Object]),
+    __metadata("design:paramtypes", [String, typeof (_g = typeof update_user_dto_1.UpdateUserDto !== "undefined" && update_user_dto_1.UpdateUserDto) === "function" ? _g : Object]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Delete, user_entity_1.User)),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -2244,12 +2517,14 @@ __decorate([
 ], UserController.prototype, "remove", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard, policies_guard_1.PoliciesGuard),
     (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(user_service_1.UserService)),
-    __param(2, (0, common_1.Inject)(cqrs_1.CommandBus)),
-    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _b : Object, typeof (_c = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _c : Object])
+    __param(2, (0, common_1.Inject)(user_mapper_1.UserMapper)),
+    __param(3, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _b : Object, typeof (_c = typeof user_mapper_1.UserMapper !== "undefined" && user_mapper_1.UserMapper) === "function" ? _c : Object, typeof (_d = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _d : Object])
 ], UserController);
 
 
@@ -2295,6 +2570,7 @@ exports.UserModule = UserModule = __decorate([
             user_updated_handler_1.UserUpdatedHandler,
             user_removed_handler_1.UserRemovedHandler,
         ],
+        exports: [user_service_1.UserService],
     })
 ], UserModule);
 
@@ -2338,16 +2614,14 @@ let UserService = class UserService {
         this.repo = repo;
         this.mapper = mapper;
     }
+    async createWithManager(createUserDto, manager) {
+        const repo = manager.getRepository(user_model_1.User);
+        const entity = repo.create({ ...createUserDto });
+        const result = await repo.save(entity);
+        return this.mapper.toDomain(result);
+    }
     async create(createUserDto) {
-        this.logger.debug('Creating new user', {
-            correlationId: '90f11fc2-e5e7-4d60-b472-4f1afdba7ca6',
-            payload: JSON.stringify(createUserDto),
-        });
         const entity = this.repo.create({ ...createUserDto });
-        this.logger.debug('Created user entity', {
-            correlationId: '42bbcd62-1ae1-4a06-8c63-52ce0250c1e0',
-            entity: JSON.stringify(entity),
-        });
         const result = await this.repo.save(entity);
         return this.mapper.toDomain(result);
     }
@@ -2381,21 +2655,97 @@ let UserService = class UserService {
     async findOne(id) {
         try {
             const entity = await this.repo.findOneBy({ id });
-            if (entity) {
-                return this.mapper.toDomain(entity);
+            if (!entity) {
+                throw new common_1.NotFoundException();
             }
-            return {};
+            return this.mapper.toDomain(entity);
         }
         catch (err) {
             this.logger.error(`${this.constructor.name}.${this.findOne.name} encountered an error`, {
                 correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
                 err: JSON.stringify(err),
             });
-            return {};
+            throw new common_1.InternalServerErrorException();
         }
     }
-    update(id, updateUserDto) {
-        return `This action updates a #${id} user with: ${JSON.stringify(updateUserDto)}`;
+    async findOneByEmail(email) {
+        try {
+            const entity = await this.repo.findOneBy({ email });
+            if (entity) {
+                return this.mapper.toDomain(entity);
+            }
+            return null;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOneByEmail.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            return null;
+        }
+    }
+    async updateWithManager(id, updateUserDto, manager) {
+        try {
+            const repo = manager.getRepository(user_model_1.User);
+            const model = await repo.findOneBy({ id });
+            if (!model) {
+                throw new common_1.NotFoundException();
+            }
+            const entity = this.mapper.toDomain(model);
+            if (updateUserDto.email) {
+                entity.updateEmail(updateUserDto.email);
+            }
+            if (updateUserDto.refresh_token) {
+                entity.updateRefreshToken(updateUserDto.refresh_token);
+            }
+            if (updateUserDto.role) {
+                entity.updateRole(updateUserDto.role);
+            }
+            if (updateUserDto.name) {
+                entity.updateName(updateUserDto.name);
+            }
+            if (updateUserDto.password) {
+                entity.updatePassword(updateUserDto.password);
+            }
+            await repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.updateWithManager.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async update(id, updateUserDto) {
+        try {
+            const entity = await this.findOne(id);
+            if (updateUserDto.email) {
+                entity.updateEmail(updateUserDto.email);
+            }
+            if (updateUserDto.refresh_token) {
+                entity.updateRefreshToken(updateUserDto.refresh_token);
+            }
+            if (updateUserDto.role) {
+                entity.updateRole(updateUserDto.role);
+            }
+            if (updateUserDto.name) {
+                entity.updateName(updateUserDto.name);
+            }
+            if (updateUserDto.password) {
+                entity.updatePassword(updateUserDto.password);
+            }
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.update.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
     }
     remove(id) {
         return `This action removes a #${id} user`;
@@ -2500,6 +2850,16 @@ module.exports = require("@nestjs/cqrs");
 /***/ ((module) => {
 
 module.exports = require("@nestjs/event-emitter");
+
+/***/ }),
+
+/***/ "@nestjs/jwt":
+/*!******************************!*\
+  !*** external "@nestjs/jwt" ***!
+  \******************************/
+/***/ ((module) => {
+
+module.exports = require("@nestjs/jwt");
 
 /***/ }),
 

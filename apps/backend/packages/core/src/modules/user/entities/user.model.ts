@@ -37,6 +37,9 @@ export class User {
   @Column({ nullable: true })
   name?: string;
 
+  @Column({ nullable: true })
+  refresh_token?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -46,11 +49,11 @@ export class User {
   @DeleteDateColumn()
   deletedAt?: Date;
 
-  @Column()
-  createdBy: string;
+  @Column({ nullable: true })
+  createdBy?: string;
 
-  @Column()
-  updatedBy: string;
+  @Column({ nullable: true })
+  updatedBy?: string;
 
   @Column({ nullable: true })
   deletedBy?: string;

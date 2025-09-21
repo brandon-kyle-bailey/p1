@@ -1,10 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoggingService } from '@app/logging';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.model';
-import { Repository } from 'typeorm';
+import { User as UserDomain } from './entities/user.entity';
+import { EntityManager, Repository } from 'typeorm';
 import { UserMapper } from './dto/user.mapper';
 
 @Injectable()
@@ -17,16 +23,19 @@ export class UserService {
     @Inject(UserMapper)
     private readonly mapper: UserMapper,
   ) {}
+
+  async createWithManager(
+    createUserDto: CreateUserDto,
+    manager: EntityManager,
+  ) {
+    const repo = manager.getRepository(User);
+    const entity = repo.create({ ...createUserDto });
+    const result = await repo.save(entity);
+    return this.mapper.toDomain(result);
+  }
+
   async create(createUserDto: CreateUserDto) {
-    this.logger.debug('Creating new user', {
-      correlationId: '90f11fc2-e5e7-4d60-b472-4f1afdba7ca6',
-      payload: JSON.stringify(createUserDto),
-    });
     const entity = this.repo.create({ ...createUserDto });
-    this.logger.debug('Created user entity', {
-      correlationId: '42bbcd62-1ae1-4a06-8c63-52ce0250c1e0',
-      entity: JSON.stringify(entity),
-    });
     const result = await this.repo.save(entity);
     return this.mapper.toDomain(result);
   }
@@ -61,13 +70,13 @@ export class UserService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<UserDomain> {
     try {
       const entity = await this.repo.findOneBy({ id });
-      if (entity) {
-        return this.mapper.toDomain(entity);
+      if (!entity) {
+        throw new NotFoundException();
       }
-      return {};
+      return this.mapper.toDomain(entity);
     } catch (err: any) {
       this.logger.error(
         `${this.constructor.name}.${this.findOne.name} encountered an error`,
@@ -76,12 +85,100 @@ export class UserService {
           err: JSON.stringify(err),
         },
       );
-      return {};
+      throw new InternalServerErrorException();
     }
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user with: ${JSON.stringify(updateUserDto)}`;
+  async findOneByEmail(email: string): Promise<UserDomain | null> {
+    try {
+      const entity = await this.repo.findOneBy({ email });
+      if (entity) {
+        return this.mapper.toDomain(entity);
+      }
+      return null;
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.findOneByEmail.name} encountered an error`,
+        {
+          correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+          err: JSON.stringify(err),
+        },
+      );
+      return null;
+    }
+  }
+
+  async updateWithManager(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    manager: EntityManager,
+  ): Promise<UserDomain> {
+    try {
+      const repo = manager.getRepository(User);
+      const model = await repo.findOneBy({ id });
+      if (!model) {
+        throw new NotFoundException();
+      }
+      const entity = this.mapper.toDomain(model);
+      if (updateUserDto.email) {
+        entity.updateEmail(updateUserDto.email);
+      }
+      if (updateUserDto.refresh_token) {
+        entity.updateRefreshToken(updateUserDto.refresh_token);
+      }
+      if (updateUserDto.role) {
+        entity.updateRole(updateUserDto.role);
+      }
+      if (updateUserDto.name) {
+        entity.updateName(updateUserDto.name);
+      }
+      if (updateUserDto.password) {
+        entity.updatePassword(updateUserDto.password);
+      }
+      await repo.update(entity.id, this.mapper.toPersistence(entity));
+      return entity;
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.updateWithManager.name} encountered an error`,
+        {
+          correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+          err: JSON.stringify(err),
+        },
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDomain> {
+    try {
+      const entity = await this.findOne(id);
+      if (updateUserDto.email) {
+        entity.updateEmail(updateUserDto.email);
+      }
+      if (updateUserDto.refresh_token) {
+        entity.updateRefreshToken(updateUserDto.refresh_token);
+      }
+      if (updateUserDto.role) {
+        entity.updateRole(updateUserDto.role);
+      }
+      if (updateUserDto.name) {
+        entity.updateName(updateUserDto.name);
+      }
+      if (updateUserDto.password) {
+        entity.updatePassword(updateUserDto.password);
+      }
+      await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+      return entity;
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.update.name} encountered an error`,
+        {
+          correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+          err: JSON.stringify(err),
+        },
+      );
+      throw new InternalServerErrorException();
+    }
   }
 
   remove(id: string) {

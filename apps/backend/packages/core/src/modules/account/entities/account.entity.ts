@@ -4,8 +4,8 @@ export interface AccountProps {
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
-  createdBy: string;
-  updatedBy: string;
+  createdBy?: string;
+  updatedBy?: string;
   deletedBy?: string;
 }
 

@@ -20,5 +20,6 @@ import { CaslModule } from '../casl/casl.module';
     AccountUpdatedHandler,
     AccountRemovedHandler,
   ],
+  exports: [AccountService],
 })
 export class AccountModule {}

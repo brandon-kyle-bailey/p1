@@ -26,8 +26,11 @@ import {
   Action,
   AppAbility,
 } from '../casl/casl-ability.factory/casl-ability.factory';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { UserMapper } from './dto/user.mapper';
 
 @Controller('users')
+@UseGuards(AuthGuard, PoliciesGuard)
 @UseInterceptors(LoggingCacheInterceptor)
 @ApiBearerAuth()
 export class UserController {
@@ -36,11 +39,14 @@ export class UserController {
     private readonly logger: LoggingService,
     @Inject(UserService)
     private readonly service: UserService,
+    @Inject(UserMapper)
+    private readonly mapper: UserMapper,
     @Inject(CommandBus)
     private readonly commandBus: CommandBus,
   ) {}
 
   @Post()
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, User))
   async create(@Body() createUserDto: CreateUserDto) {
     const result = await this.service.create(createUserDto);
     await this.commandBus.execute(new UserCreatedCommand(result));
@@ -48,7 +54,6 @@ export class UserController {
   }
 
   @Get()
-  @UseGuards(PoliciesGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, User))
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
@@ -57,20 +62,27 @@ export class UserController {
     @Query('skip') skip = 0,
     @Query('take') take = 100,
   ): Promise<FindAllResponseDto<User>> {
-    return await this.service.findAll(skip, take);
+    const result = await this.service.findAll(skip, take);
+    return {
+      ...result,
+      data: result.data.map((user) => this.mapper.toInterface(user)),
+    };
   }
 
   @Get(':id')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, User))
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
   }
 
   @Patch(':id')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.service.update(id, updateUserDto);
   }
 
   @Delete(':id')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, User))
   remove(@Param('id') id: string) {
     return this.service.remove(id);
   }

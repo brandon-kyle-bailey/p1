@@ -30,6 +30,10 @@ export class CreateUserDto {
   @IsOptional()
   name?: string;
 
+  @IsString()
+  @IsOptional()
+  refresh_token?: string;
+
   @ApiProperty({ description: 'The role of the user' })
   @IsEnum(Role)
   @IsOptional()

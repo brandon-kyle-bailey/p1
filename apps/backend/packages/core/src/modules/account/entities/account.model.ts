@@ -25,14 +25,14 @@ export class Account {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
-  createdBy: string;
+  @Column({ nullable: true })
+  createdBy?: string;
 
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column()
-  updatedBy: string;
+  @Column({ nullable: true })
+  updatedBy?: string;
 
   @DeleteDateColumn()
   deletedAt?: Date;

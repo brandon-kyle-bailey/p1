@@ -3,7 +3,7 @@ import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account } from './entities/account.model';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { AccountMapper } from './dto/account.mapper';
 import { LoggingService } from '@app/logging';
 
@@ -17,6 +17,17 @@ export class AccountService {
     @Inject(AccountMapper)
     private readonly mapper: AccountMapper,
   ) {}
+
+  async createWithManager(
+    createAccountDto: CreateAccountDto,
+    manager: EntityManager,
+  ) {
+    const repo = manager.getRepository(Account);
+    const entity = repo.create({ ...createAccountDto });
+    const result = await repo.save(entity);
+    return this.mapper.toDomain(result);
+  }
+
   async create(createAccountDto: CreateAccountDto) {
     const entity = this.repo.create({ ...createAccountDto });
     const result = await this.repo.save(entity);
