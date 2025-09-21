@@ -1,3 +1,4 @@
+import { FindAllResponseDto } from '@app/dtos';
 import { LoggingService } from '@app/logging';
 import {
   Body,
@@ -9,31 +10,30 @@ import {
   Patch,
   Post,
   Query,
+  Request,
   UnauthorizedException,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { LoggingCacheInterceptor } from 'src/interceptors/logging-cache.interceptor';
-import { UserCreatedCommand } from './commands/user-created.command';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserService } from './user.service';
 import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { User as UserDomain } from './entities/user.entity';
-import { FindAllResponseDto } from '@app/dtos';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CheckPolicies, PoliciesGuard } from 'src/guards/policies.guard';
+import { LoggingCacheInterceptor } from 'src/interceptors/logging-cache.interceptor';
 import {
   Action,
   AppAbility,
   CaslAbilityFactory,
 } from '../casl/casl-ability.factory/casl-ability.factory';
-import { AuthGuard } from 'src/guards/auth.guard';
+import { UserCreatedCommand } from './commands/user-created.command';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UserMapper } from './dto/user.mapper';
-import { User } from '../../decorators/user.decorator';
+import { User as UserDomain } from './entities/user.entity';
+import { UserService } from './user.service';
 
 @Controller('users')
-@UseGuards(AuthGuard, PoliciesGuard)
+@UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(LoggingCacheInterceptor)
 @ApiBearerAuth()
 export class UserController {
@@ -56,9 +56,9 @@ export class UserController {
   )
   async create(
     @Body() createUserDto: CreateUserDto,
-    @User('sub') userId: string,
+    @Request() req: { user: UserDomain },
   ) {
-    const result = await this.service.create(createUserDto, userId);
+    const result = await this.service.create(createUserDto, req.user.id);
     await this.commandBus.execute(new UserCreatedCommand(result));
     return result;
   }
@@ -81,8 +81,8 @@ export class UserController {
 
   @Get(':id')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, UserDomain))
-  async findOne(@Param('id') id: string, @User('sub') userId: string) {
-    const ability = await this.caslAbilityFactory.createForUser(userId);
+  async findOne(@Param('id') id: string, @Request() req: { user: UserDomain }) {
+    const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     const user = await this.service.findOne(id);
     if (!ability.can(Action.Read, user)) {
       throw new UnauthorizedException();
@@ -97,27 +97,27 @@ export class UserController {
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @User('sub') userId: string,
+    @Request() req: { user: UserDomain },
   ) {
-    const ability = await this.caslAbilityFactory.createForUser(userId);
+    const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     const user = await this.service.findOne(id);
     if (!ability.can(Action.Update, user)) {
       this.logger.debug('failing because we got here....');
       throw new UnauthorizedException();
     }
-    return this.service.update(id, updateUserDto, userId);
+    return this.service.update(id, updateUserDto, req.user.id);
   }
 
   @Delete(':id')
   @CheckPolicies((ability: AppAbility) =>
     ability.can(Action.Delete, UserDomain),
   )
-  async remove(@Param('id') id: string, @User('sub') userId: string) {
-    const ability = await this.caslAbilityFactory.createForUser(userId);
+  async remove(@Param('id') id: string, @Request() req: { user: UserDomain }) {
+    const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     const user = await this.service.findOne(id);
     if (!ability.can(Action.Update, user)) {
       throw new UnauthorizedException();
     }
-    return this.service.remove(id, userId);
+    return this.service.remove(id, req.user.id);
   }
 }

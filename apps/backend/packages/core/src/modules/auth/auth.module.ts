@@ -7,6 +7,9 @@ import { CaslModule } from '../casl/casl.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { PassportModule } from '@nestjs/passport';
+import { LocalStrategy } from './local.strategy';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
@@ -15,6 +18,7 @@ import { AuthService } from './auth.service';
     HttpModule,
     AccountModule,
     UserModule,
+    PassportModule,
     JwtModule.register({
       global: true,
       secret: '7ac54472-4dcf-4fa1-be39-8967d47d02d6',
@@ -22,7 +26,7 @@ import { AuthService } from './auth.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

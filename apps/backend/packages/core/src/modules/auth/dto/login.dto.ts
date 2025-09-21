@@ -9,7 +9,7 @@ import {
 export class LoginDto {
   @ApiProperty({ description: 'The email address of the user' })
   @IsEmail()
-  email: string;
+  username: string;
 
   @ApiProperty({ description: 'The password of the user' })
   @IsString()

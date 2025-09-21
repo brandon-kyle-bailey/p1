@@ -89,13 +89,13 @@ export class UserService {
     }
   }
 
-  async findOneByEmail(email: string): Promise<UserDomain | null> {
+  async findOneByEmail(email: string): Promise<UserDomain> {
     try {
-      const entity = await this.repo.findOneBy({ email });
-      if (entity) {
-        return this.mapper.toDomain(entity);
+      const model = await this.repo.findOneBy({ email });
+      if (!model) {
+        throw new NotFoundException();
       }
-      return null;
+      return this.mapper.toDomain(model);
     } catch (err: any) {
       this.logger.error(
         `${this.constructor.name}.${this.findOneByEmail.name} encountered an error`,
@@ -104,7 +104,7 @@ export class UserService {
           err: JSON.stringify(err),
         },
       );
-      return null;
+      throw new InternalServerErrorException();
     }
   }
 

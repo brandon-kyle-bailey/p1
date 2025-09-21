@@ -34,8 +34,8 @@ export class AccountService {
     return this.mapper.toDomain(result);
   }
 
-  async create(createAccountDto: CreateAccountDto) {
-    const entity = this.repo.create({ ...createAccountDto });
+  async create(createAccountDto: CreateAccountDto, createdBy: string) {
+    const entity = this.repo.create({ ...createAccountDto, createdBy });
     const result = await this.repo.save(entity);
     return this.mapper.toDomain(result);
   }
@@ -127,6 +127,7 @@ export class AccountService {
   async update(
     id: string,
     updateAccountDto: UpdateAccountDto,
+    updatedBy: string,
   ): Promise<AccountDomain> {
     try {
       const entity = await this.findOne(id);
@@ -136,9 +137,7 @@ export class AccountService {
       if (updateAccountDto.createdBy) {
         entity.updateOwner(updateAccountDto.createdBy);
       }
-      if (updateAccountDto.updatedBy) {
-        entity.updateUpdatedBy(updateAccountDto.updatedBy);
-      }
+      entity.updateUpdatedBy(updatedBy);
       await this.repo.update(entity.id, this.mapper.toPersistence(entity));
       return entity;
     } catch (err: any) {
@@ -153,10 +152,10 @@ export class AccountService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string, removedBy: string) {
     try {
       const entity = await this.findOne(id);
-      entity.softDelete(entity.updatedBy);
+      entity.softDelete(removedBy);
       await this.repo.update(entity.id, this.mapper.toPersistence(entity));
       return entity;
     } catch (err: any) {

@@ -33,6 +33,8 @@ export class CaslAbilityFactory {
     if ([Role.Owner, Role.Admin].includes(user.role)) {
       can(Action.Manage, 'all');
     } else {
+      can(Action.Create, User);
+
       can(Action.Read, User);
       can(Action.Read, Account, { createdBy: user.id });
       can(Action.Read, Account, { id: user.accountId });
@@ -40,9 +42,8 @@ export class CaslAbilityFactory {
       can(Action.Update, User, { id: user.id });
       can(Action.Update, Account, { createdBy: user.id });
 
-      can(Action.Create, User);
-
       cannot(Action.Create, Account);
+
       cannot(Action.Delete, User);
       cannot(Action.Delete, Account);
     }
