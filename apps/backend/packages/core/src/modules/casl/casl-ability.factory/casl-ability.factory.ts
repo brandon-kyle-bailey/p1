@@ -10,6 +10,8 @@ import {
 } from '@casl/ability';
 import { Account } from 'src/modules/account/entities/account.entity';
 import { UserService } from 'src/modules/user/user.service';
+import { App } from 'src/modules/app/entities/app.entity';
+import { Workspace } from 'src/modules/workspace/entities/workspace.entity';
 
 export enum Action {
   Manage = 'manage',
@@ -19,7 +21,9 @@ export enum Action {
   Delete = 'delete',
 }
 
-type Subjects = InferSubjects<typeof User | typeof Account> | 'all';
+type Subjects =
+  | InferSubjects<typeof User | typeof Account | typeof App | typeof Workspace>
+  | 'all';
 
 export type AppAbility = MongoAbility<[Action, Subjects]>;
 
@@ -34,18 +38,31 @@ export class CaslAbilityFactory {
       can(Action.Manage, 'all');
     } else {
       can(Action.Create, User);
+      can(Action.Create, App);
+      can(Action.Create, Workspace);
 
-      can(Action.Read, User);
+      can(Action.Read, User, { accountId: user.accountId });
       can(Action.Read, Account, { createdBy: user.id });
       can(Action.Read, Account, { id: user.accountId });
+      can(Action.Read, App, { createdBy: user.id });
+      can(Action.Read, App, { id: user.accountId });
+      can(Action.Read, Workspace, { createdBy: user.id });
+      can(Action.Read, Workspace, { id: user.accountId });
+
+      can(Action.Read, Workspace, { createdBy: user.id });
+      can(Action.Read, Workspace, { id: user.accountId });
 
       can(Action.Update, User, { id: user.id });
       can(Action.Update, Account, { createdBy: user.id });
+      can(Action.Update, App, { createdBy: user.id });
+      can(Action.Update, Workspace, { createdBy: user.id });
 
       cannot(Action.Create, Account);
 
       cannot(Action.Delete, User);
       cannot(Action.Delete, Account);
+      cannot(Action.Delete, App);
+      cannot(Action.Delete, Workspace);
     }
 
     return build({

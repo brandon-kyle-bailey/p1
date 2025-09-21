@@ -21,6 +21,11 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/entities/user.model';
 import { CaslModule } from './casl/casl.module';
+import { AppModule as AppsModule } from './app/app.module';
+import { WorkspaceModule } from './workspace/workspace.module';
+import { Workspace } from './workspace/entities/workspace.model';
+import { App } from './app/entities/app.model';
+import { WorkspaceUser } from './workspace/entities/workspace-user.model';
 
 @Module({
   imports: [
@@ -37,7 +42,7 @@ import { CaslModule } from './casl/casl.module';
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'p1'),
-        entities: [Account, User],
+        entities: [Account, User, App, Workspace, WorkspaceUser],
         synchronize: true,
         autoLoadEntities: true,
         retryAttempts: 10,
@@ -81,6 +86,8 @@ import { CaslModule } from './casl/casl.module';
     UserModule,
     AuthModule,
     CaslModule,
+    AppsModule,
+    WorkspaceModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: LoggingThrottlerGuard }],
 })

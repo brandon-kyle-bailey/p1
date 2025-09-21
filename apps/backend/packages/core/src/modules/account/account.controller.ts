@@ -31,6 +31,8 @@ import {
   Action,
   AppAbility,
 } from '../casl/casl-ability.factory/casl-ability.factory';
+import { AccountMapper } from './dto/account.mapper';
+import { AccountDto } from './dto/account.dto';
 
 @Controller('accounts')
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -42,6 +44,7 @@ export class AccountController {
     private readonly logger: LoggingService,
     @Inject(AccountService)
     private readonly service: AccountService,
+    @Inject(AccountMapper) private readonly mapper: AccountMapper,
     @Inject(CommandBus)
     private readonly commandBus: CommandBus,
   ) {}
@@ -54,7 +57,7 @@ export class AccountController {
   ) {
     const result = await this.service.create(createAccountDto, req.user.id);
     await this.commandBus.execute(new AccountCreatedCommand(result));
-    return result;
+    return this.mapper.toInterface(result);
   }
 
   @Get()
@@ -66,29 +69,36 @@ export class AccountController {
     @Query('skip') skip = 0,
     @Query('take') take = 100,
     @Request() req: { user: UserDomain },
-  ): Promise<FindAllResponseDto<Account>> {
-    return await this.service.findAll(skip, take);
+  ): Promise<FindAllResponseDto<AccountDto>> {
+    const result = await this.service.findAll(skip, take);
+    return {
+      ...result,
+      data: result.data.map((entity) => this.mapper.toInterface(entity)),
+    };
   }
 
   @Get(':id')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Account))
-  findOne(@Param('id') id: string, @Request() req: { user: UserDomain }) {
-    return this.service.findOne(id);
+  async findOne(@Param('id') id: string, @Request() req: { user: UserDomain }) {
+    const result = await this.service.findOne(id);
+    return this.mapper.toInterface(result);
   }
 
   @Patch(':id')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Account))
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateAccountDto: UpdateAccountDto,
     @Request() req: { user: UserDomain },
   ) {
-    return this.service.update(id, updateAccountDto, req.user.id);
+    const result = await this.service.update(id, updateAccountDto, req.user.id);
+    return this.mapper.toInterface(result);
   }
 
   @Delete(':id')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Account))
-  remove(@Param('id') id: string, @Request() req: { user: UserDomain }) {
-    return this.service.remove(id, req.user.id);
+  async remove(@Param('id') id: string, @Request() req: { user: UserDomain }) {
+    const result = await this.service.remove(id, req.user.id);
+    return result.id;
   }
 }

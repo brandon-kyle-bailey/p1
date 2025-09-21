@@ -12,12 +12,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from './user.entity';
-import { WorkspaceUser } from 'src/modules/workspace/entities/workspace-user.model';
-import { Workspace } from 'src/modules/workspace/entities/workspace.model';
+import { WorkspaceUser } from './workspace-user.model';
+import { User } from 'src/modules/user/entities/user.model';
 
-@Entity('users')
-export class User {
+@Entity('workspaces')
+export class Workspace {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -30,31 +29,19 @@ export class User {
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
-  @OneToMany(() => WorkspaceUser, (wu) => wu.user)
+  @OneToMany(() => WorkspaceUser, (wu) => wu.workspace)
   workspaceUsers: WorkspaceUser[];
 
-  @ManyToMany(() => Workspace, (workspace) => workspace.users)
+  @ManyToMany(() => User, (user) => user.workspaces)
   @JoinTable({
     name: 'workspace_users',
-    joinColumn: { name: 'userId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'workspaceId', referencedColumnName: 'id' },
+    joinColumn: { name: 'workspaceId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'userId', referencedColumnName: 'id' },
   })
-  workspaces: Workspace[];
-
-  @Column({ unique: true })
-  email: string;
+  users: User[];
 
   @Column()
-  password: string;
-
-  @Column({ type: 'enum', enum: Role, default: Role.User })
-  role: Role;
-
-  @Column({ nullable: true })
-  name?: string;
-
-  @Column({ nullable: true })
-  refresh_token?: string;
+  name: string;
 
   @CreateDateColumn()
   createdAt: Date;

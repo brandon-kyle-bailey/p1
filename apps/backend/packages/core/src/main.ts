@@ -4,10 +4,10 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import compression from 'compression';
 import helmet from 'helmet';
-import { AppModule } from './modules/app.module';
 import { ConfigService } from '@nestjs/config';
 import { LoggingService } from '@app/logging';
 import { HttpService } from '@nestjs/axios';
+import { AppModule } from './modules/app.module';
 
 // const httpsOptions = {
 //   key: fs.readFileSync('./secrets/private-key.pem'),

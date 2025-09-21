@@ -1,4 +1,5 @@
 /******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
 /***/ "./libs/dtos/src/find-all-response.dto.ts":
@@ -7,7 +8,6 @@
   \************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -46,7 +46,6 @@ __decorate([
   \********************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -75,7 +74,6 @@ __exportStar(__webpack_require__(/*! ./pagination-meta.dto */ "./libs/dtos/src/p
   \**********************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -122,7 +120,6 @@ __decorate([
   \***********************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -151,7 +148,6 @@ __exportStar(__webpack_require__(/*! ./logging.service */ "./libs/logging/src/lo
   \********************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -184,7 +180,6 @@ exports.LoggingModule = LoggingModule = __decorate([
   \*********************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -255,407 +250,12 @@ exports.LoggingService = LoggingService = __decorate([
 
 /***/ }),
 
-/***/ "./node_modules/passport-jwt/lib/auth_header.js":
-/*!******************************************************!*\
-  !*** ./node_modules/passport-jwt/lib/auth_header.js ***!
-  \******************************************************/
-/***/ ((module) => {
-
-"use strict";
-
-
-var re = /(\S+)\s+(\S+)/;
-
-
-
-function parseAuthHeader(hdrValue) {
-    if (typeof hdrValue !== 'string') {
-        return null;
-    }
-    var matches = hdrValue.match(re);
-    return matches && { scheme: matches[1], value: matches[2] };
-}
-
-
-
-module.exports = {
-    parse: parseAuthHeader
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/passport-jwt/lib/extract_jwt.js":
-/*!******************************************************!*\
-  !*** ./node_modules/passport-jwt/lib/extract_jwt.js ***!
-  \******************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-
-var url = __webpack_require__(/*! url */ "url"),
-    auth_hdr = __webpack_require__(/*! ./auth_header */ "./node_modules/passport-jwt/lib/auth_header.js");
-
-// Note: express http converts all headers
-// to lower case.
-var AUTH_HEADER = "authorization",
-    LEGACY_AUTH_SCHEME = "JWT", 
-    BEARER_AUTH_SCHEME = 'bearer';
-
-
-var extractors = {};
-
-
-extractors.fromHeader = function (header_name) {
-    return function (request) {
-        var token = null;
-        if (request.headers[header_name]) {
-            token = request.headers[header_name];
-        }
-        return token;
-    };
-};
-
-
-
-extractors.fromBodyField = function (field_name) {
-    return function (request) {
-        var token = null;
-        if (request.body && Object.prototype.hasOwnProperty.call(request.body, field_name)) {
-            token = request.body[field_name];
-        }
-        return token;
-    };
-};
-
-
-
-extractors.fromUrlQueryParameter = function (param_name) {
-    return function (request) {
-        var token = null,
-            parsed_url = url.parse(request.url, true);
-        if (parsed_url.query && Object.prototype.hasOwnProperty.call(parsed_url.query, param_name)) {
-            token = parsed_url.query[param_name];
-        }
-        return token;
-    };
-};
-
-
-
-extractors.fromAuthHeaderWithScheme = function (auth_scheme) {
-    var auth_scheme_lower = auth_scheme.toLowerCase();
-    return function (request) {
-
-        var token = null;
-        if (request.headers[AUTH_HEADER]) {
-            var auth_params = auth_hdr.parse(request.headers[AUTH_HEADER]);
-            if (auth_params && auth_scheme_lower === auth_params.scheme.toLowerCase()) {
-                token = auth_params.value;
-            }
-        }
-        return token;
-    };
-};
-
-
-
-extractors.fromAuthHeaderAsBearerToken = function () {
-    return extractors.fromAuthHeaderWithScheme(BEARER_AUTH_SCHEME);
-};
-
-
-extractors.fromExtractors = function(extractors) {
-    if (!Array.isArray(extractors)) {
-        throw new TypeError('extractors.fromExtractors expects an array')
-    }
-    
-    return function (request) {
-        var token = null;
-        var index = 0;
-        while(!token && index < extractors.length) {
-            token = extractors[index].call(this, request);
-            index ++;
-        }
-        return token;
-    }
-};
-
-
-/**
- * This extractor mimics the behavior of the v1.*.* extraction logic.
- *
- * This extractor exists only to provide an easy transition from the v1.*.* API to the v2.0.0
- * API.
- *
- * This extractor first checks the auth header, if it doesn't find a token there then it checks the 
- * specified body field and finally the url query parameters.
- * 
- * @param options
- *          authScheme: Expected scheme when JWT can be found in HTTP Authorize header. Default is JWT. 
- *          tokenBodyField: Field in request body containing token. Default is auth_token.
- *          tokenQueryParameterName: Query parameter name containing the token. Default is auth_token.
- */
-extractors.versionOneCompatibility = function (options) {
-    var authScheme = options.authScheme || LEGACY_AUTH_SCHEME,
-        bodyField = options.tokenBodyField || 'auth_token',
-        queryParam = options.tokenQueryParameterName || 'auth_token';
-
-    return function (request) {
-        var authHeaderExtractor = extractors.fromAuthHeaderWithScheme(authScheme);
-        var token =  authHeaderExtractor(request);
-        
-        if (!token) {
-            var bodyExtractor = extractors.fromBodyField(bodyField);
-            token = bodyExtractor(request);
-        }
-
-        if (!token) {
-            var queryExtractor = extractors.fromUrlQueryParameter(queryParam);
-            token = queryExtractor(request);
-        }
-
-        return token;
-    };
-}
-
-
-
-/**
- * Export the Jwt extraction functions
- */
-module.exports = extractors;
-
-
-/***/ }),
-
-/***/ "./node_modules/passport-jwt/lib/helpers/assign.js":
-/*!*********************************************************!*\
-  !*** ./node_modules/passport-jwt/lib/helpers/assign.js ***!
-  \*********************************************************/
-/***/ ((module) => {
-
-// note: This is a polyfill to Object.assign to support old nodejs versions (0.10 / 0.12) where
-// Object.assign doesn't exist.
-// Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-module.exports = function(target, varArgs) {
-  if (target == null) { // TypeError if undefined or null
-    throw new TypeError('Cannot convert undefined or null to object');
-  }
-
-  var to = Object(target);
-
-  for (var index = 1; index < arguments.length; index++) {
-    var nextSource = arguments[index];
-
-    if (nextSource != null) { // Skip over if undefined or null
-      for (var nextKey in nextSource) {
-        // Avoid bugs when hasOwnProperty is shadowed
-        if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-          to[nextKey] = nextSource[nextKey];
-        }
-      }
-    }
-  }
-  return to;
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/passport-jwt/lib/index.js":
-/*!************************************************!*\
-  !*** ./node_modules/passport-jwt/lib/index.js ***!
-  \************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-
-var Strategy = __webpack_require__(/*! ./strategy */ "./node_modules/passport-jwt/lib/strategy.js"),
-    ExtractJwt = __webpack_require__(/*! ./extract_jwt.js */ "./node_modules/passport-jwt/lib/extract_jwt.js");
-
-
-module.exports = {
-    Strategy: Strategy,
-    ExtractJwt : ExtractJwt
-};
-
-
-/***/ }),
-
-/***/ "./node_modules/passport-jwt/lib/strategy.js":
-/*!***************************************************!*\
-  !*** ./node_modules/passport-jwt/lib/strategy.js ***!
-  \***************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var passport = __webpack_require__(/*! passport-strategy */ "passport-strategy")
-    , auth_hdr = __webpack_require__(/*! ./auth_header */ "./node_modules/passport-jwt/lib/auth_header.js")
-    , util = __webpack_require__(/*! util */ "util")
-    , url = __webpack_require__(/*! url */ "url")
-    , assign = __webpack_require__(/*! ./helpers/assign.js */ "./node_modules/passport-jwt/lib/helpers/assign.js");
-
-
-
-/**
- * Strategy constructor
- *
- * @param options
- *          secretOrKey: String or buffer containing the secret or PEM-encoded public key. Required unless secretOrKeyProvider is provided.
- *          secretOrKeyProvider: callback in the format secretOrKeyProvider(request, rawJwtToken, done)`,
- *                               which should call done with a secret or PEM-encoded public key
- *                               (asymmetric) for the given undecoded jwt token string and  request
- *                               combination. done has the signature function done(err, secret).
- *                               REQUIRED unless `secretOrKey` is provided.
- *          jwtFromRequest: (REQUIRED) Function that accepts a request as the only parameter and returns the either JWT as a string or null
- *          issuer: If defined issuer will be verified against this value
- *          audience: If defined audience will be verified against this value
- *          algorithms: List of strings with the names of the allowed algorithms. For instance, ["HS256", "HS384"].
- *          ignoreExpiration: if true do not validate the expiration of the token.
- *          passReqToCallback: If true the verify callback will be called with args (request, jwt_payload, done_callback).
- * @param verify - Verify callback with args (jwt_payload, done_callback) if passReqToCallback is false,
- *                 (request, jwt_payload, done_callback) if true.
- */
-function JwtStrategy(options, verify) {
-
-    passport.Strategy.call(this);
-    this.name = 'jwt';
-
-    this._secretOrKeyProvider = options.secretOrKeyProvider;
-
-    if (options.secretOrKey) {
-        if (this._secretOrKeyProvider) {
-          	throw new TypeError('JwtStrategy has been given both a secretOrKey and a secretOrKeyProvider');
-        }
-        this._secretOrKeyProvider = function (request, rawJwtToken, done) {
-            done(null, options.secretOrKey)
-        };
-    }
-
-    if (!this._secretOrKeyProvider) {
-        throw new TypeError('JwtStrategy requires a secret or key');
-    }
-
-    this._verify = verify;
-    if (!this._verify) {
-        throw new TypeError('JwtStrategy requires a verify callback');
-    }
-
-    this._jwtFromRequest = options.jwtFromRequest;
-    if (!this._jwtFromRequest) {
-        throw new TypeError('JwtStrategy requires a function to retrieve jwt from requests (see option jwtFromRequest)');
-    }
-
-    this._passReqToCallback = options.passReqToCallback;
-    var jsonWebTokenOptions = options.jsonWebTokenOptions || {};
-    //for backwards compatibility, still allowing you to pass
-    //audience / issuer / algorithms / ignoreExpiration
-    //on the options.
-    this._verifOpts = assign({}, jsonWebTokenOptions, {
-      audience: options.audience,
-      issuer: options.issuer,
-      algorithms: options.algorithms,
-      ignoreExpiration: !!options.ignoreExpiration
-    });
-
-}
-util.inherits(JwtStrategy, passport.Strategy);
-
-
-
-/**
- * Allow for injection of JWT Verifier.
- *
- * This improves testability by allowing tests to cleanly isolate failures in the JWT Verification
- * process from failures in the passport related mechanics of authentication.
- *
- * Note that this should only be replaced in tests.
- */
-JwtStrategy.JwtVerifier = __webpack_require__(/*! ./verify_jwt */ "./node_modules/passport-jwt/lib/verify_jwt.js");
-
-
-
-/**
- * Authenticate request based on JWT obtained from header or post body
- */
-JwtStrategy.prototype.authenticate = function(req, options) {
-    var self = this;
-
-    var token = self._jwtFromRequest(req);
-
-    if (!token) {
-        return self.fail(new Error("No auth token"));
-    }
-
-    this._secretOrKeyProvider(req, token, function(secretOrKeyError, secretOrKey) {
-        if (secretOrKeyError) {
-            self.fail(secretOrKeyError)
-        } else {
-            // Verify the JWT
-            JwtStrategy.JwtVerifier(token, secretOrKey, self._verifOpts, function(jwt_err, payload) {
-                if (jwt_err) {
-                    return self.fail(jwt_err);
-                } else {
-                    // Pass the parsed token to the user
-                    var verified = function(err, user, info) {
-                        if(err) {
-                            return self.error(err);
-                        } else if (!user) {
-                            return self.fail(info);
-                        } else {
-                            return self.success(user, info);
-                        }
-                    };
-
-                    try {
-                        if (self._passReqToCallback) {
-                            self._verify(req, payload, verified);
-                        } else {
-                            self._verify(payload, verified);
-                        }
-                    } catch(ex) {
-                        self.error(ex);
-                    }
-                }
-            });
-        }
-    });
-};
-
-
-
-/**
- * Export the Jwt Strategy
- */
- module.exports = JwtStrategy;
-
-
-/***/ }),
-
-/***/ "./node_modules/passport-jwt/lib/verify_jwt.js":
-/*!*****************************************************!*\
-  !*** ./node_modules/passport-jwt/lib/verify_jwt.js ***!
-  \*****************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var jwt = __webpack_require__(/*! jsonwebtoken */ "jsonwebtoken");
-
-module.exports  = function(token, secretOrKey, options, callback) {
-    return jwt.verify(token, secretOrKey, options, callback);
-};
-
-
-/***/ }),
-
 /***/ "./src/guards/jwt-auth.guard.ts":
 /*!**************************************!*\
   !*** ./src/guards/jwt-auth.guard.ts ***!
   \**************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -683,7 +283,6 @@ exports.JwtAuthGuard = JwtAuthGuard = __decorate([
   \****************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -711,7 +310,6 @@ exports.LocalAuthGuard = LocalAuthGuard = __decorate([
   \**********************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -759,7 +357,6 @@ exports.LoggingThrottlerGuard = LoggingThrottlerGuard = __decorate([
   \**************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -827,7 +424,6 @@ exports.PoliciesGuard = PoliciesGuard = __decorate([
   \*******************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -852,7 +448,14 @@ let LoggingCacheInterceptor = class LoggingCacheInterceptor extends cache_manage
         this.logger = logger;
     }
     trackBy(context) {
-        const key = super.trackBy(context);
+        const baseKey = super.trackBy(context);
+        if (!baseKey)
+            return undefined;
+        const request = context
+            .switchToHttp()
+            .getRequest();
+        const userId = request.user?.id;
+        const key = userId ? `${userId}:${baseKey}` : baseKey;
         this.logger.debug(`${this.constructor.name}.${this.trackBy.name}`, {
             correlationId: '159b8055-b731-46f3-88e8-0ede0576a2e8',
             key,
@@ -875,7 +478,6 @@ exports.LoggingCacheInterceptor = LoggingCacheInterceptor = __decorate([
   \*********************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -886,10 +488,10 @@ const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const compression_1 = __importDefault(__webpack_require__(/*! compression */ "compression"));
 const helmet_1 = __importDefault(__webpack_require__(/*! helmet */ "helmet"));
-const app_module_1 = __webpack_require__(/*! ./modules/app.module */ "./src/modules/app.module.ts");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
 const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
+const app_module_1 = __webpack_require__(/*! ./modules/app.module */ "./src/modules/app.module.ts");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {});
     const configService = app.get(config_1.ConfigService);
@@ -926,7 +528,6 @@ void bootstrap();
   \***************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -940,7 +541,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountController = void 0;
 const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
@@ -957,31 +558,41 @@ const create_account_dto_1 = __webpack_require__(/*! ./dto/create-account.dto */
 const update_account_dto_1 = __webpack_require__(/*! ./dto/update-account.dto */ "./src/modules/account/dto/update-account.dto.ts");
 const account_entity_1 = __webpack_require__(/*! ./entities/account.entity */ "./src/modules/account/entities/account.entity.ts");
 const casl_ability_factory_1 = __webpack_require__(/*! ../casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
+const account_mapper_1 = __webpack_require__(/*! ./dto/account.mapper */ "./src/modules/account/dto/account.mapper.ts");
 let AccountController = class AccountController {
     logger;
     service;
+    mapper;
     commandBus;
-    constructor(logger, service, commandBus) {
+    constructor(logger, service, mapper, commandBus) {
         this.logger = logger;
         this.service = service;
+        this.mapper = mapper;
         this.commandBus = commandBus;
     }
     async create(createAccountDto, req) {
         const result = await this.service.create(createAccountDto, req.user.id);
         await this.commandBus.execute(new account_created_command_1.AccountCreatedCommand(result));
-        return result;
+        return this.mapper.toInterface(result);
     }
     async findAll(skip = 0, take = 100, req) {
-        return await this.service.findAll(skip, take);
+        const result = await this.service.findAll(skip, take);
+        return {
+            ...result,
+            data: result.data.map((entity) => this.mapper.toInterface(entity)),
+        };
     }
-    findOne(id, req) {
-        return this.service.findOne(id);
+    async findOne(id, req) {
+        const result = await this.service.findOne(id);
+        return this.mapper.toInterface(result);
     }
-    update(id, updateAccountDto, req) {
-        return this.service.update(id, updateAccountDto, req.user.id);
+    async update(id, updateAccountDto, req) {
+        const result = await this.service.update(id, updateAccountDto, req.user.id);
+        return this.mapper.toInterface(result);
     }
-    remove(id, req) {
-        return this.service.remove(id, req.user.id);
+    async remove(id, req) {
+        const result = await this.service.remove(id, req.user.id);
+        return result.id;
     }
 };
 exports.AccountController = AccountController;
@@ -991,7 +602,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof create_account_dto_1.CreateAccountDto !== "undefined" && create_account_dto_1.CreateAccountDto) === "function" ? _d : Object, Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof create_account_dto_1.CreateAccountDto !== "undefined" && create_account_dto_1.CreateAccountDto) === "function" ? _e : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AccountController.prototype, "create", null);
 __decorate([
@@ -1005,7 +616,7 @@ __decorate([
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object, Object]),
-    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], AccountController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
@@ -1014,7 +625,7 @@ __decorate([
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AccountController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
@@ -1023,8 +634,8 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_f = typeof update_account_dto_1.UpdateAccountDto !== "undefined" && update_account_dto_1.UpdateAccountDto) === "function" ? _f : Object, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, typeof (_g = typeof update_account_dto_1.UpdateAccountDto !== "undefined" && update_account_dto_1.UpdateAccountDto) === "function" ? _g : Object, Object]),
+    __metadata("design:returntype", Promise)
 ], AccountController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
@@ -1033,7 +644,7 @@ __decorate([
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AccountController.prototype, "remove", null);
 exports.AccountController = AccountController = __decorate([
     (0, common_1.Controller)('accounts'),
@@ -1042,8 +653,9 @@ exports.AccountController = AccountController = __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(account_service_1.AccountService)),
-    __param(2, (0, common_1.Inject)(cqrs_1.CommandBus)),
-    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof account_service_1.AccountService !== "undefined" && account_service_1.AccountService) === "function" ? _b : Object, typeof (_c = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _c : Object])
+    __param(2, (0, common_1.Inject)(account_mapper_1.AccountMapper)),
+    __param(3, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof account_service_1.AccountService !== "undefined" && account_service_1.AccountService) === "function" ? _b : Object, typeof (_c = typeof account_mapper_1.AccountMapper !== "undefined" && account_mapper_1.AccountMapper) === "function" ? _c : Object, typeof (_d = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _d : Object])
 ], AccountController);
 
 
@@ -1055,7 +667,6 @@ exports.AccountController = AccountController = __decorate([
   \***********************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1103,7 +714,6 @@ exports.AccountModule = AccountModule = __decorate([
   \************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1272,7 +882,6 @@ exports.AccountService = AccountService = __decorate([
   \*****************************************************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountCreatedCommand = void 0;
@@ -1295,7 +904,6 @@ exports.AccountCreatedCommand = AccountCreatedCommand;
   \*****************************************************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountRemovedCommand = void 0;
@@ -1318,7 +926,6 @@ exports.AccountRemovedCommand = AccountRemovedCommand;
   \*****************************************************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountUpdatedCommand = void 0;
@@ -1341,7 +948,6 @@ exports.AccountUpdatedCommand = AccountUpdatedCommand;
   \************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1415,7 +1021,6 @@ __decorate([
   \***************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1467,7 +1072,6 @@ exports.AccountMapper = AccountMapper = AccountMapper_1 = __decorate([
   \*******************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1538,7 +1142,6 @@ __decorate([
   \*******************************************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateAccountDto = void 0;
@@ -1557,7 +1160,6 @@ exports.UpdateAccountDto = UpdateAccountDto;
   \********************************************************/
 /***/ ((__unused_webpack_module, exports) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Account = void 0;
@@ -1633,7 +1235,6 @@ exports.Account = Account;
   \*******************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1712,7 +1313,6 @@ exports.Account = Account = __decorate([
   \*****************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1765,7 +1365,6 @@ exports.AccountCreatedHandler = AccountCreatedHandler = __decorate([
   \*****************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1818,7 +1417,6 @@ exports.AccountRemovedHandler = AccountRemovedHandler = __decorate([
   \*****************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1871,7 +1469,6 @@ exports.AccountUpdatedHandler = AccountUpdatedHandler = __decorate([
   \***********************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1906,6 +1503,11 @@ const user_module_1 = __webpack_require__(/*! ./user/user.module */ "./src/modul
 const auth_module_1 = __webpack_require__(/*! ./auth/auth.module */ "./src/modules/auth/auth.module.ts");
 const user_model_1 = __webpack_require__(/*! ./user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
 const casl_module_1 = __webpack_require__(/*! ./casl/casl.module */ "./src/modules/casl/casl.module.ts");
+const app_module_1 = __webpack_require__(/*! ./app/app.module */ "./src/modules/app/app.module.ts");
+const workspace_module_1 = __webpack_require__(/*! ./workspace/workspace.module */ "./src/modules/workspace/workspace.module.ts");
+const workspace_model_1 = __webpack_require__(/*! ./workspace/entities/workspace.model */ "./src/modules/workspace/entities/workspace.model.ts");
+const app_model_1 = __webpack_require__(/*! ./app/entities/app.model */ "./src/modules/app/entities/app.model.ts");
+const workspace_user_model_1 = __webpack_require__(/*! ./workspace/entities/workspace-user.model */ "./src/modules/workspace/entities/workspace-user.model.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -1925,7 +1527,7 @@ exports.AppModule = AppModule = __decorate([
                     username: config.get('DB_USER', 'postgres'),
                     password: config.get('DB_PASS', 'postgres'),
                     database: config.get('DB_NAME', 'p1'),
-                    entities: [account_model_1.Account, user_model_1.User],
+                    entities: [account_model_1.Account, user_model_1.User, app_model_1.App, workspace_model_1.Workspace, workspace_user_model_1.WorkspaceUser],
                     synchronize: true,
                     autoLoadEntities: true,
                     retryAttempts: 10,
@@ -1965,10 +1567,971 @@ exports.AppModule = AppModule = __decorate([
             user_module_1.UserModule,
             auth_module_1.AuthModule,
             casl_module_1.CaslModule,
+            app_module_1.AppModule,
+            workspace_module_1.WorkspaceModule,
         ],
         providers: [{ provide: core_1.APP_GUARD, useClass: logging_thottler_guard_1.LoggingThrottlerGuard }],
     })
 ], AppModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/app/app.controller.ts":
+/*!*******************************************!*\
+  !*** ./src/modules/app/app.controller.ts ***!
+  \*******************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppController = void 0;
+const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const jwt_auth_guard_1 = __webpack_require__(/*! src/guards/jwt-auth.guard */ "./src/guards/jwt-auth.guard.ts");
+const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
+const logging_cache_interceptor_1 = __webpack_require__(/*! src/interceptors/logging-cache.interceptor */ "./src/interceptors/logging-cache.interceptor.ts");
+const casl_ability_factory_1 = __webpack_require__(/*! ../casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
+const app_created_command_1 = __webpack_require__(/*! ./commands/app-created.command */ "./src/modules/app/commands/app-created.command.ts");
+const create_app_dto_1 = __webpack_require__(/*! ./dto/create-app.dto */ "./src/modules/app/dto/create-app.dto.ts");
+const update_app_dto_1 = __webpack_require__(/*! ./dto/update-app.dto */ "./src/modules/app/dto/update-app.dto.ts");
+const app_mapper_1 = __webpack_require__(/*! ./dto/app.mapper */ "./src/modules/app/dto/app.mapper.ts");
+const app_entity_1 = __webpack_require__(/*! ./entities/app.entity */ "./src/modules/app/entities/app.entity.ts");
+const app_service_1 = __webpack_require__(/*! ./app.service */ "./src/modules/app/app.service.ts");
+let AppController = class AppController {
+    logger;
+    service;
+    mapper;
+    caslAbilityFactory;
+    commandBus;
+    constructor(logger, service, mapper, caslAbilityFactory, commandBus) {
+        this.logger = logger;
+        this.service = service;
+        this.mapper = mapper;
+        this.caslAbilityFactory = caslAbilityFactory;
+        this.commandBus = commandBus;
+    }
+    async create(createAppDto, req) {
+        const result = await this.service.create(createAppDto, req.app.id);
+        await this.commandBus.execute(new app_created_command_1.AppCreatedCommand(result));
+        return this.mapper.toInterface(result);
+    }
+    async findAll(skip = 0, take = 100) {
+        const result = await this.service.findAll(skip, take);
+        return {
+            ...result,
+            data: result.data.map((app) => this.mapper.toInterface(app)),
+        };
+    }
+    async findOne(id, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.app.id);
+        const app = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Read, app)) {
+            throw new common_1.UnauthorizedException();
+        }
+        return this.mapper.toInterface(app);
+    }
+    async update(id, updateAppDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.app.id);
+        const app = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Update, app)) {
+            this.logger.debug('failing because we got here....');
+            throw new common_1.UnauthorizedException();
+        }
+        const updated = await this.service.update(id, updateAppDto, req.app.id);
+        return this.mapper.toInterface(updated);
+    }
+    async remove(id, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.app.id);
+        const app = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Update, app)) {
+            throw new common_1.UnauthorizedException();
+        }
+        await this.service.remove(id, req.app.id);
+        return app.id;
+    }
+};
+exports.AppController = AppController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Create, app_entity_1.App)),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_app_dto_1.CreateAppDto !== "undefined" && create_app_dto_1.CreateAppDto) === "function" ? _f : Object, Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, app_entity_1.App)),
+    (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: Number }),
+    (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
+    __param(0, (0, common_1.Query)('skip')),
+    __param(1, (0, common_1.Query)('take')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], AppController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, app_entity_1.App)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Update, app_entity_1.App)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_h = typeof update_app_dto_1.UpdateAppDto !== "undefined" && update_app_dto_1.UpdateAppDto) === "function" ? _h : Object, Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Delete, app_entity_1.App)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "remove", null);
+exports.AppController = AppController = __decorate([
+    (0, common_1.Controller)('apps'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor, common_1.ClassSerializerInterceptor),
+    (0, swagger_1.ApiBearerAuth)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, common_1.Inject)(app_service_1.AppService)),
+    __param(2, (0, common_1.Inject)(app_mapper_1.AppMapper)),
+    __param(3, (0, common_1.Inject)(casl_ability_factory_1.CaslAbilityFactory)),
+    __param(4, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _b : Object, typeof (_c = typeof app_mapper_1.AppMapper !== "undefined" && app_mapper_1.AppMapper) === "function" ? _c : Object, typeof (_d = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _d : Object, typeof (_e = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _e : Object])
+], AppController);
+
+
+/***/ }),
+
+/***/ "./src/modules/app/app.module.ts":
+/*!***************************************!*\
+  !*** ./src/modules/app/app.module.ts ***!
+  \***************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const app_service_1 = __webpack_require__(/*! ./app.service */ "./src/modules/app/app.service.ts");
+const app_controller_1 = __webpack_require__(/*! ./app.controller */ "./src/modules/app/app.controller.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const app_model_1 = __webpack_require__(/*! ./entities/app.model */ "./src/modules/app/entities/app.model.ts");
+const casl_module_1 = __webpack_require__(/*! ../casl/casl.module */ "./src/modules/casl/casl.module.ts");
+const app_mapper_1 = __webpack_require__(/*! ./dto/app.mapper */ "./src/modules/app/dto/app.mapper.ts");
+const app_created_handler_1 = __webpack_require__(/*! ./handlers/app-created.handler */ "./src/modules/app/handlers/app-created.handler.ts");
+const app_removed_handler_1 = __webpack_require__(/*! ./handlers/app-removed.handler */ "./src/modules/app/handlers/app-removed.handler.ts");
+const app_updated_handler_1 = __webpack_require__(/*! ./handlers/app-updated.handler */ "./src/modules/app/handlers/app-updated.handler.ts");
+let AppModule = class AppModule {
+};
+exports.AppModule = AppModule;
+exports.AppModule = AppModule = __decorate([
+    (0, common_1.Module)({
+        imports: [logging_1.LoggingModule, typeorm_1.TypeOrmModule.forFeature([app_model_1.App]), casl_module_1.CaslModule],
+        controllers: [app_controller_1.AppController],
+        providers: [
+            app_mapper_1.AppMapper,
+            app_service_1.AppService,
+            app_created_handler_1.AppCreatedHandler,
+            app_updated_handler_1.AppUpdatedHandler,
+            app_removed_handler_1.AppRemovedHandler,
+        ],
+        exports: [app_service_1.AppService],
+    })
+], AppModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/app/app.service.ts":
+/*!****************************************!*\
+  !*** ./src/modules/app/app.service.ts ***!
+  \****************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppService = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const app_mapper_1 = __webpack_require__(/*! ./dto/app.mapper */ "./src/modules/app/dto/app.mapper.ts");
+const app_model_1 = __webpack_require__(/*! ./entities/app.model */ "./src/modules/app/entities/app.model.ts");
+let AppService = class AppService {
+    logger;
+    repo;
+    mapper;
+    constructor(logger, repo, mapper) {
+        this.logger = logger;
+        this.repo = repo;
+        this.mapper = mapper;
+    }
+    async createWithManager(createAppDto, manager) {
+        const repo = manager.getRepository(app_model_1.App);
+        const entity = repo.create({ ...createAppDto });
+        const result = await repo.save(entity);
+        return this.mapper.toDomain(result);
+    }
+    async create(createAppDto, createdBy) {
+        const entity = this.repo.create({ ...createAppDto, createdBy });
+        const result = await this.repo.save(entity);
+        return this.mapper.toDomain(result);
+    }
+    async findAll(skip = 0, take = 100) {
+        try {
+            const [entities, count] = await this.repo.findAndCount({
+                skip,
+                take,
+            });
+            return {
+                data: entities.map((entity) => this.mapper.toDomain(entity)),
+                pagination: {
+                    total: count,
+                    skip,
+                    take,
+                    hasNextPage: skip + take < count,
+                },
+            };
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findAll.name} encountered an error`, {
+                correlationId: '6d437955-6b3a-417d-825b-3f43dedd8825',
+                err: JSON.stringify(err),
+            });
+            return {
+                data: [],
+                pagination: { total: 0, skip: 0, take, hasNextPage: false },
+            };
+        }
+    }
+    async findOne(id) {
+        try {
+            const entity = await this.repo.findOneBy({ id });
+            if (!entity) {
+                throw new common_1.NotFoundException();
+            }
+            return this.mapper.toDomain(entity);
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOne.name} encountered an error`, {
+                correlationId: '6acb4b57-7592-4f08-869c-b4a14cddd072',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async findOneByName(name) {
+        try {
+            const model = await this.repo.findOneBy({ name });
+            if (!model) {
+                throw new common_1.NotFoundException();
+            }
+            return this.mapper.toDomain(model);
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOneByName.name} encountered an error`, {
+                correlationId: '7cce84d8-8f89-4058-8d2e-af450cfad2d3',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async updateWithManager(id, updateAppDto, manager) {
+        try {
+            const repo = manager.getRepository(app_model_1.App);
+            const model = await repo.findOneBy({ id });
+            if (!model) {
+                throw new common_1.NotFoundException();
+            }
+            const entity = this.mapper.toDomain(model);
+            if (updateAppDto.name) {
+                entity.updateName(updateAppDto.name);
+            }
+            if (updateAppDto.createdBy) {
+                entity.updateOwner(updateAppDto.createdBy);
+            }
+            if (updateAppDto.updatedBy) {
+                entity.updateUpdatedBy(updateAppDto.updatedBy);
+            }
+            await repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.updateWithManager.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async update(id, updateAppDto, updatedBy) {
+        try {
+            const entity = await this.findOne(id);
+            if (updateAppDto.name) {
+                entity.updateName(updateAppDto.name);
+            }
+            entity.updateUpdatedBy(updatedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.update.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async remove(id, removedBy) {
+        try {
+            const entity = await this.findOne(id);
+            entity.softDelete(removedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.remove.name} encountered an error`, {
+                correlationId: 'b76287ba-c244-475f-adcb-52c6917ba739',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+};
+exports.AppService = AppService;
+exports.AppService = AppService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, typeorm_1.InjectRepository)(app_model_1.App)),
+    __param(2, (0, common_1.Inject)(app_mapper_1.AppMapper)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof app_mapper_1.AppMapper !== "undefined" && app_mapper_1.AppMapper) === "function" ? _c : Object])
+], AppService);
+
+
+/***/ }),
+
+/***/ "./src/modules/app/commands/app-created.command.ts":
+/*!*********************************************************!*\
+  !*** ./src/modules/app/commands/app-created.command.ts ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppCreatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class AppCreatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.AppCreatedCommand = AppCreatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/app/commands/app-removed.command.ts":
+/*!*********************************************************!*\
+  !*** ./src/modules/app/commands/app-removed.command.ts ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppRemovedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class AppRemovedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.AppRemovedCommand = AppRemovedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/app/commands/app-updated.command.ts":
+/*!*********************************************************!*\
+  !*** ./src/modules/app/commands/app-updated.command.ts ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppUpdatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class AppUpdatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.AppUpdatedCommand = AppUpdatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/app/dto/app.dto.ts":
+/*!****************************************!*\
+  !*** ./src/modules/app/dto/app.dto.ts ***!
+  \****************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class AppDto {
+    constructor(partial) {
+        Object.assign(this, partial);
+    }
+    accountId;
+    name;
+    createdBy;
+    updatedBy;
+    deletedBy;
+    createdAt;
+    updatedAt;
+    deletedAt;
+}
+exports.AppDto = AppDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], AppDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The name of the app' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AppDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], AppDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], AppDto.prototype, "updatedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], AppDto.prototype, "deletedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], AppDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], AppDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], AppDto.prototype, "deletedAt", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/app/dto/app.mapper.ts":
+/*!*******************************************!*\
+  !*** ./src/modules/app/dto/app.mapper.ts ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppMapper = void 0;
+const app_entity_1 = __webpack_require__(/*! ../entities/app.entity */ "./src/modules/app/entities/app.entity.ts");
+const app_dto_1 = __webpack_require__(/*! ./app.dto */ "./src/modules/app/dto/app.dto.ts");
+class AppMapper {
+    static toInterface(user) {
+        return new app_dto_1.AppDto(user.props);
+    }
+    toInterface(user) {
+        return AppMapper.toInterface(user);
+    }
+    static toDomain(user) {
+        return new app_entity_1.App({
+            ...user,
+        });
+    }
+    toDomain(user) {
+        return AppMapper.toDomain(user);
+    }
+    static toPersistence(user) {
+        return {
+            ...user.props,
+        };
+    }
+    toPersistence(user) {
+        return AppMapper.toPersistence(user);
+    }
+}
+exports.AppMapper = AppMapper;
+
+
+/***/ }),
+
+/***/ "./src/modules/app/dto/create-app.dto.ts":
+/*!***********************************************!*\
+  !*** ./src/modules/app/dto/create-app.dto.ts ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateAppDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CreateAppDto {
+    accountId;
+    name;
+    createdBy;
+    updatedBy;
+}
+exports.CreateAppDto = CreateAppDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateAppDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The name of the app' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateAppDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateAppDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateAppDto.prototype, "updatedBy", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/app/dto/update-app.dto.ts":
+/*!***********************************************!*\
+  !*** ./src/modules/app/dto/update-app.dto.ts ***!
+  \***********************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateAppDto = void 0;
+const mapped_types_1 = __webpack_require__(/*! @nestjs/mapped-types */ "@nestjs/mapped-types");
+const create_app_dto_1 = __webpack_require__(/*! ./create-app.dto */ "./src/modules/app/dto/create-app.dto.ts");
+class UpdateAppDto extends (0, mapped_types_1.PartialType)(create_app_dto_1.CreateAppDto) {
+}
+exports.UpdateAppDto = UpdateAppDto;
+
+
+/***/ }),
+
+/***/ "./src/modules/app/entities/app.entity.ts":
+/*!************************************************!*\
+  !*** ./src/modules/app/entities/app.entity.ts ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.App = void 0;
+class App {
+    props;
+    constructor(props) {
+        this.props = {
+            ...props,
+            createdAt: props.createdAt ?? new Date(),
+            updatedAt: props.updatedAt ?? new Date(),
+        };
+    }
+    get id() {
+        return this.props.id;
+    }
+    get accountId() {
+        return this.props.accountId;
+    }
+    get name() {
+        return this.props.name;
+    }
+    get createdAt() {
+        return this.props.createdAt;
+    }
+    get updatedAt() {
+        return this.props.updatedAt;
+    }
+    get deletedAt() {
+        return this.props.deletedAt;
+    }
+    get createdBy() {
+        return this.props.createdBy;
+    }
+    get updatedBy() {
+        return this.props.updatedBy;
+    }
+    get deletedBy() {
+        return this.props.deletedBy;
+    }
+    updateName(newName) {
+        this.props.name = newName;
+        this.touch();
+    }
+    softDelete(byUserId) {
+        this.props.deletedAt = new Date();
+        if (byUserId) {
+            this.props.deletedBy = byUserId;
+        }
+        this.touch();
+    }
+    updateOwner(id) {
+        this.props.createdBy = id;
+        this.touch();
+    }
+    updateUpdatedBy(id) {
+        this.props.updatedBy = id;
+        this.touch();
+    }
+    restore() {
+        this.props.deletedAt = undefined;
+        this.props.deletedBy = undefined;
+        this.touch();
+    }
+    touch(id) {
+        this.props.updatedAt = new Date();
+        if (id) {
+            this.props.updatedBy = id;
+        }
+    }
+}
+exports.App = App;
+
+
+/***/ }),
+
+/***/ "./src/modules/app/entities/app.model.ts":
+/*!***********************************************!*\
+  !*** ./src/modules/app/entities/app.model.ts ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.App = void 0;
+const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let App = class App {
+    id;
+    accountId;
+    account;
+    name;
+    createdAt;
+    updatedAt;
+    deletedAt;
+    createdBy;
+    updatedBy;
+    deletedBy;
+};
+exports.App = App;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], App.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], App.prototype, "accountId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.users, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'accountId' }),
+    __metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
+], App.prototype, "account", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], App.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], App.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], App.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], App.prototype, "deletedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], App.prototype, "createdBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], App.prototype, "updatedBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], App.prototype, "deletedBy", void 0);
+exports.App = App = __decorate([
+    (0, typeorm_1.Entity)('apps')
+], App);
+
+
+/***/ }),
+
+/***/ "./src/modules/app/handlers/app-created.handler.ts":
+/*!*********************************************************!*\
+  !*** ./src/modules/app/handlers/app-created.handler.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppCreatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const app_created_command_1 = __webpack_require__(/*! ../commands/app-created.command */ "./src/modules/app/commands/app-created.command.ts");
+let AppCreatedHandler = class AppCreatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('App created handler called', {
+            correlationId: '8adf5d96-ec23-45bc-abf4-3d650c30a76a',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.AppCreatedHandler = AppCreatedHandler;
+exports.AppCreatedHandler = AppCreatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(app_created_command_1.AppCreatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], AppCreatedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/app/handlers/app-removed.handler.ts":
+/*!*********************************************************!*\
+  !*** ./src/modules/app/handlers/app-removed.handler.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppRemovedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const app_removed_command_1 = __webpack_require__(/*! ../commands/app-removed.command */ "./src/modules/app/commands/app-removed.command.ts");
+let AppRemovedHandler = class AppRemovedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('App removed handler called', {
+            correlationId: '4954e2c3-42c3-4aaf-b9ae-365f15d83ef6',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.AppRemovedHandler = AppRemovedHandler;
+exports.AppRemovedHandler = AppRemovedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(app_removed_command_1.AppRemovedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], AppRemovedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/app/handlers/app-updated.handler.ts":
+/*!*********************************************************!*\
+  !*** ./src/modules/app/handlers/app-updated.handler.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppUpdatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const app_updated_command_1 = __webpack_require__(/*! ../commands/app-updated.command */ "./src/modules/app/commands/app-updated.command.ts");
+let AppUpdatedHandler = class AppUpdatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('App updated handler called', {
+            correlationId: '67a859be-a168-4574-bbc3-c05b27dc4612',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.AppUpdatedHandler = AppUpdatedHandler;
+exports.AppUpdatedHandler = AppUpdatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(app_updated_command_1.AppUpdatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], AppUpdatedHandler);
 
 
 /***/ }),
@@ -1979,7 +2542,6 @@ exports.AppModule = AppModule = __decorate([
   \*********************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2120,7 +2682,6 @@ exports.AuthController = AuthController = __decorate([
   \*****************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -2175,7 +2736,6 @@ exports.AuthModule = AuthModule = __decorate([
   \******************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2277,7 +2837,6 @@ exports.AuthService = AuthService = __decorate([
   \*******************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -2319,7 +2878,6 @@ __decorate([
   \**********************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -2403,7 +2961,6 @@ __decorate([
   \******************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -2418,7 +2975,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtStrategy = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const passport_1 = __webpack_require__(/*! @nestjs/passport */ "@nestjs/passport");
-const passport_jwt_1 = __webpack_require__(/*! passport-jwt */ "./node_modules/passport-jwt/lib/index.js");
+const passport_jwt_1 = __webpack_require__(/*! passport-jwt */ "passport-jwt");
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
     constructor() {
         super({
@@ -2446,7 +3003,6 @@ exports.JwtStrategy = JwtStrategy = __decorate([
   \********************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -2497,7 +3053,6 @@ exports.LocalStrategy = LocalStrategy = __decorate([
   \***********************************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -2519,6 +3074,8 @@ const user_entity_1 = __webpack_require__(/*! src/modules/user/entities/user.ent
 const ability_1 = __webpack_require__(/*! @casl/ability */ "@casl/ability");
 const account_entity_1 = __webpack_require__(/*! src/modules/account/entities/account.entity */ "./src/modules/account/entities/account.entity.ts");
 const user_service_1 = __webpack_require__(/*! src/modules/user/user.service */ "./src/modules/user/user.service.ts");
+const app_entity_1 = __webpack_require__(/*! src/modules/app/entities/app.entity */ "./src/modules/app/entities/app.entity.ts");
+const workspace_entity_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace.entity */ "./src/modules/workspace/entities/workspace.entity.ts");
 var Action;
 (function (Action) {
     Action["Manage"] = "manage";
@@ -2540,14 +3097,26 @@ let CaslAbilityFactory = class CaslAbilityFactory {
         }
         else {
             can(Action.Create, user_entity_1.User);
-            can(Action.Read, user_entity_1.User);
+            can(Action.Create, app_entity_1.App);
+            can(Action.Create, workspace_entity_1.Workspace);
+            can(Action.Read, user_entity_1.User, { accountId: user.accountId });
             can(Action.Read, account_entity_1.Account, { createdBy: user.id });
             can(Action.Read, account_entity_1.Account, { id: user.accountId });
+            can(Action.Read, app_entity_1.App, { createdBy: user.id });
+            can(Action.Read, app_entity_1.App, { id: user.accountId });
+            can(Action.Read, workspace_entity_1.Workspace, { createdBy: user.id });
+            can(Action.Read, workspace_entity_1.Workspace, { id: user.accountId });
+            can(Action.Read, workspace_entity_1.Workspace, { createdBy: user.id });
+            can(Action.Read, workspace_entity_1.Workspace, { id: user.accountId });
             can(Action.Update, user_entity_1.User, { id: user.id });
             can(Action.Update, account_entity_1.Account, { createdBy: user.id });
+            can(Action.Update, app_entity_1.App, { createdBy: user.id });
+            can(Action.Update, workspace_entity_1.Workspace, { createdBy: user.id });
             cannot(Action.Create, account_entity_1.Account);
             cannot(Action.Delete, user_entity_1.User);
             cannot(Action.Delete, account_entity_1.Account);
+            cannot(Action.Delete, app_entity_1.App);
+            cannot(Action.Delete, workspace_entity_1.Workspace);
         }
         return build({
             detectSubjectType: (item) => item.constructor,
@@ -2570,7 +3139,6 @@ exports.CaslAbilityFactory = CaslAbilityFactory = __decorate([
   \*****************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -2608,7 +3176,6 @@ exports.CaslModule = CaslModule = __decorate([
   \*********************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -2638,7 +3205,6 @@ exports.HealthModule = HealthModule = __decorate([
   \***********************************************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserCreatedCommand = void 0;
@@ -2661,7 +3227,6 @@ exports.UserCreatedCommand = UserCreatedCommand;
   \***********************************************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserRemovedCommand = void 0;
@@ -2684,7 +3249,6 @@ exports.UserRemovedCommand = UserRemovedCommand;
   \***********************************************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserUpdatedCommand = void 0;
@@ -2707,7 +3271,6 @@ exports.UserUpdatedCommand = UserUpdatedCommand;
   \*************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -2789,7 +3352,6 @@ __decorate([
   \*************************************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateUserDto = void 0;
@@ -2808,7 +3370,6 @@ exports.UpdateUserDto = UpdateUserDto;
   \******************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -2919,7 +3480,6 @@ __decorate([
   \*********************************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserMapper = void 0;
@@ -2960,7 +3520,6 @@ exports.UserMapper = UserMapper;
   \**************************************************/
 /***/ ((__unused_webpack_module, exports) => {
 
-"use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.User = exports.Role = void 0;
@@ -3076,7 +3635,6 @@ exports.User = User;
   \*************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3093,10 +3651,14 @@ exports.User = void 0;
 const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const user_entity_1 = __webpack_require__(/*! ./user.entity */ "./src/modules/user/entities/user.entity.ts");
+const workspace_user_model_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace-user.model */ "./src/modules/workspace/entities/workspace-user.model.ts");
+const workspace_model_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace.model */ "./src/modules/workspace/entities/workspace.model.ts");
 let User = class User {
     id;
     accountId;
     account;
+    workspaceUsers;
+    workspaces;
     email;
     password;
     role;
@@ -3125,6 +3687,19 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'accountId' }),
     __metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
 ], User.prototype, "account", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => workspace_user_model_1.WorkspaceUser, (wu) => wu.user),
+    __metadata("design:type", Array)
+], User.prototype, "workspaceUsers", void 0);
+__decorate([
+    (0, typeorm_1.ManyToMany)(() => workspace_model_1.Workspace, (workspace) => workspace.users),
+    (0, typeorm_1.JoinTable)({
+        name: 'workspace_users',
+        joinColumn: { name: 'userId', referencedColumnName: 'id' },
+        inverseJoinColumn: { name: 'workspaceId', referencedColumnName: 'id' },
+    }),
+    __metadata("design:type", Array)
+], User.prototype, "workspaces", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
@@ -3182,7 +3757,6 @@ exports.User = User = __decorate([
   \***********************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3235,7 +3809,6 @@ exports.UserCreatedHandler = UserCreatedHandler = __decorate([
   \***********************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3288,7 +3861,6 @@ exports.UserRemovedHandler = UserRemovedHandler = __decorate([
   \***********************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3341,7 +3913,6 @@ exports.UserUpdatedHandler = UserUpdatedHandler = __decorate([
   \*********************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3498,7 +4069,6 @@ exports.UserController = UserController = __decorate([
   \*****************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3546,7 +4116,6 @@ exports.UserModule = UserModule = __decorate([
   \******************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3746,13 +4315,1095 @@ exports.UserService = UserService = __decorate([
 
 /***/ }),
 
+/***/ "./src/modules/workspace/commands/workspace-created.command.ts":
+/*!*********************************************************************!*\
+  !*** ./src/modules/workspace/commands/workspace-created.command.ts ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceCreatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class WorkspaceCreatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.WorkspaceCreatedCommand = WorkspaceCreatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/commands/workspace-removed.command.ts":
+/*!*********************************************************************!*\
+  !*** ./src/modules/workspace/commands/workspace-removed.command.ts ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceRemovedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class WorkspaceRemovedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.WorkspaceRemovedCommand = WorkspaceRemovedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/commands/workspace-updated.command.ts":
+/*!*********************************************************************!*\
+  !*** ./src/modules/workspace/commands/workspace-updated.command.ts ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceUpdatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class WorkspaceUpdatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.WorkspaceUpdatedCommand = WorkspaceUpdatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/dto/create-workspace.dto.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/workspace/dto/create-workspace.dto.ts ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateWorkspaceDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CreateWorkspaceDto {
+    accountId;
+    name;
+    createdBy;
+    updatedBy;
+}
+exports.CreateWorkspaceDto = CreateWorkspaceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateWorkspaceDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The name of the workspace' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateWorkspaceDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateWorkspaceDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateWorkspaceDto.prototype, "updatedBy", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/dto/update-workspace.dto.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/workspace/dto/update-workspace.dto.ts ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateWorkspaceDto = void 0;
+const mapped_types_1 = __webpack_require__(/*! @nestjs/mapped-types */ "@nestjs/mapped-types");
+const create_workspace_dto_1 = __webpack_require__(/*! ./create-workspace.dto */ "./src/modules/workspace/dto/create-workspace.dto.ts");
+class UpdateWorkspaceDto extends (0, mapped_types_1.PartialType)(create_workspace_dto_1.CreateWorkspaceDto) {
+}
+exports.UpdateWorkspaceDto = UpdateWorkspaceDto;
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/dto/workspace.dto.ts":
+/*!****************************************************!*\
+  !*** ./src/modules/workspace/dto/workspace.dto.ts ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class WorkspaceDto {
+    constructor(partial) {
+        Object.assign(this, partial);
+    }
+    accountId;
+    name;
+    createdBy;
+    updatedBy;
+    deletedBy;
+    createdAt;
+    updatedAt;
+    deletedAt;
+}
+exports.WorkspaceDto = WorkspaceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], WorkspaceDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The name of the workspace' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], WorkspaceDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], WorkspaceDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], WorkspaceDto.prototype, "updatedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], WorkspaceDto.prototype, "deletedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], WorkspaceDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], WorkspaceDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], WorkspaceDto.prototype, "deletedAt", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/dto/workspace.mapper.ts":
+/*!*******************************************************!*\
+  !*** ./src/modules/workspace/dto/workspace.mapper.ts ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceMapper = void 0;
+const workspace_entity_1 = __webpack_require__(/*! ../entities/workspace.entity */ "./src/modules/workspace/entities/workspace.entity.ts");
+const workspace_dto_1 = __webpack_require__(/*! ./workspace.dto */ "./src/modules/workspace/dto/workspace.dto.ts");
+class WorkspaceMapper {
+    static toInterface(user) {
+        return new workspace_dto_1.WorkspaceDto(user.props);
+    }
+    toInterface(user) {
+        return WorkspaceMapper.toInterface(user);
+    }
+    static toDomain(user) {
+        return new workspace_entity_1.Workspace({
+            ...user,
+        });
+    }
+    toDomain(user) {
+        return WorkspaceMapper.toDomain(user);
+    }
+    static toPersistence(user) {
+        return {
+            ...user.props,
+        };
+    }
+    toPersistence(user) {
+        return WorkspaceMapper.toPersistence(user);
+    }
+}
+exports.WorkspaceMapper = WorkspaceMapper;
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/entities/workspace-user.model.ts":
+/*!****************************************************************!*\
+  !*** ./src/modules/workspace/entities/workspace-user.model.ts ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceUser = void 0;
+const user_model_1 = __webpack_require__(/*! src/modules/user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const workspace_model_1 = __webpack_require__(/*! ./workspace.model */ "./src/modules/workspace/entities/workspace.model.ts");
+let WorkspaceUser = class WorkspaceUser {
+    id;
+    userId;
+    workspaceId;
+    user;
+    workspace;
+    createdAt;
+    updatedAt;
+    deletedAt;
+    createdBy;
+    updatedBy;
+    deletedBy;
+};
+exports.WorkspaceUser = WorkspaceUser;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], WorkspaceUser.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], WorkspaceUser.prototype, "userId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], WorkspaceUser.prototype, "workspaceId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_model_1.User, (user) => user.workspaceUsers, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
+    __metadata("design:type", typeof (_a = typeof user_model_1.User !== "undefined" && user_model_1.User) === "function" ? _a : Object)
+], WorkspaceUser.prototype, "user", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => workspace_model_1.Workspace, (workspace) => workspace.workspaceUsers, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'workspaceId' }),
+    __metadata("design:type", typeof (_b = typeof workspace_model_1.Workspace !== "undefined" && workspace_model_1.Workspace) === "function" ? _b : Object)
+], WorkspaceUser.prototype, "workspace", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], WorkspaceUser.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], WorkspaceUser.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
+], WorkspaceUser.prototype, "deletedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], WorkspaceUser.prototype, "createdBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], WorkspaceUser.prototype, "updatedBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], WorkspaceUser.prototype, "deletedBy", void 0);
+exports.WorkspaceUser = WorkspaceUser = __decorate([
+    (0, typeorm_1.Entity)('workspace_users')
+], WorkspaceUser);
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/entities/workspace.entity.ts":
+/*!************************************************************!*\
+  !*** ./src/modules/workspace/entities/workspace.entity.ts ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Workspace = void 0;
+class Workspace {
+    props;
+    constructor(props) {
+        this.props = {
+            ...props,
+            createdAt: props.createdAt ?? new Date(),
+            updatedAt: props.updatedAt ?? new Date(),
+        };
+    }
+    get id() {
+        return this.props.id;
+    }
+    get accountId() {
+        return this.props.accountId;
+    }
+    get name() {
+        return this.props.name;
+    }
+    get createdAt() {
+        return this.props.createdAt;
+    }
+    get updatedAt() {
+        return this.props.updatedAt;
+    }
+    get deletedAt() {
+        return this.props.deletedAt;
+    }
+    get createdBy() {
+        return this.props.createdBy;
+    }
+    get updatedBy() {
+        return this.props.updatedBy;
+    }
+    get deletedBy() {
+        return this.props.deletedBy;
+    }
+    updateName(newName) {
+        this.props.name = newName;
+        this.touch();
+    }
+    softDelete(byUserId) {
+        this.props.deletedAt = new Date();
+        if (byUserId) {
+            this.props.deletedBy = byUserId;
+        }
+        this.touch();
+    }
+    updateOwner(id) {
+        this.props.createdBy = id;
+        this.touch();
+    }
+    updateUpdatedBy(id) {
+        this.props.updatedBy = id;
+        this.touch();
+    }
+    restore() {
+        this.props.deletedAt = undefined;
+        this.props.deletedBy = undefined;
+        this.touch();
+    }
+    touch(id) {
+        this.props.updatedAt = new Date();
+        if (id) {
+            this.props.updatedBy = id;
+        }
+    }
+}
+exports.Workspace = Workspace;
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/entities/workspace.model.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/workspace/entities/workspace.model.ts ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Workspace = void 0;
+const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const workspace_user_model_1 = __webpack_require__(/*! ./workspace-user.model */ "./src/modules/workspace/entities/workspace-user.model.ts");
+const user_model_1 = __webpack_require__(/*! src/modules/user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+let Workspace = class Workspace {
+    id;
+    accountId;
+    account;
+    workspaceUsers;
+    users;
+    name;
+    createdAt;
+    updatedAt;
+    deletedAt;
+    createdBy;
+    updatedBy;
+    deletedBy;
+};
+exports.Workspace = Workspace;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], Workspace.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Workspace.prototype, "accountId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.users, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'accountId' }),
+    __metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
+], Workspace.prototype, "account", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => workspace_user_model_1.WorkspaceUser, (wu) => wu.workspace),
+    __metadata("design:type", Array)
+], Workspace.prototype, "workspaceUsers", void 0);
+__decorate([
+    (0, typeorm_1.ManyToMany)(() => user_model_1.User, (user) => user.workspaces),
+    (0, typeorm_1.JoinTable)({
+        name: 'workspace_users',
+        joinColumn: { name: 'workspaceId', referencedColumnName: 'id' },
+        inverseJoinColumn: { name: 'userId', referencedColumnName: 'id' },
+    }),
+    __metadata("design:type", Array)
+], Workspace.prototype, "users", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Workspace.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], Workspace.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], Workspace.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], Workspace.prototype, "deletedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Workspace.prototype, "createdBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Workspace.prototype, "updatedBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Workspace.prototype, "deletedBy", void 0);
+exports.Workspace = Workspace = __decorate([
+    (0, typeorm_1.Entity)('workspaces')
+], Workspace);
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/handlers/workspace-created.handler.ts":
+/*!*********************************************************************!*\
+  !*** ./src/modules/workspace/handlers/workspace-created.handler.ts ***!
+  \*********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceCreatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const workspace_created_command_1 = __webpack_require__(/*! ../commands/workspace-created.command */ "./src/modules/workspace/commands/workspace-created.command.ts");
+let WorkspaceCreatedHandler = class WorkspaceCreatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Workspace created handler called', {
+            correlationId: '8adf5d96-ec23-45bc-abf4-3d650c30a76a',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.WorkspaceCreatedHandler = WorkspaceCreatedHandler;
+exports.WorkspaceCreatedHandler = WorkspaceCreatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(workspace_created_command_1.WorkspaceCreatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], WorkspaceCreatedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/handlers/workspace-removed.handler.ts":
+/*!*********************************************************************!*\
+  !*** ./src/modules/workspace/handlers/workspace-removed.handler.ts ***!
+  \*********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceRemovedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const workspace_removed_command_1 = __webpack_require__(/*! ../commands/workspace-removed.command */ "./src/modules/workspace/commands/workspace-removed.command.ts");
+let WorkspaceRemovedHandler = class WorkspaceRemovedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Workspace removed handler called', {
+            correlationId: '4954e2c3-42c3-4aaf-b9ae-365f15d83ef6',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.WorkspaceRemovedHandler = WorkspaceRemovedHandler;
+exports.WorkspaceRemovedHandler = WorkspaceRemovedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(workspace_removed_command_1.WorkspaceRemovedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], WorkspaceRemovedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/handlers/workspace-updated.handler.ts":
+/*!*********************************************************************!*\
+  !*** ./src/modules/workspace/handlers/workspace-updated.handler.ts ***!
+  \*********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceUpdatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const workspace_updated_command_1 = __webpack_require__(/*! ../commands/workspace-updated.command */ "./src/modules/workspace/commands/workspace-updated.command.ts");
+let WorkspaceUpdatedHandler = class WorkspaceUpdatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Workspace updated handler called', {
+            correlationId: '67a859be-a168-4574-bbc3-c05b27dc4612',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.WorkspaceUpdatedHandler = WorkspaceUpdatedHandler;
+exports.WorkspaceUpdatedHandler = WorkspaceUpdatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(workspace_updated_command_1.WorkspaceUpdatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], WorkspaceUpdatedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/workspace.controller.ts":
+/*!*******************************************************!*\
+  !*** ./src/modules/workspace/workspace.controller.ts ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceController = void 0;
+const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const jwt_auth_guard_1 = __webpack_require__(/*! src/guards/jwt-auth.guard */ "./src/guards/jwt-auth.guard.ts");
+const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
+const logging_cache_interceptor_1 = __webpack_require__(/*! src/interceptors/logging-cache.interceptor */ "./src/interceptors/logging-cache.interceptor.ts");
+const casl_ability_factory_1 = __webpack_require__(/*! ../casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
+const workspace_created_command_1 = __webpack_require__(/*! ./commands/workspace-created.command */ "./src/modules/workspace/commands/workspace-created.command.ts");
+const create_workspace_dto_1 = __webpack_require__(/*! ./dto/create-workspace.dto */ "./src/modules/workspace/dto/create-workspace.dto.ts");
+const update_workspace_dto_1 = __webpack_require__(/*! ./dto/update-workspace.dto */ "./src/modules/workspace/dto/update-workspace.dto.ts");
+const workspace_mapper_1 = __webpack_require__(/*! ./dto/workspace.mapper */ "./src/modules/workspace/dto/workspace.mapper.ts");
+const workspace_entity_1 = __webpack_require__(/*! ./entities/workspace.entity */ "./src/modules/workspace/entities/workspace.entity.ts");
+const workspace_service_1 = __webpack_require__(/*! ./workspace.service */ "./src/modules/workspace/workspace.service.ts");
+let WorkspaceController = class WorkspaceController {
+    logger;
+    service;
+    mapper;
+    caslAbilityFactory;
+    commandBus;
+    constructor(logger, service, mapper, caslAbilityFactory, commandBus) {
+        this.logger = logger;
+        this.service = service;
+        this.mapper = mapper;
+        this.caslAbilityFactory = caslAbilityFactory;
+        this.commandBus = commandBus;
+    }
+    async create(createWorkspaceDto, req) {
+        const result = await this.service.create(createWorkspaceDto, req.user.id);
+        await this.commandBus.execute(new workspace_created_command_1.WorkspaceCreatedCommand(result));
+        return this.mapper.toInterface(result);
+    }
+    async findAll(skip = 0, take = 100) {
+        const result = await this.service.findAll(skip, take);
+        return {
+            ...result,
+            data: result.data.map((app) => this.mapper.toInterface(app)),
+        };
+    }
+    async findOne(id, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const app = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Read, app)) {
+            throw new common_1.UnauthorizedException();
+        }
+        return this.mapper.toInterface(app);
+    }
+    async update(id, updateWorkspaceDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const app = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Update, app)) {
+            this.logger.debug('failing because we got here....');
+            throw new common_1.UnauthorizedException();
+        }
+        const updated = await this.service.update(id, updateWorkspaceDto, req.user.id);
+        return this.mapper.toInterface(updated);
+    }
+    async remove(id, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const app = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Update, app)) {
+            throw new common_1.UnauthorizedException();
+        }
+        await this.service.remove(id, req.user.id);
+        return app.id;
+    }
+};
+exports.WorkspaceController = WorkspaceController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Create, workspace_entity_1.Workspace)),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_workspace_dto_1.CreateWorkspaceDto !== "undefined" && create_workspace_dto_1.CreateWorkspaceDto) === "function" ? _f : Object, Object]),
+    __metadata("design:returntype", Promise)
+], WorkspaceController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, workspace_entity_1.Workspace)),
+    (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: Number }),
+    (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
+    __param(0, (0, common_1.Query)('skip')),
+    __param(1, (0, common_1.Query)('take')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], WorkspaceController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, workspace_entity_1.Workspace)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], WorkspaceController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Update, workspace_entity_1.Workspace)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_h = typeof update_workspace_dto_1.UpdateWorkspaceDto !== "undefined" && update_workspace_dto_1.UpdateWorkspaceDto) === "function" ? _h : Object, Object]),
+    __metadata("design:returntype", Promise)
+], WorkspaceController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Delete, workspace_entity_1.Workspace)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], WorkspaceController.prototype, "remove", null);
+exports.WorkspaceController = WorkspaceController = __decorate([
+    (0, common_1.Controller)('workspaces'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor, common_1.ClassSerializerInterceptor),
+    (0, swagger_1.ApiBearerAuth)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, common_1.Inject)(workspace_service_1.WorkspaceService)),
+    __param(2, (0, common_1.Inject)(workspace_mapper_1.WorkspaceMapper)),
+    __param(3, (0, common_1.Inject)(casl_ability_factory_1.CaslAbilityFactory)),
+    __param(4, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof workspace_service_1.WorkspaceService !== "undefined" && workspace_service_1.WorkspaceService) === "function" ? _b : Object, typeof (_c = typeof workspace_mapper_1.WorkspaceMapper !== "undefined" && workspace_mapper_1.WorkspaceMapper) === "function" ? _c : Object, typeof (_d = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _d : Object, typeof (_e = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _e : Object])
+], WorkspaceController);
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/workspace.module.ts":
+/*!***************************************************!*\
+  !*** ./src/modules/workspace/workspace.module.ts ***!
+  \***************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const workspace_service_1 = __webpack_require__(/*! ./workspace.service */ "./src/modules/workspace/workspace.service.ts");
+const workspace_controller_1 = __webpack_require__(/*! ./workspace.controller */ "./src/modules/workspace/workspace.controller.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const workspace_model_1 = __webpack_require__(/*! ./entities/workspace.model */ "./src/modules/workspace/entities/workspace.model.ts");
+const casl_module_1 = __webpack_require__(/*! ../casl/casl.module */ "./src/modules/casl/casl.module.ts");
+const workspace_mapper_1 = __webpack_require__(/*! ./dto/workspace.mapper */ "./src/modules/workspace/dto/workspace.mapper.ts");
+const workspace_created_handler_1 = __webpack_require__(/*! ./handlers/workspace-created.handler */ "./src/modules/workspace/handlers/workspace-created.handler.ts");
+const workspace_removed_handler_1 = __webpack_require__(/*! ./handlers/workspace-removed.handler */ "./src/modules/workspace/handlers/workspace-removed.handler.ts");
+const workspace_updated_handler_1 = __webpack_require__(/*! ./handlers/workspace-updated.handler */ "./src/modules/workspace/handlers/workspace-updated.handler.ts");
+const user_model_1 = __webpack_require__(/*! ../user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const workspace_user_model_1 = __webpack_require__(/*! ./entities/workspace-user.model */ "./src/modules/workspace/entities/workspace-user.model.ts");
+let WorkspaceModule = class WorkspaceModule {
+};
+exports.WorkspaceModule = WorkspaceModule;
+exports.WorkspaceModule = WorkspaceModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            logging_1.LoggingModule,
+            typeorm_1.TypeOrmModule.forFeature([user_model_1.User, workspace_model_1.Workspace, workspace_user_model_1.WorkspaceUser]),
+            casl_module_1.CaslModule,
+        ],
+        controllers: [workspace_controller_1.WorkspaceController],
+        providers: [
+            workspace_mapper_1.WorkspaceMapper,
+            workspace_service_1.WorkspaceService,
+            workspace_created_handler_1.WorkspaceCreatedHandler,
+            workspace_updated_handler_1.WorkspaceUpdatedHandler,
+            workspace_removed_handler_1.WorkspaceRemovedHandler,
+        ],
+        exports: [workspace_service_1.WorkspaceService],
+    })
+], WorkspaceModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/workspace/workspace.service.ts":
+/*!****************************************************!*\
+  !*** ./src/modules/workspace/workspace.service.ts ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WorkspaceService = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const workspace_mapper_1 = __webpack_require__(/*! ./dto/workspace.mapper */ "./src/modules/workspace/dto/workspace.mapper.ts");
+const workspace_model_1 = __webpack_require__(/*! ./entities/workspace.model */ "./src/modules/workspace/entities/workspace.model.ts");
+const workspace_user_model_1 = __webpack_require__(/*! ./entities/workspace-user.model */ "./src/modules/workspace/entities/workspace-user.model.ts");
+let WorkspaceService = class WorkspaceService {
+    logger;
+    repo;
+    workspaceUserRepo;
+    mapper;
+    constructor(logger, repo, workspaceUserRepo, mapper) {
+        this.logger = logger;
+        this.repo = repo;
+        this.workspaceUserRepo = workspaceUserRepo;
+        this.mapper = mapper;
+    }
+    async createWithManager(createWorkspaceDto, manager) {
+        const repo = manager.getRepository(workspace_model_1.Workspace);
+        const entity = repo.create({ ...createWorkspaceDto });
+        const result = await repo.save(entity);
+        return this.mapper.toDomain(result);
+    }
+    async create(createWorkspaceDto, createdBy) {
+        const entity = this.repo.create({ ...createWorkspaceDto, createdBy });
+        const result = await this.repo.save(entity);
+        const wu = this.workspaceUserRepo.create({
+            workspaceId: result.id,
+            userId: createdBy,
+            createdBy,
+        });
+        await this.workspaceUserRepo.save(wu);
+        return this.mapper.toDomain(result);
+    }
+    async findAll(skip = 0, take = 100) {
+        try {
+            const [entities, count] = await this.repo.findAndCount({
+                skip,
+                take,
+            });
+            return {
+                data: entities.map((entity) => this.mapper.toDomain(entity)),
+                pagination: {
+                    total: count,
+                    skip,
+                    take,
+                    hasNextPage: skip + take < count,
+                },
+            };
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findAll.name} encountered an error`, {
+                correlationId: '6d437955-6b3a-417d-825b-3f43dedd8825',
+                err: JSON.stringify(err),
+            });
+            return {
+                data: [],
+                pagination: { total: 0, skip: 0, take, hasNextPage: false },
+            };
+        }
+    }
+    async findOne(id) {
+        try {
+            const entity = await this.repo.findOneBy({ id });
+            if (!entity) {
+                throw new common_1.NotFoundException();
+            }
+            return this.mapper.toDomain(entity);
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOne.name} encountered an error`, {
+                correlationId: '6acb4b57-7592-4f08-869c-b4a14cddd072',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async findOneByName(name) {
+        try {
+            const model = await this.repo.findOneBy({ name });
+            if (!model) {
+                throw new common_1.NotFoundException();
+            }
+            return this.mapper.toDomain(model);
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOneByName.name} encountered an error`, {
+                correlationId: '7cce84d8-8f89-4058-8d2e-af450cfad2d3',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async updateWithManager(id, updateWorkspaceDto, manager) {
+        try {
+            const repo = manager.getRepository(workspace_model_1.Workspace);
+            const model = await repo.findOneBy({ id });
+            if (!model) {
+                throw new common_1.NotFoundException();
+            }
+            const entity = this.mapper.toDomain(model);
+            if (updateWorkspaceDto.name) {
+                entity.updateName(updateWorkspaceDto.name);
+            }
+            if (updateWorkspaceDto.createdBy) {
+                entity.updateOwner(updateWorkspaceDto.createdBy);
+            }
+            if (updateWorkspaceDto.updatedBy) {
+                entity.updateUpdatedBy(updateWorkspaceDto.updatedBy);
+            }
+            await repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.updateWithManager.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async update(id, updateWorkspaceDto, updatedBy) {
+        try {
+            const entity = await this.findOne(id);
+            if (updateWorkspaceDto.name) {
+                entity.updateName(updateWorkspaceDto.name);
+            }
+            entity.updateUpdatedBy(updatedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.update.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async remove(id, removedBy) {
+        try {
+            const entity = await this.findOne(id);
+            entity.softDelete(removedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.remove.name} encountered an error`, {
+                correlationId: 'b76287ba-c244-475f-adcb-52c6917ba739',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+};
+exports.WorkspaceService = WorkspaceService;
+exports.WorkspaceService = WorkspaceService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, typeorm_1.InjectRepository)(workspace_model_1.Workspace)),
+    __param(2, (0, typeorm_1.InjectRepository)(workspace_user_model_1.WorkspaceUser)),
+    __param(3, (0, common_1.Inject)(workspace_mapper_1.WorkspaceMapper)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _c : Object, typeof (_d = typeof workspace_mapper_1.WorkspaceMapper !== "undefined" && workspace_mapper_1.WorkspaceMapper) === "function" ? _d : Object])
+], WorkspaceService);
+
+
+/***/ }),
+
 /***/ "@casl/ability":
 /*!********************************!*\
   !*** external "@casl/ability" ***!
   \********************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@casl/ability");
 
 /***/ }),
@@ -3763,7 +5414,6 @@ module.exports = require("@casl/ability");
   \******************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@keyv/redis");
 
 /***/ }),
@@ -3774,7 +5424,6 @@ module.exports = require("@keyv/redis");
   \********************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/axios");
 
 /***/ }),
@@ -3785,7 +5434,6 @@ module.exports = require("@nestjs/axios");
   \****************************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/cache-manager");
 
 /***/ }),
@@ -3796,7 +5444,6 @@ module.exports = require("@nestjs/cache-manager");
   \*********************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/common");
 
 /***/ }),
@@ -3807,7 +5454,6 @@ module.exports = require("@nestjs/common");
   \*********************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/config");
 
 /***/ }),
@@ -3818,7 +5464,6 @@ module.exports = require("@nestjs/config");
   \*******************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/core");
 
 /***/ }),
@@ -3829,7 +5474,6 @@ module.exports = require("@nestjs/core");
   \*******************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/cqrs");
 
 /***/ }),
@@ -3840,7 +5484,6 @@ module.exports = require("@nestjs/cqrs");
   \****************************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/event-emitter");
 
 /***/ }),
@@ -3851,7 +5494,6 @@ module.exports = require("@nestjs/event-emitter");
   \******************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/jwt");
 
 /***/ }),
@@ -3862,7 +5504,6 @@ module.exports = require("@nestjs/jwt");
   \***************************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/mapped-types");
 
 /***/ }),
@@ -3873,7 +5514,6 @@ module.exports = require("@nestjs/mapped-types");
   \***********************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/passport");
 
 /***/ }),
@@ -3884,7 +5524,6 @@ module.exports = require("@nestjs/passport");
   \***********************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/schedule");
 
 /***/ }),
@@ -3895,7 +5534,6 @@ module.exports = require("@nestjs/schedule");
   \**********************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/swagger");
 
 /***/ }),
@@ -3906,7 +5544,6 @@ module.exports = require("@nestjs/swagger");
   \***********************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/terminus");
 
 /***/ }),
@@ -3917,7 +5554,6 @@ module.exports = require("@nestjs/terminus");
   \************************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/throttler");
 
 /***/ }),
@@ -3928,7 +5564,6 @@ module.exports = require("@nestjs/throttler");
   \**********************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("@nestjs/typeorm");
 
 /***/ }),
@@ -3939,7 +5574,6 @@ module.exports = require("@nestjs/typeorm");
   \*************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("bcrypt");
 
 /***/ }),
@@ -3950,7 +5584,6 @@ module.exports = require("bcrypt");
   \****************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("cacheable");
 
 /***/ }),
@@ -3961,7 +5594,6 @@ module.exports = require("cacheable");
   \************************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("class-transformer");
 
 /***/ }),
@@ -3972,7 +5604,6 @@ module.exports = require("class-transformer");
   \**********************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("class-validator");
 
 /***/ }),
@@ -3983,7 +5614,6 @@ module.exports = require("class-validator");
   \******************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("compression");
 
 /***/ }),
@@ -3994,19 +5624,7 @@ module.exports = require("compression");
   \*************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("helmet");
-
-/***/ }),
-
-/***/ "jsonwebtoken":
-/*!*******************************!*\
-  !*** external "jsonwebtoken" ***!
-  \*******************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("jsonwebtoken");
 
 /***/ }),
 
@@ -4016,8 +5634,17 @@ module.exports = require("jsonwebtoken");
   \***********************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("keyv");
+
+/***/ }),
+
+/***/ "passport-jwt":
+/*!*******************************!*\
+  !*** external "passport-jwt" ***!
+  \*******************************/
+/***/ ((module) => {
+
+module.exports = require("passport-jwt");
 
 /***/ }),
 
@@ -4027,19 +5654,7 @@ module.exports = require("keyv");
   \*********************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("passport-local");
-
-/***/ }),
-
-/***/ "passport-strategy":
-/*!************************************!*\
-  !*** external "passport-strategy" ***!
-  \************************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("passport-strategy");
 
 /***/ }),
 
@@ -4049,7 +5664,6 @@ module.exports = require("passport-strategy");
   \***********************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("rxjs");
 
 /***/ }),
@@ -4060,30 +5674,7 @@ module.exports = require("rxjs");
   \**************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = require("typeorm");
-
-/***/ }),
-
-/***/ "url":
-/*!**********************!*\
-  !*** external "url" ***!
-  \**********************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("url");
-
-/***/ }),
-
-/***/ "util":
-/*!***********************!*\
-  !*** external "util" ***!
-  \***********************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("util");
 
 /***/ })
 
