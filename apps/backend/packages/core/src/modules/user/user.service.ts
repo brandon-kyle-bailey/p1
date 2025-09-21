@@ -1,17 +1,17 @@
+import { LoggingService } from '@app/logging';
 import {
   Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { LoggingService } from '@app/logging';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.model';
-import { User as UserDomain } from './entities/user.entity';
-import { EntityManager, Repository } from 'typeorm';
 import { UserMapper } from './dto/user.mapper';
+import { User as UserDomain } from './entities/user.entity';
+import { User } from './entities/user.model';
 
 @Injectable()
 export class UserService {
@@ -34,8 +34,8 @@ export class UserService {
     return this.mapper.toDomain(result);
   }
 
-  async create(createUserDto: CreateUserDto) {
-    const entity = this.repo.create({ ...createUserDto });
+  async create(createUserDto: CreateUserDto, createdBy: string) {
+    const entity = this.repo.create({ ...createUserDto, createdBy });
     const result = await this.repo.save(entity);
     return this.mapper.toDomain(result);
   }
@@ -135,6 +135,12 @@ export class UserService {
       if (updateUserDto.password) {
         entity.updatePassword(updateUserDto.password);
       }
+      if (updateUserDto.createdBy) {
+        entity.updateOwner(updateUserDto.createdBy);
+      }
+      if (updateUserDto.updatedBy) {
+        entity.updateUpdatedBy(updateUserDto.updatedBy);
+      }
       await repo.update(entity.id, this.mapper.toPersistence(entity));
       return entity;
     } catch (err: any) {
@@ -149,7 +155,11 @@ export class UserService {
     }
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDomain> {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    updatedBy: string,
+  ): Promise<UserDomain> {
     try {
       const entity = await this.findOne(id);
       if (updateUserDto.email) {
@@ -167,6 +177,7 @@ export class UserService {
       if (updateUserDto.password) {
         entity.updatePassword(updateUserDto.password);
       }
+      entity.updateUpdatedBy(updatedBy);
       await this.repo.update(entity.id, this.mapper.toPersistence(entity));
       return entity;
     } catch (err: any) {
@@ -181,7 +192,21 @@ export class UserService {
     }
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} user`;
+  async remove(id: string, removedBy: string) {
+    try {
+      const entity = await this.findOne(id);
+      entity.softDelete(removedBy);
+      await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+      return entity;
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.remove.name} encountered an error`,
+        {
+          correlationId: 'b76287ba-c244-475f-adcb-52c6917ba739',
+          err: JSON.stringify(err),
+        },
+      );
+      throw new InternalServerErrorException();
+    }
   }
 }

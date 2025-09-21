@@ -11,7 +11,6 @@ import {
   AppAbility,
   CaslAbilityFactory,
 } from 'src/modules/casl/casl-ability.factory/casl-ability.factory';
-import { User } from 'src/modules/user/entities/user.entity';
 
 interface IPolicyHandler {
   handle(ability: AppAbility): boolean;
@@ -33,19 +32,21 @@ export class PoliciesGuard implements CanActivate {
     @Inject(LoggingService) private readonly logger: LoggingService,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const policyHandlers =
       this.reflector.get<PolicyHandler[]>(
         CHECK_POLICIES_KEY,
         context.getHandler(),
       ) || [];
 
-    const { user } = context.switchToHttp().getRequest<{ user: User }>();
+    const { user } = context
+      .switchToHttp()
+      .getRequest<{ user: { sub: string; username: string; role: string } }>();
     this.logger.debug(`${this.constructor.name}.${this.canActivate.name}`, {
       correlationId: '75be8396-f6b7-42fd-b413-67efae3d889c',
       user: JSON.stringify(user),
     });
-    const ability = this.caslAbilityFactory.createForUser(user);
+    const ability = await this.caslAbilityFactory.createForUser(user.sub);
 
     return policyHandlers.every((handler) =>
       this.execPolicyHandler(handler, ability),

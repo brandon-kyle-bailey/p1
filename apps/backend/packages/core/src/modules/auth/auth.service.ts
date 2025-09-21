@@ -17,6 +17,7 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { DataSource } from 'typeorm';
 import { User as UserDomain } from '../user/entities/user.entity';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
+import { UpdateAccountDto } from '../account/dto/update-account.dto';
 
 @Injectable()
 export class AuthService {
@@ -60,7 +61,7 @@ export class AuthService {
     const token = this._generateToken(user);
     const updateUserDto = new UpdateUserDto();
     updateUserDto.refresh_token = token.refresh_token;
-    await this.userService.update(user.id, updateUserDto);
+    await this.userService.update(user.id, updateUserDto, user.id);
     return token;
   }
   async register(
@@ -91,7 +92,14 @@ export class AuthService {
         manager,
       );
 
-      // login outside persistence calls
+      const updateAccountDto = new UpdateAccountDto();
+      updateAccountDto.createdBy = user.id;
+      await this.accountService.updateWithManager(
+        account.id,
+        updateAccountDto,
+        manager,
+      );
+
       const token = this._generateToken(user);
       const updateUserDto = new UpdateUserDto();
       updateUserDto.refresh_token = token.refresh_token;

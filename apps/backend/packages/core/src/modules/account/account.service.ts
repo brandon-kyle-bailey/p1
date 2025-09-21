@@ -1,11 +1,17 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { CreateAccountDto } from './dto/create-account.dto';
-import { UpdateAccountDto } from './dto/update-account.dto';
+import { LoggingService } from '@app/logging';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Account } from './entities/account.model';
 import { EntityManager, Repository } from 'typeorm';
 import { AccountMapper } from './dto/account.mapper';
-import { LoggingService } from '@app/logging';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { UpdateAccountDto } from './dto/update-account.dto';
+import { Account } from './entities/account.model';
+import { Account as AccountDomain } from './entities/account.entity';
 
 @Injectable()
 export class AccountService {
@@ -66,11 +72,11 @@ export class AccountService {
 
   async findOne(id: string) {
     try {
-      const entity = await this.repo.findOneBy({ id });
-      if (entity) {
-        return this.mapper.toDomain(entity);
+      const model = await this.repo.findOneBy({ id });
+      if (!model) {
+        throw new NotFoundException();
       }
-      return {};
+      return this.mapper.toDomain(model);
     } catch (err: any) {
       this.logger.error(
         `${this.constructor.name}.${this.findOne.name} encountered an error`,
@@ -79,15 +85,89 @@ export class AccountService {
           err: JSON.stringify(err),
         },
       );
-      return {};
+      throw new InternalServerErrorException();
     }
   }
 
-  update(id: string, updateAccountDto: UpdateAccountDto) {
-    return `This action updates a #${id} account with: ${JSON.stringify(updateAccountDto)}`;
+  async updateWithManager(
+    id: string,
+    updateAccountDto: UpdateAccountDto,
+    manager: EntityManager,
+  ) {
+    try {
+      const repo = manager.getRepository(Account);
+      const model = await repo.findOneBy({ id });
+      if (!model) {
+        throw new NotFoundException();
+      }
+      const entity = this.mapper.toDomain(model);
+      if (updateAccountDto.name) {
+        entity.updateName(updateAccountDto.name);
+      }
+      if (updateAccountDto.createdBy) {
+        entity.updateOwner(updateAccountDto.createdBy);
+      }
+      if (updateAccountDto.updatedBy) {
+        entity.updateUpdatedBy(updateAccountDto.updatedBy);
+      }
+      await repo.update(entity.id, this.mapper.toPersistence(entity));
+      return entity;
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.updateWithManager.name} encountered an error`,
+        {
+          correlationId: '64746231-a49d-46eb-b945-967b18e309f0',
+          err: JSON.stringify(err),
+        },
+      );
+      throw new InternalServerErrorException();
+    }
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} account`;
+  async update(
+    id: string,
+    updateAccountDto: UpdateAccountDto,
+  ): Promise<AccountDomain> {
+    try {
+      const entity = await this.findOne(id);
+      if (updateAccountDto.name) {
+        entity.updateName(updateAccountDto.name);
+      }
+      if (updateAccountDto.createdBy) {
+        entity.updateOwner(updateAccountDto.createdBy);
+      }
+      if (updateAccountDto.updatedBy) {
+        entity.updateUpdatedBy(updateAccountDto.updatedBy);
+      }
+      await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+      return entity;
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.update.name} encountered an error`,
+        {
+          correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+          err: JSON.stringify(err),
+        },
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async remove(id: string) {
+    try {
+      const entity = await this.findOne(id);
+      entity.softDelete(entity.updatedBy);
+      await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+      return entity;
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.remove.name} encountered an error`,
+        {
+          correlationId: 'c66f2ab8-2721-44f7-ba05-daa1aaf1b764',
+          err: JSON.stringify(err),
+        },
+      );
+      throw new InternalServerErrorException();
+    }
   }
 }

@@ -250,6 +250,27 @@ exports.LoggingService = LoggingService = __decorate([
 
 /***/ }),
 
+/***/ "./src/decorators/user.decorator.ts":
+/*!******************************************!*\
+  !*** ./src/decorators/user.decorator.ts ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.User = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+exports.User = (0, common_1.createParamDecorator)((data, ctx) => {
+    const request = ctx.switchToHttp().getRequest();
+    const user = request.user;
+    if (!user)
+        return undefined;
+    return data ? user[data] : user;
+});
+
+
+/***/ }),
+
 /***/ "./src/guards/auth.guard.ts":
 /*!**********************************!*\
   !*** ./src/guards/auth.guard.ts ***!
@@ -266,15 +287,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthGuard = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
 let AuthGuard = class AuthGuard {
     jwtService;
-    constructor(jwtService) {
+    logger;
+    constructor(jwtService, logger) {
         this.jwtService = jwtService;
+        this.logger = logger;
     }
     canActivate(context) {
         const request = context.switchToHttp().getRequest();
@@ -287,6 +314,10 @@ let AuthGuard = class AuthGuard {
                 secret: '7ac54472-4dcf-4fa1-be39-8967d47d02d6',
             });
             request['user'] = payload;
+            this.logger.debug(`${this.constructor.name}.${this.canActivate.name}`, {
+                correlationId: 'b2224bd3-5de3-4de1-b9e4-6596bc5dc8fb',
+                payload: JSON.stringify(payload),
+            });
         }
         catch {
             throw new common_1.UnauthorizedException();
@@ -301,7 +332,8 @@ let AuthGuard = class AuthGuard {
 exports.AuthGuard = AuthGuard;
 exports.AuthGuard = AuthGuard = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object])
+    __param(1, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _b : Object])
 ], AuthGuard);
 
 
@@ -392,14 +424,16 @@ let PoliciesGuard = class PoliciesGuard {
         this.caslAbilityFactory = caslAbilityFactory;
         this.logger = logger;
     }
-    canActivate(context) {
+    async canActivate(context) {
         const policyHandlers = this.reflector.get(exports.CHECK_POLICIES_KEY, context.getHandler()) || [];
-        const { user } = context.switchToHttp().getRequest();
+        const { user } = context
+            .switchToHttp()
+            .getRequest();
         this.logger.debug(`${this.constructor.name}.${this.canActivate.name}`, {
             correlationId: '75be8396-f6b7-42fd-b413-67efae3d889c',
             user: JSON.stringify(user),
         });
-        const ability = this.caslAbilityFactory.createForUser(user);
+        const ability = await this.caslAbilityFactory.createForUser(user.sub);
         return policyHandlers.every((handler) => this.execPolicyHandler(handler, ability));
     }
     execPolicyHandler(handler, ability) {
@@ -701,12 +735,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountService = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
-const account_model_1 = __webpack_require__(/*! ./entities/account.model */ "./src/modules/account/entities/account.model.ts");
 const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 const account_mapper_1 = __webpack_require__(/*! ./dto/account.mapper */ "./src/modules/account/dto/account.mapper.ts");
-const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const account_model_1 = __webpack_require__(/*! ./entities/account.model */ "./src/modules/account/entities/account.model.ts");
 let AccountService = class AccountService {
     logger;
     repo;
@@ -756,25 +790,85 @@ let AccountService = class AccountService {
     }
     async findOne(id) {
         try {
-            const entity = await this.repo.findOneBy({ id });
-            if (entity) {
-                return this.mapper.toDomain(entity);
+            const model = await this.repo.findOneBy({ id });
+            if (!model) {
+                throw new common_1.NotFoundException();
             }
-            return {};
+            return this.mapper.toDomain(model);
         }
         catch (err) {
             this.logger.error(`${this.constructor.name}.${this.findOne.name} encountered an error`, {
                 correlationId: 'f64ea9bf-6aae-4b87-9629-d7fe14f6c1d8',
                 err: JSON.stringify(err),
             });
-            return {};
+            throw new common_1.InternalServerErrorException();
         }
     }
-    update(id, updateAccountDto) {
-        return `This action updates a #${id} account with: ${JSON.stringify(updateAccountDto)}`;
+    async updateWithManager(id, updateAccountDto, manager) {
+        try {
+            const repo = manager.getRepository(account_model_1.Account);
+            const model = await repo.findOneBy({ id });
+            if (!model) {
+                throw new common_1.NotFoundException();
+            }
+            const entity = this.mapper.toDomain(model);
+            if (updateAccountDto.name) {
+                entity.updateName(updateAccountDto.name);
+            }
+            if (updateAccountDto.createdBy) {
+                entity.updateOwner(updateAccountDto.createdBy);
+            }
+            if (updateAccountDto.updatedBy) {
+                entity.updateUpdatedBy(updateAccountDto.updatedBy);
+            }
+            await repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.updateWithManager.name} encountered an error`, {
+                correlationId: '64746231-a49d-46eb-b945-967b18e309f0',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
     }
-    remove(id) {
-        return `This action removes a #${id} account`;
+    async update(id, updateAccountDto) {
+        try {
+            const entity = await this.findOne(id);
+            if (updateAccountDto.name) {
+                entity.updateName(updateAccountDto.name);
+            }
+            if (updateAccountDto.createdBy) {
+                entity.updateOwner(updateAccountDto.createdBy);
+            }
+            if (updateAccountDto.updatedBy) {
+                entity.updateUpdatedBy(updateAccountDto.updatedBy);
+            }
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.update.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async remove(id) {
+        try {
+            const entity = await this.findOne(id);
+            entity.softDelete(entity.updatedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.remove.name} encountered an error`, {
+                correlationId: 'c66f2ab8-2721-44f7-ba05-daa1aaf1b764',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
     }
 };
 exports.AccountService = AccountService;
@@ -874,6 +968,14 @@ exports.AccountMapper = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const account_entity_1 = __webpack_require__(/*! ../entities/account.entity */ "./src/modules/account/entities/account.entity.ts");
 let AccountMapper = AccountMapper_1 = class AccountMapper {
+    static toInterface(entity) {
+        return {
+            ...entity.props,
+        };
+    }
+    toInterface(entity) {
+        return AccountMapper_1.toInterface(entity);
+    }
     static toDomain(model) {
         return new account_entity_1.Account({
             ...model,
@@ -881,6 +983,14 @@ let AccountMapper = AccountMapper_1 = class AccountMapper {
     }
     toDomain(model) {
         return AccountMapper_1.toDomain(model);
+    }
+    static toPersistence(entity) {
+        return {
+            ...entity.props,
+        };
+    }
+    toPersistence(entity) {
+        return AccountMapper_1.toPersistence(entity);
     }
 };
 exports.AccountMapper = AccountMapper;
@@ -913,6 +1023,8 @@ const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 class CreateAccountDto {
     name;
+    createdBy;
+    updatedBy;
 }
 exports.CreateAccountDto = CreateAccountDto;
 __decorate([
@@ -920,6 +1032,16 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateAccountDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateAccountDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateAccountDto.prototype, "updatedBy", void 0);
 
 
 /***/ }),
@@ -988,6 +1110,13 @@ class Account {
         this.props.name = newName;
         this.touch();
     }
+    updateOwner(id) {
+        this.props.createdBy = id;
+        this.touch();
+    }
+    updateUpdatedBy(id) {
+        this.touch(id);
+    }
     softDelete(byUserId) {
         this.props.deletedAt = new Date();
         if (byUserId) {
@@ -998,8 +1127,11 @@ class Account {
         this.props.deletedAt = undefined;
         this.props.deletedBy = undefined;
     }
-    touch() {
+    touch(updatedBy) {
         this.props.updatedAt = new Date();
+        if (updatedBy) {
+            this.props.updatedBy = updatedBy;
+        }
     }
 }
 exports.Account = Account;
@@ -1527,6 +1659,7 @@ const create_account_dto_1 = __webpack_require__(/*! ../account/dto/create-accou
 const create_user_dto_1 = __webpack_require__(/*! ../user/dto/create-user.dto */ "./src/modules/user/dto/create-user.dto.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const update_user_dto_1 = __webpack_require__(/*! ../user/dto/update-user.dto */ "./src/modules/user/dto/update-user.dto.ts");
+const update_account_dto_1 = __webpack_require__(/*! ../account/dto/update-account.dto */ "./src/modules/account/dto/update-account.dto.ts");
 let AuthService = class AuthService {
     logger;
     dataSource;
@@ -1567,7 +1700,7 @@ let AuthService = class AuthService {
         const token = this._generateToken(user);
         const updateUserDto = new update_user_dto_1.UpdateUserDto();
         updateUserDto.refresh_token = token.refresh_token;
-        await this.userService.update(user.id, updateUserDto);
+        await this.userService.update(user.id, updateUserDto, user.id);
         return token;
     }
     async register(registerDto) {
@@ -1587,6 +1720,9 @@ let AuthService = class AuthService {
             createUserDto.email = registerDto.email;
             createUserDto.password = bcrypt.hashSync(registerDto.password, 10);
             const user = await this.userService.createWithManager(createUserDto, manager);
+            const updateAccountDto = new update_account_dto_1.UpdateAccountDto();
+            updateAccountDto.createdBy = user.id;
+            await this.accountService.updateWithManager(account.id, updateAccountDto, manager);
             const token = this._generateToken(user);
             const updateUserDto = new update_user_dto_1.UpdateUserDto();
             updateUserDto.refresh_token = token.refresh_token;
@@ -1740,12 +1876,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CaslAbilityFactory = exports.Action = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const user_entity_1 = __webpack_require__(/*! src/modules/user/entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
 const ability_1 = __webpack_require__(/*! @casl/ability */ "@casl/ability");
 const account_entity_1 = __webpack_require__(/*! src/modules/account/entities/account.entity */ "./src/modules/account/entities/account.entity.ts");
+const user_service_1 = __webpack_require__(/*! src/modules/user/user.service */ "./src/modules/user/user.service.ts");
 var Action;
 (function (Action) {
     Action["Manage"] = "manage";
@@ -1755,18 +1899,27 @@ var Action;
     Action["Delete"] = "delete";
 })(Action || (exports.Action = Action = {}));
 let CaslAbilityFactory = class CaslAbilityFactory {
-    createForUser(user) {
+    userService;
+    constructor(userService) {
+        this.userService = userService;
+    }
+    async createForUser(userId) {
+        const user = await this.userService.findOne(userId);
         const { can, cannot, build } = new ability_1.AbilityBuilder(ability_1.createMongoAbility);
         if ([user_entity_1.Role.Owner, user_entity_1.Role.Admin].includes(user.role)) {
             can(Action.Manage, 'all');
         }
         else {
-            can(Action.Read, 'all');
+            can(Action.Read, user_entity_1.User);
+            can(Action.Read, account_entity_1.Account, { createdBy: user.id });
+            can(Action.Read, account_entity_1.Account, { id: user.accountId });
+            can(Action.Update, user_entity_1.User, { id: user.id });
+            can(Action.Update, account_entity_1.Account, { createdBy: user.id });
+            can(Action.Create, user_entity_1.User);
+            cannot(Action.Create, account_entity_1.Account);
+            cannot(Action.Delete, user_entity_1.User);
+            cannot(Action.Delete, account_entity_1.Account);
         }
-        can(Action.Update, account_entity_1.Account, { createdBy: user.id });
-        can(Action.Update, user_entity_1.User, { id: user.id });
-        cannot(Action.Delete, account_entity_1.Account);
-        cannot(Action.Delete, user_entity_1.User);
         return build({
             detectSubjectType: (item) => item.constructor,
         });
@@ -1774,7 +1927,9 @@ let CaslAbilityFactory = class CaslAbilityFactory {
 };
 exports.CaslAbilityFactory = CaslAbilityFactory;
 exports.CaslAbilityFactory = CaslAbilityFactory = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(user_service_1.UserService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
 ], CaslAbilityFactory);
 
 
@@ -1795,17 +1950,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CaslModule = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const casl_ability_factory_1 = __webpack_require__(/*! ./casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
-const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
+const casl_ability_factory_1 = __webpack_require__(/*! ./casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const user_model_1 = __webpack_require__(/*! ../user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const user_service_1 = __webpack_require__(/*! ../user/user.service */ "./src/modules/user/user.service.ts");
+const user_mapper_1 = __webpack_require__(/*! ../user/dto/user.mapper */ "./src/modules/user/dto/user.mapper.ts");
 let CaslModule = class CaslModule {
 };
 exports.CaslModule = CaslModule;
 exports.CaslModule = CaslModule = __decorate([
     (0, common_1.Module)({
-        imports: [logging_1.LoggingModule],
-        providers: [casl_ability_factory_1.CaslAbilityFactory, policies_guard_1.PoliciesGuard],
+        imports: [logging_1.LoggingModule, typeorm_1.TypeOrmModule.forFeature([user_model_1.User])],
+        providers: [casl_ability_factory_1.CaslAbilityFactory, policies_guard_1.PoliciesGuard, user_service_1.UserService, user_mapper_1.UserMapper],
         exports: [casl_ability_factory_1.CaslAbilityFactory, policies_guard_1.PoliciesGuard],
     })
 ], CaslModule);
@@ -1937,6 +2096,8 @@ class CreateUserDto {
     name;
     refresh_token;
     role;
+    createdBy;
+    updatedBy;
 }
 exports.CreateUserDto = CreateUserDto;
 __decorate([
@@ -1973,6 +2134,16 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", typeof (_a = typeof user_entity_1.Role !== "undefined" && user_entity_1.Role) === "function" ? _a : Object)
 ], CreateUserDto.prototype, "role", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "updatedBy", void 0);
 
 
 /***/ }),
@@ -2124,13 +2295,26 @@ class User {
         if (byUserId) {
             this.props.deletedBy = byUserId;
         }
+        this.touch();
+    }
+    updateOwner(id) {
+        this.props.createdBy = id;
+        this.touch();
+    }
+    updateUpdatedBy(id) {
+        this.props.updatedBy = id;
+        this.touch();
     }
     restore() {
         this.props.deletedAt = undefined;
         this.props.deletedBy = undefined;
+        this.touch();
     }
-    touch() {
+    touch(id) {
         this.props.updatedAt = new Date();
+        if (id) {
+            this.props.updatedBy = id;
+        }
     }
 }
 exports.User = User;
@@ -2418,7 +2602,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserController = void 0;
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
@@ -2436,19 +2620,22 @@ const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ ".
 const casl_ability_factory_1 = __webpack_require__(/*! ../casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
 const auth_guard_1 = __webpack_require__(/*! src/guards/auth.guard */ "./src/guards/auth.guard.ts");
 const user_mapper_1 = __webpack_require__(/*! ./dto/user.mapper */ "./src/modules/user/dto/user.mapper.ts");
+const user_decorator_1 = __webpack_require__(/*! ../../decorators/user.decorator */ "./src/decorators/user.decorator.ts");
 let UserController = class UserController {
     logger;
     service;
     mapper;
+    caslAbilityFactory;
     commandBus;
-    constructor(logger, service, mapper, commandBus) {
+    constructor(logger, service, mapper, caslAbilityFactory, commandBus) {
         this.logger = logger;
         this.service = service;
         this.mapper = mapper;
+        this.caslAbilityFactory = caslAbilityFactory;
         this.commandBus = commandBus;
     }
-    async create(createUserDto) {
-        const result = await this.service.create(createUserDto);
+    async create(createUserDto, userId) {
+        const result = await this.service.create(createUserDto, userId);
         await this.commandBus.execute(new user_created_command_1.UserCreatedCommand(result));
         return result;
     }
@@ -2459,14 +2646,30 @@ let UserController = class UserController {
             data: result.data.map((user) => this.mapper.toInterface(user)),
         };
     }
-    findOne(id) {
-        return this.service.findOne(id);
+    async findOne(id, userId) {
+        const ability = await this.caslAbilityFactory.createForUser(userId);
+        const user = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Read, user)) {
+            throw new common_1.UnauthorizedException();
+        }
+        return user;
     }
-    update(id, updateUserDto) {
-        return this.service.update(id, updateUserDto);
+    async update(id, updateUserDto, userId) {
+        const ability = await this.caslAbilityFactory.createForUser(userId);
+        const user = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Update, user)) {
+            this.logger.debug('failing because we got here....');
+            throw new common_1.UnauthorizedException();
+        }
+        return this.service.update(id, updateUserDto, userId);
     }
-    remove(id) {
-        return this.service.remove(id);
+    async remove(id, userId) {
+        const ability = await this.caslAbilityFactory.createForUser(userId);
+        const user = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Update, user)) {
+            throw new common_1.UnauthorizedException();
+        }
+        return this.service.remove(id, userId);
     }
 };
 exports.UserController = UserController;
@@ -2474,8 +2677,9 @@ __decorate([
     (0, common_1.Post)(),
     (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Create, user_entity_1.User)),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, user_decorator_1.User)('sub')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof create_user_dto_1.CreateUserDto !== "undefined" && create_user_dto_1.CreateUserDto) === "function" ? _e : Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_user_dto_1.CreateUserDto !== "undefined" && create_user_dto_1.CreateUserDto) === "function" ? _f : Object, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "create", null);
 __decorate([
@@ -2488,32 +2692,35 @@ __decorate([
     __param(1, (0, common_1.Query)('take')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], UserController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, user_entity_1.User)),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, user_decorator_1.User)('sub')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
 ], UserController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Update, user_entity_1.User)),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, user_decorator_1.User)('sub')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_g = typeof update_user_dto_1.UpdateUserDto !== "undefined" && update_user_dto_1.UpdateUserDto) === "function" ? _g : Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, typeof (_h = typeof update_user_dto_1.UpdateUserDto !== "undefined" && update_user_dto_1.UpdateUserDto) === "function" ? _h : Object, String]),
+    __metadata("design:returntype", Promise)
 ], UserController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Delete, user_entity_1.User)),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, user_decorator_1.User)('sub')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
 ], UserController.prototype, "remove", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
@@ -2523,8 +2730,9 @@ exports.UserController = UserController = __decorate([
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(user_service_1.UserService)),
     __param(2, (0, common_1.Inject)(user_mapper_1.UserMapper)),
-    __param(3, (0, common_1.Inject)(cqrs_1.CommandBus)),
-    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _b : Object, typeof (_c = typeof user_mapper_1.UserMapper !== "undefined" && user_mapper_1.UserMapper) === "function" ? _c : Object, typeof (_d = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _d : Object])
+    __param(3, (0, common_1.Inject)(casl_ability_factory_1.CaslAbilityFactory)),
+    __param(4, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _b : Object, typeof (_c = typeof user_mapper_1.UserMapper !== "undefined" && user_mapper_1.UserMapper) === "function" ? _c : Object, typeof (_d = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _d : Object, typeof (_e = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _e : Object])
 ], UserController);
 
 
@@ -2599,12 +2807,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserService = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
-const user_model_1 = __webpack_require__(/*! ./entities/user.model */ "./src/modules/user/entities/user.model.ts");
 const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
 const user_mapper_1 = __webpack_require__(/*! ./dto/user.mapper */ "./src/modules/user/dto/user.mapper.ts");
+const user_model_1 = __webpack_require__(/*! ./entities/user.model */ "./src/modules/user/entities/user.model.ts");
 let UserService = class UserService {
     logger;
     repo;
@@ -2620,8 +2828,8 @@ let UserService = class UserService {
         const result = await repo.save(entity);
         return this.mapper.toDomain(result);
     }
-    async create(createUserDto) {
-        const entity = this.repo.create({ ...createUserDto });
+    async create(createUserDto, createdBy) {
+        const entity = this.repo.create({ ...createUserDto, createdBy });
         const result = await this.repo.save(entity);
         return this.mapper.toDomain(result);
     }
@@ -2707,6 +2915,12 @@ let UserService = class UserService {
             if (updateUserDto.password) {
                 entity.updatePassword(updateUserDto.password);
             }
+            if (updateUserDto.createdBy) {
+                entity.updateOwner(updateUserDto.createdBy);
+            }
+            if (updateUserDto.updatedBy) {
+                entity.updateUpdatedBy(updateUserDto.updatedBy);
+            }
             await repo.update(entity.id, this.mapper.toPersistence(entity));
             return entity;
         }
@@ -2718,7 +2932,7 @@ let UserService = class UserService {
             throw new common_1.InternalServerErrorException();
         }
     }
-    async update(id, updateUserDto) {
+    async update(id, updateUserDto, updatedBy) {
         try {
             const entity = await this.findOne(id);
             if (updateUserDto.email) {
@@ -2736,6 +2950,7 @@ let UserService = class UserService {
             if (updateUserDto.password) {
                 entity.updatePassword(updateUserDto.password);
             }
+            entity.updateUpdatedBy(updatedBy);
             await this.repo.update(entity.id, this.mapper.toPersistence(entity));
             return entity;
         }
@@ -2747,8 +2962,20 @@ let UserService = class UserService {
             throw new common_1.InternalServerErrorException();
         }
     }
-    remove(id) {
-        return `This action removes a #${id} user`;
+    async remove(id, removedBy) {
+        try {
+            const entity = await this.findOne(id);
+            entity.softDelete(removedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.remove.name} encountered an error`, {
+                correlationId: 'b76287ba-c244-475f-adcb-52c6917ba739',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
     }
 };
 exports.UserService = UserService;

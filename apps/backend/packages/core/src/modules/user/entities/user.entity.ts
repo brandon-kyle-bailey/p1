@@ -113,14 +113,29 @@ export class User {
     if (byUserId) {
       this.props.deletedBy = byUserId;
     }
+    this.touch();
+  }
+
+  updateOwner(id: string) {
+    this.props.createdBy = id;
+    this.touch();
+  }
+
+  updateUpdatedBy(id: string) {
+    this.props.updatedBy = id;
+    this.touch();
   }
 
   restore() {
     this.props.deletedAt = undefined;
     this.props.deletedBy = undefined;
+    this.touch();
   }
 
-  private touch() {
+  private touch(id?: string) {
     this.props.updatedAt = new Date();
+    if (id) {
+      this.props.updatedBy = id;
+    }
   }
 }

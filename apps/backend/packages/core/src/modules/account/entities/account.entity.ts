@@ -10,7 +10,7 @@ export interface AccountProps {
 }
 
 export class Account {
-  private props: AccountProps;
+  props: AccountProps;
 
   constructor(props: AccountProps) {
     this.props = {
@@ -57,6 +57,15 @@ export class Account {
     this.touch();
   }
 
+  updateOwner(id: string) {
+    this.props.createdBy = id;
+    this.touch();
+  }
+
+  updateUpdatedBy(id: string) {
+    this.touch(id);
+  }
+
   softDelete(byUserId?: string) {
     this.props.deletedAt = new Date();
     if (byUserId) {
@@ -69,7 +78,10 @@ export class Account {
     this.props.deletedBy = undefined;
   }
 
-  private touch() {
+  private touch(updatedBy?: string) {
     this.props.updatedAt = new Date();
+    if (updatedBy) {
+      this.props.updatedBy = updatedBy;
+    }
   }
 }

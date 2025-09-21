@@ -38,4 +38,12 @@ export class CreateUserDto {
   @IsEnum(Role)
   @IsOptional()
   role?: Role;
+
+  @IsUUID()
+  @IsOptional()
+  createdBy?: string;
+
+  @IsUUID()
+  @IsOptional()
+  updatedBy?: string;
 }
