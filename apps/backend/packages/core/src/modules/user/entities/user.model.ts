@@ -15,6 +15,7 @@ import {
 import { Role } from './user.entity';
 import { WorkspaceUser } from 'src/modules/workspace/entities/workspace-user.model';
 import { Workspace } from 'src/modules/workspace/entities/workspace.model';
+import { Integration } from 'src/modules/integration/entities/integration.model';
 
 @Entity('users')
 export class User {
@@ -40,6 +41,11 @@ export class User {
     inverseJoinColumn: { name: 'workspaceId', referencedColumnName: 'id' },
   })
   workspaces: Workspace[];
+
+  @OneToMany(() => Integration, (integration) => integration.user, {
+    cascade: true,
+  })
+  integrations?: Integration[];
 
   @Column({ unique: true })
   email: string;

@@ -26,6 +26,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
 import { Workspace } from './workspace/entities/workspace.model';
 import { App } from './app/entities/app.model';
 import { WorkspaceUser } from './workspace/entities/workspace-user.model';
+import { IntegrationModule } from './integration/integration.module';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { WorkspaceUser } from './workspace/entities/workspace-user.model';
     CaslModule,
     AppsModule,
     WorkspaceModule,
+    IntegrationModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: LoggingThrottlerGuard }],
 })

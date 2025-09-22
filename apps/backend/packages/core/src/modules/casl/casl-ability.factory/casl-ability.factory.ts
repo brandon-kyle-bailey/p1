@@ -12,6 +12,7 @@ import { Account } from 'src/modules/account/entities/account.entity';
 import { UserService } from 'src/modules/user/user.service';
 import { App } from 'src/modules/app/entities/app.entity';
 import { Workspace } from 'src/modules/workspace/entities/workspace.entity';
+import { Integration } from 'src/modules/integration/entities/integration.entity';
 
 export enum Action {
   Manage = 'manage',
@@ -22,7 +23,13 @@ export enum Action {
 }
 
 type Subjects =
-  | InferSubjects<typeof User | typeof Account | typeof App | typeof Workspace>
+  | InferSubjects<
+      | typeof User
+      | typeof Account
+      | typeof App
+      | typeof Workspace
+      | typeof Integration
+    >
   | 'all';
 
 export type AppAbility = MongoAbility<[Action, Subjects]>;
@@ -37,9 +44,11 @@ export class CaslAbilityFactory {
     if ([Role.Admin].includes(user.role)) {
       can(Action.Manage, 'all');
     } else {
+      cannot(Action.Create, Account);
       can(Action.Create, User);
       can(Action.Create, App);
       can(Action.Create, Workspace);
+      can(Action.Create, Integration);
 
       can(Action.Read, User, { accountId: user.accountId });
       can(Action.Read, Account, { createdBy: user.id });
@@ -48,21 +57,20 @@ export class CaslAbilityFactory {
       can(Action.Read, App, { id: user.accountId });
       can(Action.Read, Workspace, { createdBy: user.id });
       can(Action.Read, Workspace, { id: user.accountId });
-
-      can(Action.Read, Workspace, { createdBy: user.id });
-      can(Action.Read, Workspace, { id: user.accountId });
+      can(Action.Read, Integration, { createdBy: user.id });
+      can(Action.Read, Integration, { id: user.accountId });
 
       can(Action.Update, User, { id: user.id });
       can(Action.Update, Account, { createdBy: user.id });
       can(Action.Update, App, { createdBy: user.id });
       can(Action.Update, Workspace, { createdBy: user.id });
-
-      cannot(Action.Create, Account);
+      can(Action.Update, Integration, { createdBy: user.id });
 
       cannot(Action.Delete, User);
       cannot(Action.Delete, Account);
       cannot(Action.Delete, App);
       cannot(Action.Delete, Workspace);
+      cannot(Action.Delete, Integration);
     }
 
     return build({
