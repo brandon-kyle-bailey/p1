@@ -1,0 +1,1 @@
+console.log("webextension - background page loaded");

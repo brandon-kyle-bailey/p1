@@ -1,0 +1,28 @@
+{
+  "manifest_version": 2,
+  "name": "webextension",
+  "version": "0.1",
+  "description": "webextension description",
+  "content_scripts": [
+    {
+      "matches": ["https://developer.mozilla.org/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "permissions": [],
+  "icons": [
+    {
+      "src": "icon.png"
+    }
+  ],
+  "browser_action": {
+    "default_title": "webextension (browserAction)",
+    "default_icon": {
+      "64": "icon.png"
+    }
+  },
+  "background": {
+    "scripts": ["background.js"]
+  }
+}
+

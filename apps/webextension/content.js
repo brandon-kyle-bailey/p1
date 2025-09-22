@@ -1,0 +1,1 @@
+console.log("webextension - content script loaded");

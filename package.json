@@ -9,9 +9,10 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "@types/chrome": "^0.1.12",
     "prettier": "^3.6.2",
     "turbo": "^2.5.5",
-    "typescript": "5.8.3"
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=18"
