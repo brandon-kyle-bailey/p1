@@ -1,4 +1,7 @@
 import { Account } from 'src/modules/account/entities/account.model';
+import { Department } from 'src/modules/department/entities/department.model';
+import { WorkspaceUser } from 'src/modules/workspace/entities/workspace-user.model';
+import { Workspace } from 'src/modules/workspace/entities/workspace.model';
 import {
   Column,
   CreateDateColumn,
@@ -13,9 +16,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Role } from './user.entity';
-import { WorkspaceUser } from 'src/modules/workspace/entities/workspace-user.model';
-import { Workspace } from 'src/modules/workspace/entities/workspace.model';
-import { Integration } from 'src/modules/integration/entities/integration.model';
 
 @Entity('users')
 export class User {
@@ -42,10 +42,14 @@ export class User {
   })
   workspaces: Workspace[];
 
-  @OneToMany(() => Integration, (integration) => integration.user, {
-    cascade: true,
+  @Column({ nullable: true })
+  departmentId?: string;
+
+  @ManyToOne(() => Department, (relation) => relation.users, {
+    onDelete: 'CASCADE',
   })
-  integrations?: Integration[];
+  @JoinColumn({ name: 'departmentId' })
+  department?: Department;
 
   @Column({ unique: true })
   email: string;

@@ -1,7 +1,7 @@
 export interface IntegrationProps {
   id: string;
   accountId: string;
-  userId: string;
+  appId: string;
   name: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -30,8 +30,8 @@ export class Integration {
     return this.props.accountId;
   }
 
-  get userId() {
-    return this.props.userId;
+  get appId() {
+    return this.props.appId;
   }
 
   get name() {

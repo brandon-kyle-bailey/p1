@@ -6,9 +6,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Category } from './app.entity';
+import { Integration } from 'src/modules/integration/entities/integration.model';
 
 @Entity('apps')
 export class App {
@@ -24,8 +27,16 @@ export class App {
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
+  @OneToMany(() => Integration, (relation) => relation.app, {
+    cascade: true,
+  })
+  integrations?: Integration[];
+
   @Column()
   name: string;
+
+  @Column({ type: 'enum', enum: Category, default: Category.None })
+  category: Category;
 
   @Column({ nullable: true })
   description?: string;

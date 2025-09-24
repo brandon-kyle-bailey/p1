@@ -1,5 +1,5 @@
 import { Account } from 'src/modules/account/entities/account.model';
-import { App } from 'src/modules/app/entities/app.model';
+import { User } from 'src/modules/user/entities/user.model';
 import {
   Column,
   CreateDateColumn,
@@ -7,32 +7,29 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('integrations')
-export class Integration {
+@Entity('departments')
+export class Department {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ nullable: false })
   accountId: string;
 
-  @ManyToOne(() => Account, (account) => account.users, {
+  @ManyToOne(() => Account, (account) => account.departments, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
-  @Column({ nullable: false })
-  appId: string;
-
-  @ManyToOne(() => App, (relation) => relation.integrations, {
-    onDelete: 'CASCADE',
+  @OneToMany(() => User, (user) => user.department, {
+    cascade: true,
   })
-  @JoinColumn({ name: 'appId' })
-  app: App;
+  users?: User[];
 
   @Column()
   name: string;

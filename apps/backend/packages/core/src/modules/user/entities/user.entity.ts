@@ -11,6 +11,7 @@ export interface UserProps {
   password: string;
   role: Role;
   name?: string;
+  departmentId?: string;
   refresh_token?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -37,6 +38,10 @@ export class User {
 
   get accountId() {
     return this.props.accountId;
+  }
+
+  get departmentId() {
+    return this.props.departmentId;
   }
 
   get email() {
@@ -105,6 +110,11 @@ export class User {
 
   updatePassword(newPassword: string) {
     this.props.password = newPassword;
+    this.touch();
+  }
+
+  updateDepartment(departmentId: string) {
+    this.props.departmentId = departmentId;
     this.touch();
   }
 

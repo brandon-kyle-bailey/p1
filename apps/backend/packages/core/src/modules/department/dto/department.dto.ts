@@ -1,33 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsDateString,
-  IsEnum,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
-import { Category } from '../entities/app.entity';
+import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
-export class AppDto {
-  constructor(partial: Partial<AppDto>) {
+export class DepartmentDto {
+  constructor(partial: Partial<DepartmentDto>) {
     Object.assign(this, partial);
   }
   @ApiProperty({ description: 'The id of the account' })
   @IsUUID()
   accountId: string;
 
-  @ApiProperty({ description: 'The name of the app' })
+  @ApiProperty({ description: 'The id of the user' })
+  @IsUUID()
+  userId: string;
+
+  @ApiProperty({ description: 'The name of the integration' })
   @IsString()
   name: string;
-
-  @ApiProperty({ description: 'The description of the app' })
-  @IsString()
-  description: string;
-
-  @ApiProperty({ description: 'The category of the app' })
-  @IsEnum(Category)
-  @IsOptional()
-  category: Category;
 
   @IsUUID()
   @IsOptional()

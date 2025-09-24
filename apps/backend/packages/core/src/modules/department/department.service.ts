@@ -7,32 +7,36 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
-import { AppMapper } from './dto/app.mapper';
-import { CreateAppDto } from './dto/create-app.dto';
-import { UpdateAppDto } from './dto/update-app.dto';
-import { App as AppDomain } from './entities/app.entity';
-import { App } from './entities/app.model';
+import { DepartmentMapper } from './dto/department.mapper';
+import { Department as DepartmentDomain } from './entities/department.entity';
+import { Department } from './entities/department.model';
+import { CreateDepartmentDto } from './dto/create-department.dto';
+import { UpdateDepartmentDto } from './dto/update-department.dto';
 
 @Injectable()
-export class AppService {
+export class DepartmentService {
   constructor(
     @Inject(LoggingService)
     private readonly logger: LoggingService,
-    @InjectRepository(App)
-    private readonly repo: Repository<App>,
-    @Inject(AppMapper)
-    private readonly mapper: AppMapper,
+    @InjectRepository(Department)
+    private readonly repo: Repository<Department>,
+    @Inject(DepartmentMapper)
+    private readonly mapper: DepartmentMapper,
   ) {}
 
-  async createWithManager(createAppDto: CreateAppDto, manager: EntityManager) {
-    const repo = manager.getRepository(App);
-    const entity = repo.create({ ...createAppDto });
+  async createWithManager(
+    createDepartmentDto: CreateDepartmentDto,
+    manager: EntityManager,
+  ) {
+    const repo = manager.getRepository(Department);
+    const entity = repo.create({ ...createDepartmentDto });
     const result = await repo.save(entity);
     return this.mapper.toDomain(result);
   }
 
-  async create(createAppDto: CreateAppDto, createdBy: string) {
-    const entity = this.repo.create({ ...createAppDto, createdBy });
+  async create(createDepartmentDto: CreateDepartmentDto, createdBy: string) {
+    // TODO:... move to transaction
+    const entity = this.repo.create({ ...createDepartmentDto, createdBy });
     const result = await this.repo.save(entity);
     return this.mapper.toDomain(result);
   }
@@ -40,7 +44,7 @@ export class AppService {
   async findAll(
     skip: number = 0,
     take: number = 100,
-    where: FindOptionsWhere<App>,
+    where: FindOptionsWhere<Department>,
   ) {
     try {
       const [entities, count] = await this.repo.findAndCount({
@@ -72,7 +76,7 @@ export class AppService {
     }
   }
 
-  async findOne(id: string): Promise<AppDomain> {
+  async findOne(id: string): Promise<DepartmentDomain> {
     try {
       const entity = await this.repo.findOneBy({ id });
       if (!entity) {
@@ -91,7 +95,7 @@ export class AppService {
     }
   }
 
-  async findOneByName(name: string): Promise<AppDomain> {
+  async findOneByName(name: string): Promise<DepartmentDomain> {
     try {
       const model = await this.repo.findOneBy({ name });
       if (!model) {
@@ -112,24 +116,24 @@ export class AppService {
 
   async updateWithManager(
     id: string,
-    updateAppDto: UpdateAppDto,
+    updateDepartmentDto: UpdateDepartmentDto,
     manager: EntityManager,
-  ): Promise<AppDomain> {
+  ): Promise<DepartmentDomain> {
     try {
-      const repo = manager.getRepository(App);
+      const repo = manager.getRepository(Department);
       const model = await repo.findOneBy({ id });
       if (!model) {
         throw new NotFoundException();
       }
       const entity = this.mapper.toDomain(model);
-      if (updateAppDto.name) {
-        entity.updateName(updateAppDto.name);
+      if (updateDepartmentDto.name) {
+        entity.updateName(updateDepartmentDto.name);
       }
-      if (updateAppDto.createdBy) {
-        entity.updateOwner(updateAppDto.createdBy);
+      if (updateDepartmentDto.createdBy) {
+        entity.updateOwner(updateDepartmentDto.createdBy);
       }
-      if (updateAppDto.updatedBy) {
-        entity.updateUpdatedBy(updateAppDto.updatedBy);
+      if (updateDepartmentDto.updatedBy) {
+        entity.updateUpdatedBy(updateDepartmentDto.updatedBy);
       }
       await repo.update(entity.id, this.mapper.toPersistence(entity));
       return entity;
@@ -147,19 +151,13 @@ export class AppService {
 
   async update(
     id: string,
-    updateAppDto: UpdateAppDto,
+    updateDepartmentDto: UpdateDepartmentDto,
     updatedBy: string,
-  ): Promise<AppDomain> {
+  ): Promise<DepartmentDomain> {
     try {
       const entity = await this.findOne(id);
-      if (updateAppDto.name) {
-        entity.updateName(updateAppDto.name);
-      }
-      if (updateAppDto.description) {
-        entity.updateDescription(updateAppDto.description);
-      }
-      if (updateAppDto.category) {
-        entity.updateDescription(updateAppDto.category);
+      if (updateDepartmentDto.name) {
+        entity.updateName(updateDepartmentDto.name);
       }
       entity.updateUpdatedBy(updatedBy);
       await this.repo.update(entity.id, this.mapper.toPersistence(entity));

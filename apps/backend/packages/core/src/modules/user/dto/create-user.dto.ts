@@ -15,6 +15,11 @@ export class CreateUserDto {
   @IsUUID()
   accountId: string;
 
+  @ApiProperty({ description: 'The id of the department' })
+  @IsUUID()
+  @IsOptional()
+  departmentId?: string;
+
   @ApiProperty({ description: 'The email address of the user' })
   @IsEmail()
   email: string;

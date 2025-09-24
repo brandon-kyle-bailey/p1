@@ -28,6 +28,8 @@ import { App } from './app/entities/app.model';
 import { WorkspaceUser } from './workspace/entities/workspace-user.model';
 import { IntegrationModule } from './integration/integration.module';
 import { AiModule } from './ai/ai.module';
+import { Integration } from './integration/entities/integration.model';
+import { Department } from './department/entities/department.model';
 
 @Module({
   imports: [
@@ -44,7 +46,15 @@ import { AiModule } from './ai/ai.module';
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'p1'),
-        entities: [Account, User, App, Workspace, WorkspaceUser],
+        entities: [
+          Account,
+          User,
+          App,
+          Integration,
+          Department,
+          Workspace,
+          WorkspaceUser,
+        ],
         synchronize: true,
         autoLoadEntities: true,
         retryAttempts: 10,

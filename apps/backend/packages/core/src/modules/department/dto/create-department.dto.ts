@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString, IsUUID } from 'class-validator';
 
-export class CreateIntegrationDto {
+export class CreateDepartmentDto {
   @IsUUID()
   @IsOptional()
   accountId?: string;

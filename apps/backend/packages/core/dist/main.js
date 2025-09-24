@@ -1674,6 +1674,7 @@ const app_model_1 = __webpack_require__(/*! ./app/entities/app.model */ "./src/m
 const workspace_user_model_1 = __webpack_require__(/*! ./workspace/entities/workspace-user.model */ "./src/modules/workspace/entities/workspace-user.model.ts");
 const integration_module_1 = __webpack_require__(/*! ./integration/integration.module */ "./src/modules/integration/integration.module.ts");
 const ai_module_1 = __webpack_require__(/*! ./ai/ai.module */ "./src/modules/ai/ai.module.ts");
+const integration_model_1 = __webpack_require__(/*! ./integration/entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -1693,7 +1694,7 @@ exports.AppModule = AppModule = __decorate([
                     username: config.get('DB_USER', 'postgres'),
                     password: config.get('DB_PASS', 'postgres'),
                     database: config.get('DB_NAME', 'p1'),
-                    entities: [account_model_1.Account, user_model_1.User, app_model_1.App, workspace_model_1.Workspace, workspace_user_model_1.WorkspaceUser],
+                    entities: [account_model_1.Account, user_model_1.User, app_model_1.App, integration_model_1.Integration, workspace_model_1.Workspace, workspace_user_model_1.WorkspaceUser],
                     synchronize: true,
                     autoLoadEntities: true,
                     retryAttempts: 10,
@@ -2113,6 +2114,9 @@ let AppService = class AppService {
             if (updateAppDto.description) {
                 entity.updateDescription(updateAppDto.description);
             }
+            if (updateAppDto.category) {
+                entity.updateDescription(updateAppDto.category);
+            }
             entity.updateUpdatedBy(updatedBy);
             await this.repo.update(entity.id, this.mapper.toPersistence(entity));
             return entity;
@@ -2235,11 +2239,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const app_entity_1 = __webpack_require__(/*! ../entities/app.entity */ "./src/modules/app/entities/app.entity.ts");
 class AppDto {
     constructor(partial) {
         Object.assign(this, partial);
@@ -2247,6 +2252,7 @@ class AppDto {
     accountId;
     name;
     description;
+    category;
     createdBy;
     updatedBy;
     deletedBy;
@@ -2271,6 +2277,12 @@ __decorate([
     __metadata("design:type", String)
 ], AppDto.prototype, "description", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The category of the app' }),
+    (0, class_validator_1.IsEnum)(app_entity_1.Category),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof app_entity_1.Category !== "undefined" && app_entity_1.Category) === "function" ? _a : Object)
+], AppDto.prototype, "category", void 0);
+__decorate([
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -2288,17 +2300,17 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], AppDto.prototype, "createdAt", void 0);
 __decorate([
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
 ], AppDto.prototype, "updatedAt", void 0);
 __decorate([
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
 ], AppDto.prototype, "deletedAt", void 0);
 
 
@@ -2360,14 +2372,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateAppDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const app_entity_1 = __webpack_require__(/*! ../entities/app.entity */ "./src/modules/app/entities/app.entity.ts");
 class CreateAppDto {
     name;
     accountId;
     description;
+    category;
     createdBy;
     updatedBy;
 }
@@ -2387,6 +2402,11 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateAppDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(app_entity_1.Category),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof app_entity_1.Category !== "undefined" && app_entity_1.Category) === "function" ? _a : Object)
+], CreateAppDto.prototype, "category", void 0);
 __decorate([
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
@@ -2427,7 +2447,34 @@ exports.UpdateAppDto = UpdateAppDto;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.App = void 0;
+exports.App = exports.Category = exports.Type = void 0;
+var Type;
+(function (Type) {
+})(Type || (exports.Type = Type = {}));
+var Category;
+(function (Category) {
+    Category["None"] = "none";
+    Category["Communication"] = "communication";
+    Category["Collaboration"] = "collaboration";
+    Category["Development"] = "development";
+    Category["Design"] = "design";
+    Category["Storage"] = "storage";
+    Category["CRM"] = "crm";
+    Category["Marketing"] = "marketing";
+    Category["Support"] = "support";
+    Category["HR"] = "hr";
+    Category["Finance"] = "finance";
+    Category["Scheduling"] = "scheduling";
+    Category["Conferencing"] = "conferencing";
+    Category["Infrastructure"] = "infrastructure";
+    Category["Identity"] = "identity";
+    Category["Analytics"] = "analytics";
+    Category["Knowledge"] = "knowledge";
+    Category["Tracking"] = "tracking";
+    Category["Contracts"] = "contracts";
+    Category["Security"] = "security";
+    Category["Automation"] = "automation";
+})(Category || (exports.Category = Category = {}));
 class App {
     props;
     constructor(props) {
@@ -2448,6 +2495,9 @@ class App {
     }
     get description() {
         return this.props.description;
+    }
+    get category() {
+        return this.props.category;
     }
     get createdAt() {
         return this.props.createdAt;
@@ -2473,6 +2523,10 @@ class App {
     }
     updateDescription(description) {
         this.props.description = description;
+        this.touch();
+    }
+    updateCategory(category) {
+        this.props.category = category;
         this.touch();
     }
     softDelete(byUserId) {
@@ -2523,16 +2577,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.App = void 0;
 const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const app_entity_1 = __webpack_require__(/*! ./app.entity */ "./src/modules/app/entities/app.entity.ts");
+const integration_model_1 = __webpack_require__(/*! src/modules/integration/entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
 let App = class App {
     id;
     accountId;
     account;
+    integrations;
     name;
+    category;
     description;
     createdAt;
     updatedAt;
@@ -2558,24 +2616,34 @@ __decorate([
     __metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
 ], App.prototype, "account", void 0);
 __decorate([
+    (0, typeorm_1.OneToMany)(() => integration_model_1.Integration, (relation) => relation.app, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], App.prototype, "integrations", void 0);
+__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], App.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'enum', enum: app_entity_1.Category, default: app_entity_1.Category.None }),
+    __metadata("design:type", typeof (_b = typeof app_entity_1.Category !== "undefined" && app_entity_1.Category) === "function" ? _b : Object)
+], App.prototype, "category", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], App.prototype, "description", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
 ], App.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
-    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
 ], App.prototype, "updatedAt", void 0);
 __decorate([
     (0, typeorm_1.DeleteDateColumn)(),
-    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
 ], App.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
@@ -2626,6 +2694,7 @@ const ai_service_1 = __webpack_require__(/*! src/modules/ai/ai.service */ "./src
 const uuid_1 = __webpack_require__(/*! uuid */ "uuid");
 const app_service_1 = __webpack_require__(/*! ../app.service */ "./src/modules/app/app.service.ts");
 const update_app_dto_1 = __webpack_require__(/*! ../dto/update-app.dto */ "./src/modules/app/dto/update-app.dto.ts");
+const app_entity_1 = __webpack_require__(/*! ../entities/app.entity */ "./src/modules/app/entities/app.entity.ts");
 let AppCreatedHandler = class AppCreatedHandler {
     logger;
     aiService;
@@ -2640,22 +2709,36 @@ let AppCreatedHandler = class AppCreatedHandler {
             correlationId: '8adf5d96-ec23-45bc-abf4-3d650c30a76a',
             command: JSON.stringify(command),
         });
-        const description = await this.aiService.processGenericPrompt({
-            modelId: 'gpt-4o-mini-2024-07-18',
-            id: (0, uuid_1.v4)(),
-            conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
-            timestamp: Date.now(),
-            content: `Provide a short description of this app based on its name: ${command.entity.name}`,
-            contentType: 'text',
-            debug: false,
-        });
+        const modelId = 'gpt-4o-mini-2024-07-18';
+        const [description, category] = await Promise.all([
+            this.aiService.processGenericPrompt({
+                modelId,
+                id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
+                conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
+                timestamp: Date.now(),
+                content: `Short description for ${command.entity.name} dont include name`,
+                contentType: 'text',
+                debug: false,
+            }),
+            this.aiService.processGenericPrompt({
+                modelId,
+                id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
+                conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
+                timestamp: Date.now(),
+                content: `return category that best suites ${command.entity.name}: ${Object.keys(app_entity_1.Category).join(',')}`,
+                contentType: 'text',
+                debug: false,
+            }),
+        ]);
         this.logger.debug(`App description auto generated from ai for app: ${command.entity.id}`, {
             correlationId: '7f12ee2c-2710-48cf-9fc0-27e3ef2169c5',
             appId: command.entity.id,
             description: JSON.stringify(description),
+            category: JSON.stringify(category),
         });
         const updateDto = new update_app_dto_1.UpdateAppDto();
         updateDto.description = description.content;
+        updateDto.category = category.content;
         await this.appService.update(command.entity.id, updateDto, command.entity.createdBy);
         return {
             actionId: (0, uuid_1.v4)(),
@@ -3538,22 +3621,22 @@ const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 class CreateIntegrationDto {
     accountId;
-    userId;
+    appId;
     name;
     createdBy;
     updatedBy;
 }
 exports.CreateIntegrationDto = CreateIntegrationDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
     (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateIntegrationDto.prototype, "accountId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'The id of the user' }),
+    (0, swagger_1.ApiProperty)({ description: 'The id of the app' }),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
-], CreateIntegrationDto.prototype, "userId", void 0);
+], CreateIntegrationDto.prototype, "appId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The name of the workspace' }),
     (0, class_validator_1.IsString)(),
@@ -3740,8 +3823,8 @@ class Integration {
     get accountId() {
         return this.props.accountId;
     }
-    get userId() {
-        return this.props.userId;
+    get appId() {
+        return this.props.appId;
     }
     get name() {
         return this.props.name;
@@ -3820,14 +3903,14 @@ var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Integration = void 0;
 const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
-const user_model_1 = __webpack_require__(/*! src/modules/user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const app_model_1 = __webpack_require__(/*! src/modules/app/entities/app.model */ "./src/modules/app/entities/app.model.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let Integration = class Integration {
     id;
     accountId;
     account;
-    userId;
-    user;
+    appId;
+    app;
     name;
     createdAt;
     updatedAt;
@@ -3855,14 +3938,14 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ nullable: false }),
     __metadata("design:type", String)
-], Integration.prototype, "userId", void 0);
+], Integration.prototype, "appId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_model_1.User, (user) => user.integrations, {
+    (0, typeorm_1.ManyToOne)(() => app_model_1.App, (relation) => relation.integrations, {
         onDelete: 'CASCADE',
     }),
-    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
-    __metadata("design:type", typeof (_b = typeof user_model_1.User !== "undefined" && user_model_1.User) === "function" ? _b : Object)
-], Integration.prototype, "user", void 0);
+    (0, typeorm_1.JoinColumn)({ name: 'appId' }),
+    __metadata("design:type", typeof (_b = typeof app_model_1.App !== "undefined" && app_model_1.App) === "function" ? _b : Object)
+], Integration.prototype, "app", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
@@ -4238,18 +4321,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IntegrationModule = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const integration_service_1 = __webpack_require__(/*! ./integration.service */ "./src/modules/integration/integration.service.ts");
-const integration_controller_1 = __webpack_require__(/*! ./integration.controller */ "./src/modules/integration/integration.controller.ts");
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
-const integration_model_1 = __webpack_require__(/*! ./entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
 const casl_module_1 = __webpack_require__(/*! ../casl/casl.module */ "./src/modules/casl/casl.module.ts");
+const user_model_1 = __webpack_require__(/*! ../user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
 const integration_mapper_1 = __webpack_require__(/*! ./dto/integration.mapper */ "./src/modules/integration/dto/integration.mapper.ts");
+const integration_model_1 = __webpack_require__(/*! ./entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
 const integration_created_handler_1 = __webpack_require__(/*! ./handlers/integration-created.handler */ "./src/modules/integration/handlers/integration-created.handler.ts");
 const integration_removed_handler_1 = __webpack_require__(/*! ./handlers/integration-removed.handler */ "./src/modules/integration/handlers/integration-removed.handler.ts");
 const integration_updated_handler_1 = __webpack_require__(/*! ./handlers/integration-updated.handler */ "./src/modules/integration/handlers/integration-updated.handler.ts");
-const user_model_1 = __webpack_require__(/*! ../user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const integration_controller_1 = __webpack_require__(/*! ./integration.controller */ "./src/modules/integration/integration.controller.ts");
+const integration_service_1 = __webpack_require__(/*! ./integration.service */ "./src/modules/integration/integration.service.ts");
 let IntegrationModule = class IntegrationModule {
 };
 exports.IntegrationModule = IntegrationModule;
@@ -4907,18 +4990,16 @@ var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.User = void 0;
 const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
-const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
-const user_entity_1 = __webpack_require__(/*! ./user.entity */ "./src/modules/user/entities/user.entity.ts");
 const workspace_user_model_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace-user.model */ "./src/modules/workspace/entities/workspace-user.model.ts");
 const workspace_model_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace.model */ "./src/modules/workspace/entities/workspace.model.ts");
-const integration_model_1 = __webpack_require__(/*! src/modules/integration/entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const user_entity_1 = __webpack_require__(/*! ./user.entity */ "./src/modules/user/entities/user.entity.ts");
 let User = class User {
     id;
     accountId;
     account;
     workspaceUsers;
     workspaces;
-    integrations;
     email;
     password;
     role;
@@ -4960,12 +5041,6 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], User.prototype, "workspaces", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => integration_model_1.Integration, (integration) => integration.user, {
-        cascade: true,
-    }),
-    __metadata("design:type", Array)
-], User.prototype, "integrations", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)

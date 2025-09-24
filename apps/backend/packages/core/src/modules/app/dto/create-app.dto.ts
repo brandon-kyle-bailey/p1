@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import { Category } from '../entities/app.entity';
 
 export class CreateAppDto {
   @ApiProperty({ description: 'The name of the app' })
@@ -13,6 +14,10 @@ export class CreateAppDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsEnum(Category)
+  @IsOptional()
+  category?: Category;
 
   @IsUUID()
   @IsOptional()

@@ -1,35 +1,8 @@
-export enum Type {}
-
-export enum Category {
-  None = 'none',
-  Communication = 'communication',
-  Collaboration = 'collaboration',
-  Development = 'development',
-  Design = 'design',
-  Storage = 'storage',
-  CRM = 'crm',
-  Marketing = 'marketing',
-  Support = 'support',
-  HR = 'hr',
-  Finance = 'finance',
-  Scheduling = 'scheduling',
-  Conferencing = 'conferencing',
-  Infrastructure = 'infrastructure',
-  Identity = 'identity',
-  Analytics = 'analytics',
-  Knowledge = 'knowledge',
-  Tracking = 'tracking',
-  Contracts = 'contracts',
-  Security = 'security',
-  Automation = 'automation',
-}
-
-export interface AppProps {
+export interface DepartmentProps {
   id: string;
   accountId: string;
+  appId: string;
   name: string;
-  category?: Category;
-  description?: string;
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
@@ -38,10 +11,10 @@ export interface AppProps {
   deletedBy?: string;
 }
 
-export class App {
-  props: AppProps;
+export class Department {
+  props: DepartmentProps;
 
-  constructor(props: AppProps) {
+  constructor(props: DepartmentProps) {
     this.props = {
       ...props,
       createdAt: props.createdAt ?? new Date(),
@@ -57,16 +30,12 @@ export class App {
     return this.props.accountId;
   }
 
+  get appId() {
+    return this.props.appId;
+  }
+
   get name() {
     return this.props.name;
-  }
-
-  get description() {
-    return this.props.description;
-  }
-
-  get category() {
-    return this.props.category;
   }
 
   get createdAt() {
@@ -95,16 +64,6 @@ export class App {
 
   updateName(newName: string) {
     this.props.name = newName;
-    this.touch();
-  }
-
-  updateDescription(description: string) {
-    this.props.description = description;
-    this.touch();
-  }
-
-  updateCategory(category: Category) {
-    this.props.category = category;
     this.touch();
   }
 

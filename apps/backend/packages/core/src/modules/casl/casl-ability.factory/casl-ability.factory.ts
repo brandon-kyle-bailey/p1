@@ -13,6 +13,7 @@ import { UserService } from 'src/modules/user/user.service';
 import { App } from 'src/modules/app/entities/app.entity';
 import { Workspace } from 'src/modules/workspace/entities/workspace.entity';
 import { Integration } from 'src/modules/integration/entities/integration.entity';
+import { Department } from 'src/modules/department/entities/department.entity';
 
 export enum Action {
   Manage = 'manage',
@@ -29,6 +30,7 @@ type Subjects =
       | typeof App
       | typeof Workspace
       | typeof Integration
+      | typeof Department
     >
   | 'all';
 
@@ -39,43 +41,40 @@ export class CaslAbilityFactory {
   constructor(@Inject(UserService) private readonly userService: UserService) {}
   async createForUser(userId: string) {
     const user = await this.userService.findOne(userId);
-    const { can, cannot, build } = new AbilityBuilder(createMongoAbility);
+    const { can, build } = new AbilityBuilder(createMongoAbility);
 
     if ([Role.Admin].includes(user.role)) {
       can(Action.Manage, 'all');
     } else {
-      cannot(Action.Create, Account);
-      can(Action.Create, User);
-      can(Action.Create, App);
-      can(Action.Create, Workspace);
-      can(Action.Create, Integration);
-
-      can(Action.Read, User, { accountId: user.accountId });
-      can(Action.Read, Account, { createdBy: user.id });
+      can(Action.Create, Account);
       can(Action.Read, Account, { id: user.accountId });
-      can(Action.Read, App, { createdBy: user.id });
-      can(Action.Read, App, { id: user.accountId });
-      can(Action.Read, Workspace, { createdBy: user.id });
-      can(Action.Read, Workspace, { id: user.accountId });
-      can(Action.Read, Integration, { createdBy: user.id });
-      can(Action.Read, Integration, { id: user.accountId });
-
-      can(Action.Update, User, { id: user.id });
       can(Action.Update, Account, { createdBy: user.id });
-      can(Action.Update, App, { createdBy: user.id });
-      can(Action.Update, Workspace, { createdBy: user.id });
-      can(Action.Update, Integration, { createdBy: user.id });
+      can(Action.Delete, Account, { createdBy: user.id });
 
-      can(Action.Delete, User, { createdBy: user.id });
+      can(Action.Create, App);
+      can(Action.Read, App, { accountId: user.accountId });
+      can(Action.Update, App, { createdBy: user.id });
       can(Action.Delete, App, { createdBy: user.id });
-      can(Action.Delete, Workspace, { createdBy: user.id });
+
+      can(Action.Create, Integration);
+      can(Action.Read, Integration, { accountId: user.accountId });
+      can(Action.Update, Integration, { createdBy: user.id });
       can(Action.Delete, Integration, { createdBy: user.id });
 
-      // cannot(Action.Delete, User);
-      // cannot(Action.Delete, Account);
-      // cannot(Action.Delete, App);
-      // cannot(Action.Delete, Workspace);
-      // cannot(Action.Delete, Integration);
+      can(Action.Create, Department);
+      can(Action.Read, Department, { accountId: user.accountId });
+      can(Action.Update, Department, { createdBy: user.id });
+      can(Action.Delete, Department, { createdBy: user.id });
+
+      can(Action.Create, Workspace);
+      can(Action.Read, Workspace, { accountId: user.accountId });
+      can(Action.Update, Workspace, { createdBy: user.id });
+      can(Action.Delete, Workspace, { createdBy: user.id });
+
+      can(Action.Create, User);
+      can(Action.Read, User, { accountId: user.accountId });
+      can(Action.Update, User, { id: user.id });
+      can(Action.Delete, User, { createdBy: user.id });
     }
 
     return build({

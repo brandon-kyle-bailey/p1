@@ -1,3 +1,4 @@
+import { Department } from 'src/modules/department/entities/department.model';
 import { User } from 'src/modules/user/entities/user.model';
 import {
   Entity,
@@ -21,6 +22,11 @@ export class Account {
     cascade: true,
   })
   users?: User[];
+
+  @OneToMany(() => Department, (relation) => relation.account, {
+    cascade: true,
+  })
+  departments?: Department[];
 
   @CreateDateColumn()
   createdAt: Date;
