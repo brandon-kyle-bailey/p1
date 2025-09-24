@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { CreateIntegrationDto } from './dto/create-integration.dto';
 import { UpdateIntegrationDto } from './dto/update-integration.dto';
 import { IntegrationMapper } from './dto/integration.mapper';
@@ -41,11 +41,16 @@ export class IntegrationService {
     return this.mapper.toDomain(result);
   }
 
-  async findAll(skip: number = 0, take: number = 100) {
+  async findAll(
+    skip: number = 0,
+    take: number = 100,
+    where: FindOptionsWhere<Integration>,
+  ) {
     try {
       const [entities, count] = await this.repo.findAndCount({
         skip,
         take,
+        where,
       });
       return {
         data: entities.map((entity) => this.mapper.toDomain(entity)),

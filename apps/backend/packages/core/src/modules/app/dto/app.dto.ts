@@ -13,6 +13,10 @@ export class AppDto {
   @IsString()
   name: string;
 
+  @ApiProperty({ description: 'The description of the app' })
+  @IsString()
+  description: string;
+
   @IsUUID()
   @IsOptional()
   createdBy?: string;

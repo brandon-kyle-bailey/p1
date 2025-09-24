@@ -6,10 +6,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
+import { AppMapper } from './dto/app.mapper';
 import { CreateAppDto } from './dto/create-app.dto';
 import { UpdateAppDto } from './dto/update-app.dto';
-import { AppMapper } from './dto/app.mapper';
 import { App as AppDomain } from './entities/app.entity';
 import { App } from './entities/app.model';
 
@@ -37,11 +37,16 @@ export class AppService {
     return this.mapper.toDomain(result);
   }
 
-  async findAll(skip: number = 0, take: number = 100) {
+  async findAll(
+    skip: number = 0,
+    take: number = 100,
+    where: FindOptionsWhere<App>,
+  ) {
     try {
       const [entities, count] = await this.repo.findAndCount({
         skip,
         take,
+        where,
       });
       return {
         data: entities.map((entity) => this.mapper.toDomain(entity)),
@@ -149,6 +154,9 @@ export class AppService {
       const entity = await this.findOne(id);
       if (updateAppDto.name) {
         entity.updateName(updateAppDto.name);
+      }
+      if (updateAppDto.description) {
+        entity.updateDescription(updateAppDto.description);
       }
       entity.updateUpdatedBy(updatedBy);
       await this.repo.update(entity.id, this.mapper.toPersistence(entity));

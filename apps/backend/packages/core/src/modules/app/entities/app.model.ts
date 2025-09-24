@@ -27,6 +27,9 @@ export class App {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  description?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -9,9 +9,15 @@ import { AppMapper } from './dto/app.mapper';
 import { AppCreatedHandler } from './handlers/app-created.handler';
 import { AppRemovedHandler } from './handlers/app-removed.handler';
 import { AppUpdatedHandler } from './handlers/app-updated.handler';
+import { AiModule } from '../ai/ai.module';
 
 @Module({
-  imports: [LoggingModule, TypeOrmModule.forFeature([App]), CaslModule],
+  imports: [
+    LoggingModule,
+    TypeOrmModule.forFeature([App]),
+    CaslModule,
+    AiModule,
+  ],
   controllers: [AppController],
   providers: [
     AppMapper,

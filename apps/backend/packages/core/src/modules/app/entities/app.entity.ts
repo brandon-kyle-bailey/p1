@@ -2,6 +2,7 @@ export interface AppProps {
   id: string;
   accountId: string;
   name: string;
+  description?: string;
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
@@ -33,6 +34,10 @@ export class App {
     return this.props.name;
   }
 
+  get description() {
+    return this.props.description;
+  }
+
   get createdAt() {
     return this.props.createdAt;
   }
@@ -59,6 +64,11 @@ export class App {
 
   updateName(newName: string) {
     this.props.name = newName;
+    this.touch();
+  }
+
+  updateDescription(description: string) {
+    this.props.description = description;
     this.touch();
   }
 

@@ -436,12 +436,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.LoggingCacheInterceptor = void 0;
+exports.ControllerCacheInterceptor = void 0;
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
 const cache_manager_1 = __webpack_require__(/*! @nestjs/cache-manager */ "@nestjs/cache-manager");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
-let LoggingCacheInterceptor = class LoggingCacheInterceptor extends cache_manager_1.CacheInterceptor {
+let ControllerCacheInterceptor = class ControllerCacheInterceptor extends cache_manager_1.CacheInterceptor {
     logger;
     constructor(cacheManager, reflector, logger) {
         super(cacheManager, reflector);
@@ -463,11 +463,11 @@ let LoggingCacheInterceptor = class LoggingCacheInterceptor extends cache_manage
         return key;
     }
 };
-exports.LoggingCacheInterceptor = LoggingCacheInterceptor;
-exports.LoggingCacheInterceptor = LoggingCacheInterceptor = __decorate([
+exports.ControllerCacheInterceptor = ControllerCacheInterceptor;
+exports.ControllerCacheInterceptor = ControllerCacheInterceptor = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [Object, typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object, typeof (_b = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _b : Object])
-], LoggingCacheInterceptor);
+], ControllerCacheInterceptor);
 
 
 /***/ }),
@@ -541,7 +541,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountController = void 0;
 const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
@@ -559,39 +559,66 @@ const update_account_dto_1 = __webpack_require__(/*! ./dto/update-account.dto */
 const account_entity_1 = __webpack_require__(/*! ./entities/account.entity */ "./src/modules/account/entities/account.entity.ts");
 const casl_ability_factory_1 = __webpack_require__(/*! ../casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
 const account_mapper_1 = __webpack_require__(/*! ./dto/account.mapper */ "./src/modules/account/dto/account.mapper.ts");
+const account_removed_command_1 = __webpack_require__(/*! ./commands/account-removed.command */ "./src/modules/account/commands/account-removed.command.ts");
+const account_updated_command_1 = __webpack_require__(/*! ./commands/account-updated.command */ "./src/modules/account/commands/account-updated.command.ts");
 let AccountController = class AccountController {
     logger;
     service;
     mapper;
     commandBus;
-    constructor(logger, service, mapper, commandBus) {
+    caslAbilityFactory;
+    constructor(logger, service, mapper, commandBus, caslAbilityFactory) {
         this.logger = logger;
         this.service = service;
         this.mapper = mapper;
         this.commandBus = commandBus;
+        this.caslAbilityFactory = caslAbilityFactory;
     }
     async create(createAccountDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        if (!ability.can(casl_ability_factory_1.Action.Create, account_entity_1.Account)) {
+            throw new common_1.UnauthorizedException();
+        }
         const result = await this.service.create(createAccountDto, req.user.id);
-        await this.commandBus.execute(new account_created_command_1.AccountCreatedCommand(result));
+        void this.commandBus.execute(new account_created_command_1.AccountCreatedCommand(result));
         return this.mapper.toInterface(result);
     }
     async findAll(skip = 0, take = 100, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         const result = await this.service.findAll(skip, take);
         return {
             ...result,
-            data: result.data.map((entity) => this.mapper.toInterface(entity)),
+            data: result.data
+                .filter((entity) => ability.can(casl_ability_factory_1.Action.Read, entity))
+                .map((entity) => this.mapper.toInterface(entity)),
         };
     }
     async findOne(id, req) {
-        const result = await this.service.findOne(id);
-        return this.mapper.toInterface(result);
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const entity = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Read, entity)) {
+            throw new common_1.UnauthorizedException();
+        }
+        return this.mapper.toInterface(entity);
     }
     async update(id, updateAccountDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const entity = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Update, entity)) {
+            throw new common_1.UnauthorizedException();
+        }
         const result = await this.service.update(id, updateAccountDto, req.user.id);
+        void this.commandBus.execute(new account_updated_command_1.AccountUpdatedCommand(result));
         return this.mapper.toInterface(result);
     }
     async remove(id, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const entity = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Delete, entity)) {
+            throw new common_1.UnauthorizedException();
+        }
         const result = await this.service.remove(id, req.user.id);
+        void this.commandBus.execute(new account_removed_command_1.AccountRemovedCommand(result));
         return result.id;
     }
 };
@@ -602,7 +629,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof create_account_dto_1.CreateAccountDto !== "undefined" && create_account_dto_1.CreateAccountDto) === "function" ? _e : Object, Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_account_dto_1.CreateAccountDto !== "undefined" && create_account_dto_1.CreateAccountDto) === "function" ? _f : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AccountController.prototype, "create", null);
 __decorate([
@@ -616,7 +643,7 @@ __decorate([
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object, Object]),
-    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], AccountController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
@@ -634,7 +661,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_g = typeof update_account_dto_1.UpdateAccountDto !== "undefined" && update_account_dto_1.UpdateAccountDto) === "function" ? _g : Object, Object]),
+    __metadata("design:paramtypes", [String, typeof (_h = typeof update_account_dto_1.UpdateAccountDto !== "undefined" && update_account_dto_1.UpdateAccountDto) === "function" ? _h : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AccountController.prototype, "update", null);
 __decorate([
@@ -649,13 +676,14 @@ __decorate([
 exports.AccountController = AccountController = __decorate([
     (0, common_1.Controller)('accounts'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
-    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor, common_1.ClassSerializerInterceptor),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.ControllerCacheInterceptor, common_1.ClassSerializerInterceptor),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(account_service_1.AccountService)),
     __param(2, (0, common_1.Inject)(account_mapper_1.AccountMapper)),
     __param(3, (0, common_1.Inject)(cqrs_1.CommandBus)),
-    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof account_service_1.AccountService !== "undefined" && account_service_1.AccountService) === "function" ? _b : Object, typeof (_c = typeof account_mapper_1.AccountMapper !== "undefined" && account_mapper_1.AccountMapper) === "function" ? _c : Object, typeof (_d = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _d : Object])
+    __param(4, (0, common_1.Inject)(casl_ability_factory_1.CaslAbilityFactory)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof account_service_1.AccountService !== "undefined" && account_service_1.AccountService) === "function" ? _b : Object, typeof (_c = typeof account_mapper_1.AccountMapper !== "undefined" && account_mapper_1.AccountMapper) === "function" ? _c : Object, typeof (_d = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _d : Object, typeof (_e = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _e : Object])
 ], AccountController);
 
 
@@ -1463,6 +1491,142 @@ exports.AccountUpdatedHandler = AccountUpdatedHandler = __decorate([
 
 /***/ }),
 
+/***/ "./src/modules/ai/ai.module.ts":
+/*!*************************************!*\
+  !*** ./src/modules/ai/ai.module.ts ***!
+  \*************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AiModule = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const ai_service_1 = __webpack_require__(/*! ./ai.service */ "./src/modules/ai/ai.service.ts");
+let AiModule = class AiModule {
+};
+exports.AiModule = AiModule;
+exports.AiModule = AiModule = __decorate([
+    (0, common_1.Module)({
+        imports: [logging_1.LoggingModule],
+        providers: [ai_service_1.AiService],
+        exports: [ai_service_1.AiService],
+    })
+], AiModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/ai/ai.service.ts":
+/*!**************************************!*\
+  !*** ./src/modules/ai/ai.service.ts ***!
+  \**************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AiService = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const cache_manager_1 = __webpack_require__(/*! @nestjs/cache-manager */ "@nestjs/cache-manager");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const openai_1 = __importDefault(__webpack_require__(/*! openai */ "openai"));
+const uuid_1 = __webpack_require__(/*! uuid */ "uuid");
+let AiService = class AiService {
+    configService;
+    logger;
+    _instance;
+    constructor(configService, logger) {
+        this.configService = configService;
+        this.logger = logger;
+        const apiKey = this.configService.get('OPENAI_API_KEY');
+        this._instance = new openai_1.default({ apiKey });
+    }
+    async processGenericPrompt(req) {
+        try {
+            const sanitizedModel = req.modelId.split(':')[0];
+            const completion = await this._completion({
+                model: sanitizedModel,
+                prompt: req.content,
+                context: '',
+                completionPrompt(prompt, context) {
+                    return prompt + context;
+                },
+            });
+            return {
+                modelId: req.modelId,
+                conversationId: req.conversationId,
+                debug: req.debug,
+                content: completion,
+                contentType: 'text',
+                id: (0, uuid_1.v4)(),
+                timestamp: Date.now(),
+            };
+        }
+        catch (error) {
+            this.logger.error(`${this.constructor.name}.${this._completion.name} encountered an error`, {
+                correlationId: 'ccaf8ee4-042f-41b3-9333-ee91faf2e94c',
+                error: JSON.stringify(error),
+            });
+            throw new common_1.InternalServerErrorException(error);
+        }
+    }
+    async _completion(deps) {
+        try {
+            const completion = await this._instance.chat.completions.create({
+                model: deps.model,
+                messages: [
+                    {
+                        role: 'system',
+                        content: deps.completionPrompt(deps.prompt, deps.context),
+                    },
+                ],
+            });
+            return completion.choices[0].message.content;
+        }
+        catch (error) {
+            this.logger.error(`${this.constructor.name}.${this._completion.name} encountered an error`, {
+                correlationId: 'a08ff1ff-c86a-47b5-bbf8-0be77c76e4de',
+                error: JSON.stringify(error),
+            });
+            throw new common_1.InternalServerErrorException(error);
+        }
+    }
+};
+exports.AiService = AiService;
+exports.AiService = AiService = __decorate([
+    (0, common_1.Injectable)(),
+    (0, common_1.UseInterceptors)(cache_manager_1.CacheInterceptor),
+    __param(0, (0, common_1.Inject)(config_1.ConfigService)),
+    __param(1, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object, typeof (_b = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _b : Object])
+], AiService);
+
+
+/***/ }),
+
 /***/ "./src/modules/app.module.ts":
 /*!***********************************!*\
   !*** ./src/modules/app.module.ts ***!
@@ -1508,6 +1672,8 @@ const workspace_module_1 = __webpack_require__(/*! ./workspace/workspace.module 
 const workspace_model_1 = __webpack_require__(/*! ./workspace/entities/workspace.model */ "./src/modules/workspace/entities/workspace.model.ts");
 const app_model_1 = __webpack_require__(/*! ./app/entities/app.model */ "./src/modules/app/entities/app.model.ts");
 const workspace_user_model_1 = __webpack_require__(/*! ./workspace/entities/workspace-user.model */ "./src/modules/workspace/entities/workspace-user.model.ts");
+const integration_module_1 = __webpack_require__(/*! ./integration/integration.module */ "./src/modules/integration/integration.module.ts");
+const ai_module_1 = __webpack_require__(/*! ./ai/ai.module */ "./src/modules/ai/ai.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -1569,6 +1735,8 @@ exports.AppModule = AppModule = __decorate([
             casl_module_1.CaslModule,
             app_module_1.AppModule,
             workspace_module_1.WorkspaceModule,
+            integration_module_1.IntegrationModule,
+            ai_module_1.AiModule,
         ],
         providers: [{ provide: core_1.APP_GUARD, useClass: logging_thottler_guard_1.LoggingThrottlerGuard }],
     })
@@ -1614,6 +1782,8 @@ const update_app_dto_1 = __webpack_require__(/*! ./dto/update-app.dto */ "./src/
 const app_mapper_1 = __webpack_require__(/*! ./dto/app.mapper */ "./src/modules/app/dto/app.mapper.ts");
 const app_entity_1 = __webpack_require__(/*! ./entities/app.entity */ "./src/modules/app/entities/app.entity.ts");
 const app_service_1 = __webpack_require__(/*! ./app.service */ "./src/modules/app/app.service.ts");
+const app_removed_command_1 = __webpack_require__(/*! ./commands/app-removed.command */ "./src/modules/app/commands/app-removed.command.ts");
+const app_updated_command_1 = __webpack_require__(/*! ./commands/app-updated.command */ "./src/modules/app/commands/app-updated.command.ts");
 let AppController = class AppController {
     logger;
     service;
@@ -1628,19 +1798,29 @@ let AppController = class AppController {
         this.commandBus = commandBus;
     }
     async create(createAppDto, req) {
-        const result = await this.service.create(createAppDto, req.app.id);
-        await this.commandBus.execute(new app_created_command_1.AppCreatedCommand(result));
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        if (!ability.can(casl_ability_factory_1.Action.Create, app_entity_1.App)) {
+            throw new common_1.UnauthorizedException();
+        }
+        createAppDto.accountId = req.user.accountId;
+        const result = await this.service.create(createAppDto, req.user.id);
+        void this.commandBus.execute(new app_created_command_1.AppCreatedCommand(result));
         return this.mapper.toInterface(result);
     }
-    async findAll(skip = 0, take = 100) {
-        const result = await this.service.findAll(skip, take);
+    async findAll(skip = 0, take = 100, req) {
+        const result = await this.service.findAll(skip, take, {
+            accountId: req.user.accountId,
+        });
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         return {
             ...result,
-            data: result.data.map((app) => this.mapper.toInterface(app)),
+            data: result.data
+                .filter((entity) => ability.can(casl_ability_factory_1.Action.Read, entity))
+                .map((entity) => this.mapper.toInterface(entity)),
         };
     }
     async findOne(id, req) {
-        const ability = await this.caslAbilityFactory.createForUser(req.app.id);
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         const app = await this.service.findOne(id);
         if (!ability.can(casl_ability_factory_1.Action.Read, app)) {
             throw new common_1.UnauthorizedException();
@@ -1648,22 +1828,23 @@ let AppController = class AppController {
         return this.mapper.toInterface(app);
     }
     async update(id, updateAppDto, req) {
-        const ability = await this.caslAbilityFactory.createForUser(req.app.id);
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         const app = await this.service.findOne(id);
         if (!ability.can(casl_ability_factory_1.Action.Update, app)) {
-            this.logger.debug('failing because we got here....');
             throw new common_1.UnauthorizedException();
         }
-        const updated = await this.service.update(id, updateAppDto, req.app.id);
+        const updated = await this.service.update(id, updateAppDto, req.user.id);
+        void this.commandBus.execute(new app_updated_command_1.AppUpdatedCommand(updated));
         return this.mapper.toInterface(updated);
     }
     async remove(id, req) {
-        const ability = await this.caslAbilityFactory.createForUser(req.app.id);
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         const app = await this.service.findOne(id);
-        if (!ability.can(casl_ability_factory_1.Action.Update, app)) {
+        if (!ability.can(casl_ability_factory_1.Action.Delete, app)) {
             throw new common_1.UnauthorizedException();
         }
-        await this.service.remove(id, req.app.id);
+        await this.service.remove(id, req.user.id);
+        void this.commandBus.execute(new app_removed_command_1.AppRemovedCommand(app));
         return app.id;
     }
 };
@@ -1685,8 +1866,9 @@ __decorate([
     (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], AppController.prototype, "findAll", null);
 __decorate([
@@ -1720,7 +1902,7 @@ __decorate([
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)('apps'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
-    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor, common_1.ClassSerializerInterceptor),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.ControllerCacheInterceptor, common_1.ClassSerializerInterceptor),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(app_service_1.AppService)),
@@ -1759,12 +1941,18 @@ const app_mapper_1 = __webpack_require__(/*! ./dto/app.mapper */ "./src/modules/
 const app_created_handler_1 = __webpack_require__(/*! ./handlers/app-created.handler */ "./src/modules/app/handlers/app-created.handler.ts");
 const app_removed_handler_1 = __webpack_require__(/*! ./handlers/app-removed.handler */ "./src/modules/app/handlers/app-removed.handler.ts");
 const app_updated_handler_1 = __webpack_require__(/*! ./handlers/app-updated.handler */ "./src/modules/app/handlers/app-updated.handler.ts");
+const ai_module_1 = __webpack_require__(/*! ../ai/ai.module */ "./src/modules/ai/ai.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [logging_1.LoggingModule, typeorm_1.TypeOrmModule.forFeature([app_model_1.App]), casl_module_1.CaslModule],
+        imports: [
+            logging_1.LoggingModule,
+            typeorm_1.TypeOrmModule.forFeature([app_model_1.App]),
+            casl_module_1.CaslModule,
+            ai_module_1.AiModule,
+        ],
         controllers: [app_controller_1.AppController],
         providers: [
             app_mapper_1.AppMapper,
@@ -1828,11 +2016,12 @@ let AppService = class AppService {
         const result = await this.repo.save(entity);
         return this.mapper.toDomain(result);
     }
-    async findAll(skip = 0, take = 100) {
+    async findAll(skip = 0, take = 100, where) {
         try {
             const [entities, count] = await this.repo.findAndCount({
                 skip,
                 take,
+                where,
             });
             return {
                 data: entities.map((entity) => this.mapper.toDomain(entity)),
@@ -1920,6 +2109,9 @@ let AppService = class AppService {
             const entity = await this.findOne(id);
             if (updateAppDto.name) {
                 entity.updateName(updateAppDto.name);
+            }
+            if (updateAppDto.description) {
+                entity.updateDescription(updateAppDto.description);
             }
             entity.updateUpdatedBy(updatedBy);
             await this.repo.update(entity.id, this.mapper.toPersistence(entity));
@@ -2054,6 +2246,7 @@ class AppDto {
     }
     accountId;
     name;
+    description;
     createdBy;
     updatedBy;
     deletedBy;
@@ -2072,6 +2265,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], AppDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The description of the app' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AppDto.prototype, "description", void 0);
 __decorate([
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
@@ -2167,22 +2365,28 @@ exports.CreateAppDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 class CreateAppDto {
-    accountId;
     name;
+    accountId;
+    description;
     createdBy;
     updatedBy;
 }
 exports.CreateAppDto = CreateAppDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
-    (0, class_validator_1.IsUUID)(),
-    __metadata("design:type", String)
-], CreateAppDto.prototype, "accountId", void 0);
-__decorate([
     (0, swagger_1.ApiProperty)({ description: 'The name of the app' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateAppDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateAppDto.prototype, "accountId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateAppDto.prototype, "description", void 0);
 __decorate([
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
@@ -2242,6 +2446,9 @@ class App {
     get name() {
         return this.props.name;
     }
+    get description() {
+        return this.props.description;
+    }
     get createdAt() {
         return this.props.createdAt;
     }
@@ -2262,6 +2469,10 @@ class App {
     }
     updateName(newName) {
         this.props.name = newName;
+        this.touch();
+    }
+    updateDescription(description) {
+        this.props.description = description;
         this.touch();
     }
     softDelete(byUserId) {
@@ -2322,6 +2533,7 @@ let App = class App {
     accountId;
     account;
     name;
+    description;
     createdAt;
     updatedAt;
     deletedAt;
@@ -2349,6 +2561,10 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], App.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], App.prototype, "description", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
@@ -2399,26 +2615,50 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppCreatedHandler = void 0;
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
 const app_created_command_1 = __webpack_require__(/*! ../commands/app-created.command */ "./src/modules/app/commands/app-created.command.ts");
+const ai_service_1 = __webpack_require__(/*! src/modules/ai/ai.service */ "./src/modules/ai/ai.service.ts");
+const uuid_1 = __webpack_require__(/*! uuid */ "uuid");
+const app_service_1 = __webpack_require__(/*! ../app.service */ "./src/modules/app/app.service.ts");
+const update_app_dto_1 = __webpack_require__(/*! ../dto/update-app.dto */ "./src/modules/app/dto/update-app.dto.ts");
 let AppCreatedHandler = class AppCreatedHandler {
     logger;
-    constructor(logger) {
+    aiService;
+    appService;
+    constructor(logger, aiService, appService) {
         this.logger = logger;
+        this.aiService = aiService;
+        this.appService = appService;
     }
     async execute(command) {
         this.logger.debug('App created handler called', {
             correlationId: '8adf5d96-ec23-45bc-abf4-3d650c30a76a',
             command: JSON.stringify(command),
         });
-        await new Promise((res) => res(true));
+        const description = await this.aiService.processGenericPrompt({
+            modelId: 'gpt-4o-mini-2024-07-18',
+            id: (0, uuid_1.v4)(),
+            conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
+            timestamp: Date.now(),
+            content: `Provide a short description of this app based on its name: ${command.entity.name}`,
+            contentType: 'text',
+            debug: false,
+        });
+        this.logger.debug(`App description auto generated from ai for app: ${command.entity.id}`, {
+            correlationId: '7f12ee2c-2710-48cf-9fc0-27e3ef2169c5',
+            appId: command.entity.id,
+            description: JSON.stringify(description),
+        });
+        const updateDto = new update_app_dto_1.UpdateAppDto();
+        updateDto.description = description.content;
+        await this.appService.update(command.entity.id, updateDto, command.entity.createdBy);
         return {
-            actionId: crypto.randomUUID(),
+            actionId: (0, uuid_1.v4)(),
         };
     }
 };
@@ -2426,7 +2666,9 @@ exports.AppCreatedHandler = AppCreatedHandler;
 exports.AppCreatedHandler = AppCreatedHandler = __decorate([
     (0, cqrs_1.CommandHandler)(app_created_command_1.AppCreatedCommand),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
-    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+    __param(1, (0, common_1.Inject)(ai_service_1.AiService)),
+    __param(2, (0, common_1.Inject)(app_service_1.AppService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof ai_service_1.AiService !== "undefined" && ai_service_1.AiService) === "function" ? _b : Object, typeof (_c = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _c : Object])
 ], AppCreatedHandler);
 
 
@@ -2799,9 +3041,9 @@ let AuthService = class AuthService {
         this.userService = userService;
         this.jwtService = jwtService;
     }
-    async validateUser(username, pass) {
+    async validateUser(username, password) {
         const user = await this.userService.findOneByEmail(username);
-        const isMatch = await bcrypt.compare(pass, user.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
             return user;
         }
@@ -2812,6 +3054,7 @@ let AuthService = class AuthService {
             sub: user.id,
             username: user.email,
             role: user.role,
+            accountId: user.accountId,
         };
         return {
             access_token: this.jwtService.sign(payload),
@@ -2927,7 +3170,7 @@ class RegisterDto {
 exports.RegisterDto = RegisterDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The name of the user' }),
-    (0, class_validator_1.IsEmail)(),
+    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "name", void 0);
@@ -2985,7 +3228,12 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         });
     }
     validate(payload) {
-        return { id: payload.sub, email: payload.username, role: payload.role };
+        return {
+            id: payload.sub,
+            email: payload.username,
+            role: payload.role,
+            accountId: payload.accountId,
+        };
     }
 };
 exports.JwtStrategy = JwtStrategy;
@@ -3076,6 +3324,7 @@ const account_entity_1 = __webpack_require__(/*! src/modules/account/entities/ac
 const user_service_1 = __webpack_require__(/*! src/modules/user/user.service */ "./src/modules/user/user.service.ts");
 const app_entity_1 = __webpack_require__(/*! src/modules/app/entities/app.entity */ "./src/modules/app/entities/app.entity.ts");
 const workspace_entity_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace.entity */ "./src/modules/workspace/entities/workspace.entity.ts");
+const integration_entity_1 = __webpack_require__(/*! src/modules/integration/entities/integration.entity */ "./src/modules/integration/entities/integration.entity.ts");
 var Action;
 (function (Action) {
     Action["Manage"] = "manage";
@@ -3096,9 +3345,11 @@ let CaslAbilityFactory = class CaslAbilityFactory {
             can(Action.Manage, 'all');
         }
         else {
+            cannot(Action.Create, account_entity_1.Account);
             can(Action.Create, user_entity_1.User);
             can(Action.Create, app_entity_1.App);
             can(Action.Create, workspace_entity_1.Workspace);
+            can(Action.Create, integration_entity_1.Integration);
             can(Action.Read, user_entity_1.User, { accountId: user.accountId });
             can(Action.Read, account_entity_1.Account, { createdBy: user.id });
             can(Action.Read, account_entity_1.Account, { id: user.accountId });
@@ -3106,17 +3357,17 @@ let CaslAbilityFactory = class CaslAbilityFactory {
             can(Action.Read, app_entity_1.App, { id: user.accountId });
             can(Action.Read, workspace_entity_1.Workspace, { createdBy: user.id });
             can(Action.Read, workspace_entity_1.Workspace, { id: user.accountId });
-            can(Action.Read, workspace_entity_1.Workspace, { createdBy: user.id });
-            can(Action.Read, workspace_entity_1.Workspace, { id: user.accountId });
+            can(Action.Read, integration_entity_1.Integration, { createdBy: user.id });
+            can(Action.Read, integration_entity_1.Integration, { id: user.accountId });
             can(Action.Update, user_entity_1.User, { id: user.id });
             can(Action.Update, account_entity_1.Account, { createdBy: user.id });
             can(Action.Update, app_entity_1.App, { createdBy: user.id });
             can(Action.Update, workspace_entity_1.Workspace, { createdBy: user.id });
-            cannot(Action.Create, account_entity_1.Account);
-            cannot(Action.Delete, user_entity_1.User);
-            cannot(Action.Delete, account_entity_1.Account);
-            cannot(Action.Delete, app_entity_1.App);
-            cannot(Action.Delete, workspace_entity_1.Workspace);
+            can(Action.Update, integration_entity_1.Integration, { createdBy: user.id });
+            can(Action.Delete, user_entity_1.User, { createdBy: user.id });
+            can(Action.Delete, app_entity_1.App, { createdBy: user.id });
+            can(Action.Delete, workspace_entity_1.Workspace, { createdBy: user.id });
+            can(Action.Delete, integration_entity_1.Integration, { createdBy: user.id });
         }
         return build({
             detectSubjectType: (item) => item.constructor,
@@ -3195,6 +3446,1013 @@ exports.HealthModule = HealthModule = __decorate([
         imports: [terminus_1.TerminusModule],
     })
 ], HealthModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/commands/integration-created.command.ts":
+/*!*************************************************************************!*\
+  !*** ./src/modules/integration/commands/integration-created.command.ts ***!
+  \*************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IntegrationCreatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class IntegrationCreatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.IntegrationCreatedCommand = IntegrationCreatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/commands/integration-removed.command.ts":
+/*!*************************************************************************!*\
+  !*** ./src/modules/integration/commands/integration-removed.command.ts ***!
+  \*************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IntegrationRemovedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class IntegrationRemovedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.IntegrationRemovedCommand = IntegrationRemovedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/commands/integration-updated.command.ts":
+/*!*************************************************************************!*\
+  !*** ./src/modules/integration/commands/integration-updated.command.ts ***!
+  \*************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IntegrationUpdatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class IntegrationUpdatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.IntegrationUpdatedCommand = IntegrationUpdatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/dto/create-integration.dto.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/integration/dto/create-integration.dto.ts ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateIntegrationDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CreateIntegrationDto {
+    accountId;
+    userId;
+    name;
+    createdBy;
+    updatedBy;
+}
+exports.CreateIntegrationDto = CreateIntegrationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateIntegrationDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the user' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateIntegrationDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The name of the workspace' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateIntegrationDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIntegrationDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIntegrationDto.prototype, "updatedBy", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/dto/integration.dto.ts":
+/*!********************************************************!*\
+  !*** ./src/modules/integration/dto/integration.dto.ts ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IntegrationDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class IntegrationDto {
+    constructor(partial) {
+        Object.assign(this, partial);
+    }
+    accountId;
+    userId;
+    name;
+    createdBy;
+    updatedBy;
+    deletedBy;
+    createdAt;
+    updatedAt;
+    deletedAt;
+}
+exports.IntegrationDto = IntegrationDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], IntegrationDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the user' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], IntegrationDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The name of the integration' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], IntegrationDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], IntegrationDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], IntegrationDto.prototype, "updatedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], IntegrationDto.prototype, "deletedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], IntegrationDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], IntegrationDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], IntegrationDto.prototype, "deletedAt", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/dto/integration.mapper.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/integration/dto/integration.mapper.ts ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IntegrationMapper = void 0;
+const integration_entity_1 = __webpack_require__(/*! ../entities/integration.entity */ "./src/modules/integration/entities/integration.entity.ts");
+const integration_dto_1 = __webpack_require__(/*! ./integration.dto */ "./src/modules/integration/dto/integration.dto.ts");
+class IntegrationMapper {
+    static toInterface(user) {
+        return new integration_dto_1.IntegrationDto(user.props);
+    }
+    toInterface(user) {
+        return IntegrationMapper.toInterface(user);
+    }
+    static toDomain(user) {
+        return new integration_entity_1.Integration({
+            ...user,
+        });
+    }
+    toDomain(user) {
+        return IntegrationMapper.toDomain(user);
+    }
+    static toPersistence(user) {
+        return {
+            ...user.props,
+        };
+    }
+    toPersistence(user) {
+        return IntegrationMapper.toPersistence(user);
+    }
+}
+exports.IntegrationMapper = IntegrationMapper;
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/dto/update-integration.dto.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/integration/dto/update-integration.dto.ts ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateIntegrationDto = void 0;
+const mapped_types_1 = __webpack_require__(/*! @nestjs/mapped-types */ "@nestjs/mapped-types");
+const create_integration_dto_1 = __webpack_require__(/*! ./create-integration.dto */ "./src/modules/integration/dto/create-integration.dto.ts");
+class UpdateIntegrationDto extends (0, mapped_types_1.PartialType)(create_integration_dto_1.CreateIntegrationDto) {
+}
+exports.UpdateIntegrationDto = UpdateIntegrationDto;
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/entities/integration.entity.ts":
+/*!****************************************************************!*\
+  !*** ./src/modules/integration/entities/integration.entity.ts ***!
+  \****************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Integration = void 0;
+class Integration {
+    props;
+    constructor(props) {
+        this.props = {
+            ...props,
+            createdAt: props.createdAt ?? new Date(),
+            updatedAt: props.updatedAt ?? new Date(),
+        };
+    }
+    get id() {
+        return this.props.id;
+    }
+    get accountId() {
+        return this.props.accountId;
+    }
+    get userId() {
+        return this.props.userId;
+    }
+    get name() {
+        return this.props.name;
+    }
+    get createdAt() {
+        return this.props.createdAt;
+    }
+    get updatedAt() {
+        return this.props.updatedAt;
+    }
+    get deletedAt() {
+        return this.props.deletedAt;
+    }
+    get createdBy() {
+        return this.props.createdBy;
+    }
+    get updatedBy() {
+        return this.props.updatedBy;
+    }
+    get deletedBy() {
+        return this.props.deletedBy;
+    }
+    updateName(newName) {
+        this.props.name = newName;
+        this.touch();
+    }
+    softDelete(byUserId) {
+        this.props.deletedAt = new Date();
+        if (byUserId) {
+            this.props.deletedBy = byUserId;
+        }
+        this.touch();
+    }
+    updateOwner(id) {
+        this.props.createdBy = id;
+        this.touch();
+    }
+    updateUpdatedBy(id) {
+        this.props.updatedBy = id;
+        this.touch();
+    }
+    restore() {
+        this.props.deletedAt = undefined;
+        this.props.deletedBy = undefined;
+        this.touch();
+    }
+    touch(id) {
+        this.props.updatedAt = new Date();
+        if (id) {
+            this.props.updatedBy = id;
+        }
+    }
+}
+exports.Integration = Integration;
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/entities/integration.model.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/integration/entities/integration.model.ts ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Integration = void 0;
+const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
+const user_model_1 = __webpack_require__(/*! src/modules/user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let Integration = class Integration {
+    id;
+    accountId;
+    account;
+    userId;
+    user;
+    name;
+    createdAt;
+    updatedAt;
+    deletedAt;
+    createdBy;
+    updatedBy;
+    deletedBy;
+};
+exports.Integration = Integration;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], Integration.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Integration.prototype, "accountId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.users, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'accountId' }),
+    __metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
+], Integration.prototype, "account", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Integration.prototype, "userId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_model_1.User, (user) => user.integrations, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
+    __metadata("design:type", typeof (_b = typeof user_model_1.User !== "undefined" && user_model_1.User) === "function" ? _b : Object)
+], Integration.prototype, "user", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Integration.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], Integration.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], Integration.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
+], Integration.prototype, "deletedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Integration.prototype, "createdBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Integration.prototype, "updatedBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Integration.prototype, "deletedBy", void 0);
+exports.Integration = Integration = __decorate([
+    (0, typeorm_1.Entity)('integrations')
+], Integration);
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/handlers/integration-created.handler.ts":
+/*!*************************************************************************!*\
+  !*** ./src/modules/integration/handlers/integration-created.handler.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IntegrationCreatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const integration_created_command_1 = __webpack_require__(/*! ../commands/integration-created.command */ "./src/modules/integration/commands/integration-created.command.ts");
+let IntegrationCreatedHandler = class IntegrationCreatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Integration created handler called', {
+            correlationId: '8adf5d96-ec23-45bc-abf4-3d650c30a76a',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.IntegrationCreatedHandler = IntegrationCreatedHandler;
+exports.IntegrationCreatedHandler = IntegrationCreatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(integration_created_command_1.IntegrationCreatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], IntegrationCreatedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/handlers/integration-removed.handler.ts":
+/*!*************************************************************************!*\
+  !*** ./src/modules/integration/handlers/integration-removed.handler.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IntegrationRemovedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const integration_removed_command_1 = __webpack_require__(/*! ../commands/integration-removed.command */ "./src/modules/integration/commands/integration-removed.command.ts");
+let IntegrationRemovedHandler = class IntegrationRemovedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Integration removed handler called', {
+            correlationId: '4954e2c3-42c3-4aaf-b9ae-365f15d83ef6',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.IntegrationRemovedHandler = IntegrationRemovedHandler;
+exports.IntegrationRemovedHandler = IntegrationRemovedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(integration_removed_command_1.IntegrationRemovedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], IntegrationRemovedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/handlers/integration-updated.handler.ts":
+/*!*************************************************************************!*\
+  !*** ./src/modules/integration/handlers/integration-updated.handler.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IntegrationUpdatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const integration_updated_command_1 = __webpack_require__(/*! ../commands/integration-updated.command */ "./src/modules/integration/commands/integration-updated.command.ts");
+let IntegrationUpdatedHandler = class IntegrationUpdatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Integration updated handler called', {
+            correlationId: '67a859be-a168-4574-bbc3-c05b27dc4612',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.IntegrationUpdatedHandler = IntegrationUpdatedHandler;
+exports.IntegrationUpdatedHandler = IntegrationUpdatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(integration_updated_command_1.IntegrationUpdatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], IntegrationUpdatedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/integration.controller.ts":
+/*!***********************************************************!*\
+  !*** ./src/modules/integration/integration.controller.ts ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IntegrationController = void 0;
+const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const jwt_auth_guard_1 = __webpack_require__(/*! src/guards/jwt-auth.guard */ "./src/guards/jwt-auth.guard.ts");
+const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
+const logging_cache_interceptor_1 = __webpack_require__(/*! src/interceptors/logging-cache.interceptor */ "./src/interceptors/logging-cache.interceptor.ts");
+const casl_ability_factory_1 = __webpack_require__(/*! ../casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
+const integration_created_command_1 = __webpack_require__(/*! ./commands/integration-created.command */ "./src/modules/integration/commands/integration-created.command.ts");
+const create_integration_dto_1 = __webpack_require__(/*! ./dto/create-integration.dto */ "./src/modules/integration/dto/create-integration.dto.ts");
+const update_integration_dto_1 = __webpack_require__(/*! ./dto/update-integration.dto */ "./src/modules/integration/dto/update-integration.dto.ts");
+const integration_mapper_1 = __webpack_require__(/*! ./dto/integration.mapper */ "./src/modules/integration/dto/integration.mapper.ts");
+const integration_entity_1 = __webpack_require__(/*! ./entities/integration.entity */ "./src/modules/integration/entities/integration.entity.ts");
+const integration_service_1 = __webpack_require__(/*! ./integration.service */ "./src/modules/integration/integration.service.ts");
+const integration_updated_command_1 = __webpack_require__(/*! ./commands/integration-updated.command */ "./src/modules/integration/commands/integration-updated.command.ts");
+const integration_removed_command_1 = __webpack_require__(/*! ./commands/integration-removed.command */ "./src/modules/integration/commands/integration-removed.command.ts");
+let IntegrationController = class IntegrationController {
+    logger;
+    service;
+    mapper;
+    caslAbilityFactory;
+    commandBus;
+    constructor(logger, service, mapper, caslAbilityFactory, commandBus) {
+        this.logger = logger;
+        this.service = service;
+        this.mapper = mapper;
+        this.caslAbilityFactory = caslAbilityFactory;
+        this.commandBus = commandBus;
+    }
+    async create(createIntegrationDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        if (!ability.can(casl_ability_factory_1.Action.Create, integration_entity_1.Integration)) {
+            throw new common_1.UnauthorizedException();
+        }
+        const result = await this.service.create(createIntegrationDto, req.user.id);
+        void this.commandBus.execute(new integration_created_command_1.IntegrationCreatedCommand(result));
+        return this.mapper.toInterface(result);
+    }
+    async findAll(skip = 0, take = 100, req) {
+        const result = await this.service.findAll(skip, take, {
+            accountId: req.user.accountId,
+        });
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        return {
+            ...result,
+            data: result.data
+                .filter((entity) => ability.can(casl_ability_factory_1.Action.Read, entity))
+                .map((entity) => this.mapper.toInterface(entity)),
+        };
+    }
+    async findOne(id, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const app = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Read, app)) {
+            throw new common_1.UnauthorizedException();
+        }
+        return this.mapper.toInterface(app);
+    }
+    async update(id, updateIntegrationDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const app = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Update, app)) {
+            throw new common_1.UnauthorizedException();
+        }
+        const updated = await this.service.update(id, updateIntegrationDto, req.user.id);
+        void this.commandBus.execute(new integration_updated_command_1.IntegrationUpdatedCommand(updated));
+        return this.mapper.toInterface(updated);
+    }
+    async remove(id, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const entity = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Delete, entity)) {
+            throw new common_1.UnauthorizedException();
+        }
+        await this.service.remove(id, req.user.id);
+        void this.commandBus.execute(new integration_removed_command_1.IntegrationRemovedCommand(entity));
+        return entity.id;
+    }
+};
+exports.IntegrationController = IntegrationController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Create, integration_entity_1.Integration)),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_integration_dto_1.CreateIntegrationDto !== "undefined" && create_integration_dto_1.CreateIntegrationDto) === "function" ? _f : Object, Object]),
+    __metadata("design:returntype", Promise)
+], IntegrationController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, integration_entity_1.Integration)),
+    (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: Number }),
+    (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
+    __param(0, (0, common_1.Query)('skip')),
+    __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], IntegrationController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, integration_entity_1.Integration)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], IntegrationController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Update, integration_entity_1.Integration)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_h = typeof update_integration_dto_1.UpdateIntegrationDto !== "undefined" && update_integration_dto_1.UpdateIntegrationDto) === "function" ? _h : Object, Object]),
+    __metadata("design:returntype", Promise)
+], IntegrationController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Delete, integration_entity_1.Integration)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], IntegrationController.prototype, "remove", null);
+exports.IntegrationController = IntegrationController = __decorate([
+    (0, common_1.Controller)('integrations'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.ControllerCacheInterceptor, common_1.ClassSerializerInterceptor),
+    (0, swagger_1.ApiBearerAuth)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, common_1.Inject)(integration_service_1.IntegrationService)),
+    __param(2, (0, common_1.Inject)(integration_mapper_1.IntegrationMapper)),
+    __param(3, (0, common_1.Inject)(casl_ability_factory_1.CaslAbilityFactory)),
+    __param(4, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof integration_service_1.IntegrationService !== "undefined" && integration_service_1.IntegrationService) === "function" ? _b : Object, typeof (_c = typeof integration_mapper_1.IntegrationMapper !== "undefined" && integration_mapper_1.IntegrationMapper) === "function" ? _c : Object, typeof (_d = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _d : Object, typeof (_e = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _e : Object])
+], IntegrationController);
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/integration.module.ts":
+/*!*******************************************************!*\
+  !*** ./src/modules/integration/integration.module.ts ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IntegrationModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const integration_service_1 = __webpack_require__(/*! ./integration.service */ "./src/modules/integration/integration.service.ts");
+const integration_controller_1 = __webpack_require__(/*! ./integration.controller */ "./src/modules/integration/integration.controller.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const integration_model_1 = __webpack_require__(/*! ./entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
+const casl_module_1 = __webpack_require__(/*! ../casl/casl.module */ "./src/modules/casl/casl.module.ts");
+const integration_mapper_1 = __webpack_require__(/*! ./dto/integration.mapper */ "./src/modules/integration/dto/integration.mapper.ts");
+const integration_created_handler_1 = __webpack_require__(/*! ./handlers/integration-created.handler */ "./src/modules/integration/handlers/integration-created.handler.ts");
+const integration_removed_handler_1 = __webpack_require__(/*! ./handlers/integration-removed.handler */ "./src/modules/integration/handlers/integration-removed.handler.ts");
+const integration_updated_handler_1 = __webpack_require__(/*! ./handlers/integration-updated.handler */ "./src/modules/integration/handlers/integration-updated.handler.ts");
+const user_model_1 = __webpack_require__(/*! ../user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+let IntegrationModule = class IntegrationModule {
+};
+exports.IntegrationModule = IntegrationModule;
+exports.IntegrationModule = IntegrationModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            logging_1.LoggingModule,
+            typeorm_1.TypeOrmModule.forFeature([user_model_1.User, integration_model_1.Integration]),
+            casl_module_1.CaslModule,
+        ],
+        controllers: [integration_controller_1.IntegrationController],
+        providers: [
+            integration_mapper_1.IntegrationMapper,
+            integration_service_1.IntegrationService,
+            integration_created_handler_1.IntegrationCreatedHandler,
+            integration_updated_handler_1.IntegrationUpdatedHandler,
+            integration_removed_handler_1.IntegrationRemovedHandler,
+        ],
+        exports: [integration_service_1.IntegrationService],
+    })
+], IntegrationModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/integration/integration.service.ts":
+/*!********************************************************!*\
+  !*** ./src/modules/integration/integration.service.ts ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IntegrationService = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const integration_mapper_1 = __webpack_require__(/*! ./dto/integration.mapper */ "./src/modules/integration/dto/integration.mapper.ts");
+const integration_model_1 = __webpack_require__(/*! ./entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
+let IntegrationService = class IntegrationService {
+    logger;
+    repo;
+    mapper;
+    constructor(logger, repo, mapper) {
+        this.logger = logger;
+        this.repo = repo;
+        this.mapper = mapper;
+    }
+    async createWithManager(createIntegrationDto, manager) {
+        const repo = manager.getRepository(integration_model_1.Integration);
+        const entity = repo.create({ ...createIntegrationDto });
+        const result = await repo.save(entity);
+        return this.mapper.toDomain(result);
+    }
+    async create(createIntegrationDto, createdBy) {
+        const entity = this.repo.create({ ...createIntegrationDto, createdBy });
+        const result = await this.repo.save(entity);
+        return this.mapper.toDomain(result);
+    }
+    async findAll(skip = 0, take = 100, where) {
+        try {
+            const [entities, count] = await this.repo.findAndCount({
+                skip,
+                take,
+                where,
+            });
+            return {
+                data: entities.map((entity) => this.mapper.toDomain(entity)),
+                pagination: {
+                    total: count,
+                    skip,
+                    take,
+                    hasNextPage: skip + take < count,
+                },
+            };
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findAll.name} encountered an error`, {
+                correlationId: '6d437955-6b3a-417d-825b-3f43dedd8825',
+                err: JSON.stringify(err),
+            });
+            return {
+                data: [],
+                pagination: { total: 0, skip: 0, take, hasNextPage: false },
+            };
+        }
+    }
+    async findOne(id) {
+        try {
+            const entity = await this.repo.findOneBy({ id });
+            if (!entity) {
+                throw new common_1.NotFoundException();
+            }
+            return this.mapper.toDomain(entity);
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOne.name} encountered an error`, {
+                correlationId: '6acb4b57-7592-4f08-869c-b4a14cddd072',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async findOneByName(name) {
+        try {
+            const model = await this.repo.findOneBy({ name });
+            if (!model) {
+                throw new common_1.NotFoundException();
+            }
+            return this.mapper.toDomain(model);
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOneByName.name} encountered an error`, {
+                correlationId: '7cce84d8-8f89-4058-8d2e-af450cfad2d3',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async updateWithManager(id, updateIntegrationDto, manager) {
+        try {
+            const repo = manager.getRepository(integration_model_1.Integration);
+            const model = await repo.findOneBy({ id });
+            if (!model) {
+                throw new common_1.NotFoundException();
+            }
+            const entity = this.mapper.toDomain(model);
+            if (updateIntegrationDto.name) {
+                entity.updateName(updateIntegrationDto.name);
+            }
+            if (updateIntegrationDto.createdBy) {
+                entity.updateOwner(updateIntegrationDto.createdBy);
+            }
+            if (updateIntegrationDto.updatedBy) {
+                entity.updateUpdatedBy(updateIntegrationDto.updatedBy);
+            }
+            await repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.updateWithManager.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async update(id, updateIntegrationDto, updatedBy) {
+        try {
+            const entity = await this.findOne(id);
+            if (updateIntegrationDto.name) {
+                entity.updateName(updateIntegrationDto.name);
+            }
+            entity.updateUpdatedBy(updatedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.update.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async remove(id, removedBy) {
+        try {
+            const entity = await this.findOne(id);
+            entity.softDelete(removedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.remove.name} encountered an error`, {
+                correlationId: 'b76287ba-c244-475f-adcb-52c6917ba739',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+};
+exports.IntegrationService = IntegrationService;
+exports.IntegrationService = IntegrationService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, typeorm_1.InjectRepository)(integration_model_1.Integration)),
+    __param(2, (0, common_1.Inject)(integration_mapper_1.IntegrationMapper)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof integration_mapper_1.IntegrationMapper !== "undefined" && integration_mapper_1.IntegrationMapper) === "function" ? _c : Object])
+], IntegrationService);
 
 
 /***/ }),
@@ -3653,12 +4911,14 @@ const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const user_entity_1 = __webpack_require__(/*! ./user.entity */ "./src/modules/user/entities/user.entity.ts");
 const workspace_user_model_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace-user.model */ "./src/modules/workspace/entities/workspace-user.model.ts");
 const workspace_model_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace.model */ "./src/modules/workspace/entities/workspace.model.ts");
+const integration_model_1 = __webpack_require__(/*! src/modules/integration/entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
 let User = class User {
     id;
     accountId;
     account;
     workspaceUsers;
     workspaces;
+    integrations;
     email;
     password;
     role;
@@ -3700,6 +4960,12 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], User.prototype, "workspaces", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => integration_model_1.Integration, (integration) => integration.user, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], User.prototype, "integrations", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
@@ -3944,6 +5210,8 @@ const update_user_dto_1 = __webpack_require__(/*! ./dto/update-user.dto */ "./sr
 const user_mapper_1 = __webpack_require__(/*! ./dto/user.mapper */ "./src/modules/user/dto/user.mapper.ts");
 const user_entity_1 = __webpack_require__(/*! ./entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
 const user_service_1 = __webpack_require__(/*! ./user.service */ "./src/modules/user/user.service.ts");
+const user_updated_command_1 = __webpack_require__(/*! ./commands/user-updated.command */ "./src/modules/user/commands/user-updated.command.ts");
+const user_removed_command_1 = __webpack_require__(/*! ./commands/user-removed.command */ "./src/modules/user/commands/user-removed.command.ts");
 let UserController = class UserController {
     logger;
     service;
@@ -3958,15 +5226,22 @@ let UserController = class UserController {
         this.commandBus = commandBus;
     }
     async create(createUserDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        if (!ability.can(casl_ability_factory_1.Action.Create, user_entity_1.User)) {
+            throw new common_1.UnauthorizedException();
+        }
         const result = await this.service.create(createUserDto, req.user.id);
-        await this.commandBus.execute(new user_created_command_1.UserCreatedCommand(result));
+        void this.commandBus.execute(new user_created_command_1.UserCreatedCommand(result));
         return this.mapper.toInterface(result);
     }
-    async findAll(skip = 0, take = 100) {
+    async findAll(skip = 0, take = 100, req) {
         const result = await this.service.findAll(skip, take);
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         return {
             ...result,
-            data: result.data.map((user) => this.mapper.toInterface(user)),
+            data: result.data
+                .filter((entity) => ability.can(casl_ability_factory_1.Action.Read, entity))
+                .map((entity) => this.mapper.toInterface(entity)),
         };
     }
     async findOne(id, req) {
@@ -3981,19 +5256,20 @@ let UserController = class UserController {
         const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         const user = await this.service.findOne(id);
         if (!ability.can(casl_ability_factory_1.Action.Update, user)) {
-            this.logger.debug('failing because we got here....');
             throw new common_1.UnauthorizedException();
         }
         const updated = await this.service.update(id, updateUserDto, req.user.id);
+        void this.commandBus.execute(new user_updated_command_1.UserUpdatedCommand(updated));
         return this.mapper.toInterface(updated);
     }
     async remove(id, req) {
         const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         const user = await this.service.findOne(id);
-        if (!ability.can(casl_ability_factory_1.Action.Update, user)) {
+        if (!ability.can(casl_ability_factory_1.Action.Delete, user)) {
             throw new common_1.UnauthorizedException();
         }
         await this.service.remove(id, req.user.id);
+        void this.commandBus.execute(new user_removed_command_1.UserRemovedCommand(user));
         return user.id;
     }
 };
@@ -4015,8 +5291,9 @@ __decorate([
     (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], UserController.prototype, "findAll", null);
 __decorate([
@@ -4050,7 +5327,7 @@ __decorate([
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
-    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor, common_1.ClassSerializerInterceptor),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.ControllerCacheInterceptor, common_1.ClassSerializerInterceptor),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(user_service_1.UserService)),
@@ -5035,6 +6312,8 @@ const update_workspace_dto_1 = __webpack_require__(/*! ./dto/update-workspace.dt
 const workspace_mapper_1 = __webpack_require__(/*! ./dto/workspace.mapper */ "./src/modules/workspace/dto/workspace.mapper.ts");
 const workspace_entity_1 = __webpack_require__(/*! ./entities/workspace.entity */ "./src/modules/workspace/entities/workspace.entity.ts");
 const workspace_service_1 = __webpack_require__(/*! ./workspace.service */ "./src/modules/workspace/workspace.service.ts");
+const workspace_removed_command_1 = __webpack_require__(/*! ./commands/workspace-removed.command */ "./src/modules/workspace/commands/workspace-removed.command.ts");
+const workspace_updated_command_1 = __webpack_require__(/*! ./commands/workspace-updated.command */ "./src/modules/workspace/commands/workspace-updated.command.ts");
 let WorkspaceController = class WorkspaceController {
     logger;
     service;
@@ -5049,15 +6328,22 @@ let WorkspaceController = class WorkspaceController {
         this.commandBus = commandBus;
     }
     async create(createWorkspaceDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        if (!ability.can(casl_ability_factory_1.Action.Create, workspace_entity_1.Workspace)) {
+            throw new common_1.UnauthorizedException();
+        }
         const result = await this.service.create(createWorkspaceDto, req.user.id);
-        await this.commandBus.execute(new workspace_created_command_1.WorkspaceCreatedCommand(result));
+        void this.commandBus.execute(new workspace_created_command_1.WorkspaceCreatedCommand(result));
         return this.mapper.toInterface(result);
     }
-    async findAll(skip = 0, take = 100) {
+    async findAll(skip = 0, take = 100, req) {
         const result = await this.service.findAll(skip, take);
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         return {
             ...result,
-            data: result.data.map((app) => this.mapper.toInterface(app)),
+            data: result.data
+                .filter((entity) => ability.can(casl_ability_factory_1.Action.Read, entity))
+                .map((entity) => this.mapper.toInterface(entity)),
         };
     }
     async findOne(id, req) {
@@ -5072,20 +6358,21 @@ let WorkspaceController = class WorkspaceController {
         const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         const app = await this.service.findOne(id);
         if (!ability.can(casl_ability_factory_1.Action.Update, app)) {
-            this.logger.debug('failing because we got here....');
             throw new common_1.UnauthorizedException();
         }
         const updated = await this.service.update(id, updateWorkspaceDto, req.user.id);
+        void this.commandBus.execute(new workspace_updated_command_1.WorkspaceUpdatedCommand(updated));
         return this.mapper.toInterface(updated);
     }
     async remove(id, req) {
         const ability = await this.caslAbilityFactory.createForUser(req.user.id);
-        const app = await this.service.findOne(id);
-        if (!ability.can(casl_ability_factory_1.Action.Update, app)) {
+        const entity = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Delete, entity)) {
             throw new common_1.UnauthorizedException();
         }
         await this.service.remove(id, req.user.id);
-        return app.id;
+        void this.commandBus.execute(new workspace_removed_command_1.WorkspaceRemovedCommand(entity));
+        return entity.id;
     }
 };
 exports.WorkspaceController = WorkspaceController;
@@ -5106,8 +6393,9 @@ __decorate([
     (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], WorkspaceController.prototype, "findAll", null);
 __decorate([
@@ -5141,7 +6429,7 @@ __decorate([
 exports.WorkspaceController = WorkspaceController = __decorate([
     (0, common_1.Controller)('workspaces'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
-    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.LoggingCacheInterceptor, common_1.ClassSerializerInterceptor),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.ControllerCacheInterceptor, common_1.ClassSerializerInterceptor),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(workspace_service_1.WorkspaceService)),
@@ -5638,6 +6926,16 @@ module.exports = require("keyv");
 
 /***/ }),
 
+/***/ "openai":
+/*!*************************!*\
+  !*** external "openai" ***!
+  \*************************/
+/***/ ((module) => {
+
+module.exports = require("openai");
+
+/***/ }),
+
 /***/ "passport-jwt":
 /*!*******************************!*\
   !*** external "passport-jwt" ***!
@@ -5675,6 +6973,16 @@ module.exports = require("rxjs");
 /***/ ((module) => {
 
 module.exports = require("typeorm");
+
+/***/ }),
+
+/***/ "uuid":
+/*!***********************!*\
+  !*** external "uuid" ***!
+  \***********************/
+/***/ ((module) => {
+
+module.exports = require("uuid");
 
 /***/ })
 

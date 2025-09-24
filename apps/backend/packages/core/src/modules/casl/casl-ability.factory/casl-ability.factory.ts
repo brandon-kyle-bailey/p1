@@ -66,11 +66,16 @@ export class CaslAbilityFactory {
       can(Action.Update, Workspace, { createdBy: user.id });
       can(Action.Update, Integration, { createdBy: user.id });
 
-      cannot(Action.Delete, User);
-      cannot(Action.Delete, Account);
-      cannot(Action.Delete, App);
-      cannot(Action.Delete, Workspace);
-      cannot(Action.Delete, Integration);
+      can(Action.Delete, User, { createdBy: user.id });
+      can(Action.Delete, App, { createdBy: user.id });
+      can(Action.Delete, Workspace, { createdBy: user.id });
+      can(Action.Delete, Integration, { createdBy: user.id });
+
+      // cannot(Action.Delete, User);
+      // cannot(Action.Delete, Account);
+      // cannot(Action.Delete, App);
+      // cannot(Action.Delete, Workspace);
+      // cannot(Action.Delete, Integration);
     }
 
     return build({

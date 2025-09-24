@@ -27,6 +27,7 @@ import { Workspace } from './workspace/entities/workspace.model';
 import { App } from './app/entities/app.model';
 import { WorkspaceUser } from './workspace/entities/workspace-user.model';
 import { IntegrationModule } from './integration/integration.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -90,6 +91,7 @@ import { IntegrationModule } from './integration/integration.module';
     AppsModule,
     WorkspaceModule,
     IntegrationModule,
+    AiModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: LoggingThrottlerGuard }],
 })

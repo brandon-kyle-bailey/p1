@@ -42,7 +42,7 @@ export function MatchPasswords(validationOptions?: ValidationOptions) {
 
 export class RegisterDto {
   @ApiProperty({ description: 'The name of the user' })
-  @IsEmail()
+  @IsString()
   @IsOptional()
   name?: string;
 

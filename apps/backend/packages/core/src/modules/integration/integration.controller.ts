@@ -20,7 +20,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CheckPolicies, PoliciesGuard } from 'src/guards/policies.guard';
-import { LoggingCacheInterceptor } from 'src/interceptors/logging-cache.interceptor';
+import { ControllerCacheInterceptor } from 'src/interceptors/logging-cache.interceptor';
 import {
   Action,
   AppAbility,
@@ -33,10 +33,12 @@ import { UpdateIntegrationDto } from './dto/update-integration.dto';
 import { IntegrationMapper } from './dto/integration.mapper';
 import { Integration as IntegrationDomain } from './entities/integration.entity';
 import { IntegrationService } from './integration.service';
+import { IntegrationUpdatedCommand } from './commands/integration-updated.command';
+import { IntegrationRemovedCommand } from './commands/integration-removed.command';
 
 @Controller('integrations')
 @UseGuards(JwtAuthGuard, PoliciesGuard)
-@UseInterceptors(LoggingCacheInterceptor, ClassSerializerInterceptor)
+@UseInterceptors(ControllerCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()
 export class IntegrationController {
   constructor(
@@ -60,8 +62,12 @@ export class IntegrationController {
     @Body() createIntegrationDto: CreateIntegrationDto,
     @Request() req: { user: UserDomain },
   ) {
+    const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+    if (!ability.can(Action.Create, IntegrationDomain)) {
+      throw new UnauthorizedException();
+    }
     const result = await this.service.create(createIntegrationDto, req.user.id);
-    await this.commandBus.execute(new IntegrationCreatedCommand(result));
+    void this.commandBus.execute(new IntegrationCreatedCommand(result));
     return this.mapper.toInterface(result);
   }
 
@@ -75,11 +81,17 @@ export class IntegrationController {
   async findAll(
     @Query('skip') skip = 0,
     @Query('take') take = 100,
+    @Request() req: { user: UserDomain },
   ): Promise<FindAllResponseDto<{ [key: string]: any }>> {
-    const result = await this.service.findAll(skip, take);
+    const result = await this.service.findAll(skip, take, {
+      accountId: req.user.accountId,
+    });
+    const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     return {
       ...result,
-      data: result.data.map((app) => this.mapper.toInterface(app)),
+      data: result.data
+        .filter((entity) => ability.can(Action.Read, entity))
+        .map((entity) => this.mapper.toInterface(entity)),
     };
   }
 
@@ -108,7 +120,6 @@ export class IntegrationController {
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     const app = await this.service.findOne(id);
     if (!ability.can(Action.Update, app)) {
-      this.logger.debug('failing because we got here....');
       throw new UnauthorizedException();
     }
     const updated = await this.service.update(
@@ -116,6 +127,7 @@ export class IntegrationController {
       updateIntegrationDto,
       req.user.id,
     );
+    void this.commandBus.execute(new IntegrationUpdatedCommand(updated));
     return this.mapper.toInterface(updated);
   }
 
@@ -125,11 +137,12 @@ export class IntegrationController {
   )
   async remove(@Param('id') id: string, @Request() req: { user: UserDomain }) {
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
-    const app = await this.service.findOne(id);
-    if (!ability.can(Action.Update, app)) {
+    const entity = await this.service.findOne(id);
+    if (!ability.can(Action.Delete, entity)) {
       throw new UnauthorizedException();
     }
     await this.service.remove(id, req.user.id);
-    return app.id;
+    void this.commandBus.execute(new IntegrationRemovedCommand(entity));
+    return entity.id;
   }
 }

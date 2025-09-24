@@ -5,7 +5,7 @@ import { Reflector } from '@nestjs/core';
 import { User } from 'src/modules/user/entities/user.entity';
 
 @Injectable()
-export class LoggingCacheInterceptor extends CacheInterceptor {
+export class ControllerCacheInterceptor extends CacheInterceptor {
   constructor(
     cacheManager: any,
     reflector: Reflector,

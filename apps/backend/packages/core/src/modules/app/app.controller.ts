@@ -20,7 +20,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CheckPolicies, PoliciesGuard } from 'src/guards/policies.guard';
-import { LoggingCacheInterceptor } from 'src/interceptors/logging-cache.interceptor';
+import { ControllerCacheInterceptor } from 'src/interceptors/logging-cache.interceptor';
 import {
   Action,
   AppAbility,
@@ -31,11 +31,14 @@ import { CreateAppDto } from './dto/create-app.dto';
 import { UpdateAppDto } from './dto/update-app.dto';
 import { AppMapper } from './dto/app.mapper';
 import { App as AppDomain } from './entities/app.entity';
+import { User as UserDomain } from '../user/entities/user.entity';
 import { AppService } from './app.service';
+import { AppRemovedCommand } from './commands/app-removed.command';
+import { AppUpdatedCommand } from './commands/app-updated.command';
 
 @Controller('apps')
 @UseGuards(JwtAuthGuard, PoliciesGuard)
-@UseInterceptors(LoggingCacheInterceptor, ClassSerializerInterceptor)
+@UseInterceptors(ControllerCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()
 export class AppController {
   constructor(
@@ -55,10 +58,15 @@ export class AppController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, AppDomain))
   async create(
     @Body() createAppDto: CreateAppDto,
-    @Request() req: { app: AppDomain },
+    @Request() req: { user: UserDomain },
   ) {
-    const result = await this.service.create(createAppDto, req.app.id);
-    await this.commandBus.execute(new AppCreatedCommand(result));
+    const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+    if (!ability.can(Action.Create, AppDomain)) {
+      throw new UnauthorizedException();
+    }
+    createAppDto.accountId = req.user.accountId;
+    const result = await this.service.create(createAppDto, req.user.id);
+    void this.commandBus.execute(new AppCreatedCommand(result));
     return this.mapper.toInterface(result);
   }
 
@@ -70,18 +78,24 @@ export class AppController {
   async findAll(
     @Query('skip') skip = 0,
     @Query('take') take = 100,
+    @Request() req: { user: UserDomain },
   ): Promise<FindAllResponseDto<{ [key: string]: any }>> {
-    const result = await this.service.findAll(skip, take);
+    const result = await this.service.findAll(skip, take, {
+      accountId: req.user.accountId,
+    });
+    const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     return {
       ...result,
-      data: result.data.map((app) => this.mapper.toInterface(app)),
+      data: result.data
+        .filter((entity) => ability.can(Action.Read, entity))
+        .map((entity) => this.mapper.toInterface(entity)),
     };
   }
 
   @Get(':id')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, AppDomain))
-  async findOne(@Param('id') id: string, @Request() req: { app: AppDomain }) {
-    const ability = await this.caslAbilityFactory.createForUser(req.app.id);
+  async findOne(@Param('id') id: string, @Request() req: { user: UserDomain }) {
+    const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     const app = await this.service.findOne(id);
     if (!ability.can(Action.Read, app)) {
       throw new UnauthorizedException();
@@ -94,27 +108,28 @@ export class AppController {
   async update(
     @Param('id') id: string,
     @Body() updateAppDto: UpdateAppDto,
-    @Request() req: { app: AppDomain },
+    @Request() req: { user: UserDomain },
   ) {
-    const ability = await this.caslAbilityFactory.createForUser(req.app.id);
+    const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     const app = await this.service.findOne(id);
     if (!ability.can(Action.Update, app)) {
-      this.logger.debug('failing because we got here....');
       throw new UnauthorizedException();
     }
-    const updated = await this.service.update(id, updateAppDto, req.app.id);
+    const updated = await this.service.update(id, updateAppDto, req.user.id);
+    void this.commandBus.execute(new AppUpdatedCommand(updated));
     return this.mapper.toInterface(updated);
   }
 
   @Delete(':id')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, AppDomain))
-  async remove(@Param('id') id: string, @Request() req: { app: AppDomain }) {
-    const ability = await this.caslAbilityFactory.createForUser(req.app.id);
+  async remove(@Param('id') id: string, @Request() req: { user: UserDomain }) {
+    const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     const app = await this.service.findOne(id);
-    if (!ability.can(Action.Update, app)) {
+    if (!ability.can(Action.Delete, app)) {
       throw new UnauthorizedException();
     }
-    await this.service.remove(id, req.app.id);
+    await this.service.remove(id, req.user.id);
+    void this.commandBus.execute(new AppRemovedCommand(app));
     return app.id;
   }
 }

@@ -15,10 +15,10 @@ export class AuthService {
 
   async validateUser(
     username: string,
-    pass: string,
+    password: string,
   ): Promise<Partial<UserDomain> | null> {
     const user = await this.userService.findOneByEmail(username);
-    const isMatch = await bcrypt.compare(pass, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (isMatch) {
       return user;
     }
@@ -30,6 +30,7 @@ export class AuthService {
       sub: user.id,
       username: user.email,
       role: user.role,
+      accountId: user.accountId,
     };
     return {
       access_token: this.jwtService.sign(payload),
