@@ -1,4 +1,5 @@
 import { Account } from 'src/modules/account/entities/account.model';
+import { App } from 'src/modules/app/entities/app.model';
 import {
   Column,
   CreateDateColumn,
@@ -6,46 +7,35 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Category } from './app.entity';
-import { Integration } from 'src/modules/integration/entities/integration.model';
-import { Subscription } from 'src/modules/subscription/entities/subscription.model';
 
-@Entity('apps')
-export class App {
+@Entity('subscriptions')
+export class Subscription {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ nullable: false })
   accountId: string;
 
-  @ManyToOne(() => Account, (account) => account.apps, {
+  @ManyToOne(() => Account, (relation) => relation.subscriptions, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
-  @OneToMany(() => Integration, (relation) => relation.app, {
-    cascade: true,
-  })
-  integrations?: Integration[];
+  @Column({ nullable: false })
+  appId: string;
 
-  @OneToMany(() => Subscription, (relation) => relation.app, {
-    cascade: true,
+  @ManyToOne(() => App, (relation) => relation.subscriptions, {
+    onDelete: 'CASCADE',
   })
-  subscriptions?: Subscription[];
+  @JoinColumn({ name: 'appId' })
+  app: App;
 
   @Column()
-  name: string;
-
-  @Column({ type: 'enum', enum: Category, default: Category.None })
-  category: Category;
-
-  @Column({ nullable: true })
-  description?: string;
+  expression: string;
 
   @CreateDateColumn()
   createdAt: Date;

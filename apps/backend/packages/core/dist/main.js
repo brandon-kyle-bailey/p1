@@ -1276,12 +1276,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Account = void 0;
+const app_model_1 = __webpack_require__(/*! src/modules/app/entities/app.model */ "./src/modules/app/entities/app.model.ts");
+const department_model_1 = __webpack_require__(/*! src/modules/department/entities/department.model */ "./src/modules/department/entities/department.model.ts");
+const integration_model_1 = __webpack_require__(/*! src/modules/integration/entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
+const subscription_model_1 = __webpack_require__(/*! src/modules/subscription/entities/subscription.model */ "./src/modules/subscription/entities/subscription.model.ts");
 const user_model_1 = __webpack_require__(/*! src/modules/user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 let Account = class Account {
     id;
     name;
     users;
+    departments;
+    apps;
+    integrations;
+    subscriptions;
     createdAt;
     createdBy;
     updatedAt;
@@ -1304,6 +1312,30 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], Account.prototype, "users", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => department_model_1.Department, (relation) => relation.account, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], Account.prototype, "departments", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => app_model_1.App, (relation) => relation.account, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], Account.prototype, "apps", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => integration_model_1.Integration, (relation) => relation.account, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], Account.prototype, "integrations", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => subscription_model_1.Subscription, (relation) => relation.account, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], Account.prototype, "subscriptions", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
@@ -1675,6 +1707,8 @@ const workspace_user_model_1 = __webpack_require__(/*! ./workspace/entities/work
 const integration_module_1 = __webpack_require__(/*! ./integration/integration.module */ "./src/modules/integration/integration.module.ts");
 const ai_module_1 = __webpack_require__(/*! ./ai/ai.module */ "./src/modules/ai/ai.module.ts");
 const integration_model_1 = __webpack_require__(/*! ./integration/entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
+const department_model_1 = __webpack_require__(/*! ./department/entities/department.model */ "./src/modules/department/entities/department.model.ts");
+const subscription_module_1 = __webpack_require__(/*! ./subscription/subscription.module */ "./src/modules/subscription/subscription.module.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -1694,7 +1728,15 @@ exports.AppModule = AppModule = __decorate([
                     username: config.get('DB_USER', 'postgres'),
                     password: config.get('DB_PASS', 'postgres'),
                     database: config.get('DB_NAME', 'p1'),
-                    entities: [account_model_1.Account, user_model_1.User, app_model_1.App, integration_model_1.Integration, workspace_model_1.Workspace, workspace_user_model_1.WorkspaceUser],
+                    entities: [
+                        account_model_1.Account,
+                        user_model_1.User,
+                        app_model_1.App,
+                        integration_model_1.Integration,
+                        department_model_1.Department,
+                        workspace_model_1.Workspace,
+                        workspace_user_model_1.WorkspaceUser,
+                    ],
                     synchronize: true,
                     autoLoadEntities: true,
                     retryAttempts: 10,
@@ -1737,6 +1779,7 @@ exports.AppModule = AppModule = __decorate([
             app_module_1.AppModule,
             workspace_module_1.WorkspaceModule,
             integration_module_1.IntegrationModule,
+            subscription_module_1.SubscriptionModule,
             ai_module_1.AiModule,
         ],
         providers: [{ provide: core_1.APP_GUARD, useClass: logging_thottler_guard_1.LoggingThrottlerGuard }],
@@ -2584,11 +2627,13 @@ const account_model_1 = __webpack_require__(/*! src/modules/account/entities/acc
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const app_entity_1 = __webpack_require__(/*! ./app.entity */ "./src/modules/app/entities/app.entity.ts");
 const integration_model_1 = __webpack_require__(/*! src/modules/integration/entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
+const subscription_model_1 = __webpack_require__(/*! src/modules/subscription/entities/subscription.model */ "./src/modules/subscription/entities/subscription.model.ts");
 let App = class App {
     id;
     accountId;
     account;
     integrations;
+    subscriptions;
     name;
     category;
     description;
@@ -2609,7 +2654,7 @@ __decorate([
     __metadata("design:type", String)
 ], App.prototype, "accountId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.users, {
+    (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.apps, {
         onDelete: 'CASCADE',
     }),
     (0, typeorm_1.JoinColumn)({ name: 'accountId' }),
@@ -2621,6 +2666,12 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], App.prototype, "integrations", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => subscription_model_1.Subscription, (relation) => relation.app, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], App.prototype, "subscriptions", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
@@ -3408,6 +3459,8 @@ const user_service_1 = __webpack_require__(/*! src/modules/user/user.service */ 
 const app_entity_1 = __webpack_require__(/*! src/modules/app/entities/app.entity */ "./src/modules/app/entities/app.entity.ts");
 const workspace_entity_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace.entity */ "./src/modules/workspace/entities/workspace.entity.ts");
 const integration_entity_1 = __webpack_require__(/*! src/modules/integration/entities/integration.entity */ "./src/modules/integration/entities/integration.entity.ts");
+const department_entity_1 = __webpack_require__(/*! src/modules/department/entities/department.entity */ "./src/modules/department/entities/department.entity.ts");
+const subscription_entity_1 = __webpack_require__(/*! src/modules/subscription/entities/subscription.entity */ "./src/modules/subscription/entities/subscription.entity.ts");
 var Action;
 (function (Action) {
     Action["Manage"] = "manage";
@@ -3423,34 +3476,39 @@ let CaslAbilityFactory = class CaslAbilityFactory {
     }
     async createForUser(userId) {
         const user = await this.userService.findOne(userId);
-        const { can, cannot, build } = new ability_1.AbilityBuilder(ability_1.createMongoAbility);
+        const { can, build } = new ability_1.AbilityBuilder(ability_1.createMongoAbility);
         if ([user_entity_1.Role.Admin].includes(user.role)) {
             can(Action.Manage, 'all');
         }
         else {
-            cannot(Action.Create, account_entity_1.Account);
-            can(Action.Create, user_entity_1.User);
-            can(Action.Create, app_entity_1.App);
-            can(Action.Create, workspace_entity_1.Workspace);
-            can(Action.Create, integration_entity_1.Integration);
-            can(Action.Read, user_entity_1.User, { accountId: user.accountId });
-            can(Action.Read, account_entity_1.Account, { createdBy: user.id });
+            can(Action.Create, account_entity_1.Account);
             can(Action.Read, account_entity_1.Account, { id: user.accountId });
-            can(Action.Read, app_entity_1.App, { createdBy: user.id });
-            can(Action.Read, app_entity_1.App, { id: user.accountId });
-            can(Action.Read, workspace_entity_1.Workspace, { createdBy: user.id });
-            can(Action.Read, workspace_entity_1.Workspace, { id: user.accountId });
-            can(Action.Read, integration_entity_1.Integration, { createdBy: user.id });
-            can(Action.Read, integration_entity_1.Integration, { id: user.accountId });
-            can(Action.Update, user_entity_1.User, { id: user.id });
             can(Action.Update, account_entity_1.Account, { createdBy: user.id });
+            can(Action.Delete, account_entity_1.Account, { createdBy: user.id });
+            can(Action.Create, department_entity_1.Department);
+            can(Action.Read, department_entity_1.Department, { accountId: user.accountId });
+            can(Action.Update, department_entity_1.Department, { createdBy: user.id });
+            can(Action.Delete, department_entity_1.Department, { createdBy: user.id });
+            can(Action.Create, app_entity_1.App);
+            can(Action.Read, app_entity_1.App, { accountId: user.accountId });
             can(Action.Update, app_entity_1.App, { createdBy: user.id });
-            can(Action.Update, workspace_entity_1.Workspace, { createdBy: user.id });
-            can(Action.Update, integration_entity_1.Integration, { createdBy: user.id });
-            can(Action.Delete, user_entity_1.User, { createdBy: user.id });
             can(Action.Delete, app_entity_1.App, { createdBy: user.id });
-            can(Action.Delete, workspace_entity_1.Workspace, { createdBy: user.id });
+            can(Action.Create, integration_entity_1.Integration);
+            can(Action.Read, integration_entity_1.Integration, { accountId: user.accountId });
+            can(Action.Update, integration_entity_1.Integration, { createdBy: user.id });
             can(Action.Delete, integration_entity_1.Integration, { createdBy: user.id });
+            can(Action.Create, subscription_entity_1.Subscription);
+            can(Action.Read, subscription_entity_1.Subscription, { accountId: user.accountId });
+            can(Action.Update, subscription_entity_1.Subscription, { createdBy: user.id });
+            can(Action.Delete, subscription_entity_1.Subscription, { createdBy: user.id });
+            can(Action.Create, workspace_entity_1.Workspace);
+            can(Action.Read, workspace_entity_1.Workspace, { accountId: user.accountId });
+            can(Action.Update, workspace_entity_1.Workspace, { createdBy: user.id });
+            can(Action.Delete, workspace_entity_1.Workspace, { createdBy: user.id });
+            can(Action.Create, user_entity_1.User);
+            can(Action.Read, user_entity_1.User, { accountId: user.accountId });
+            can(Action.Update, user_entity_1.User, { id: user.id });
+            can(Action.Delete, user_entity_1.User, { createdBy: user.id });
         }
         return build({
             detectSubjectType: (item) => item.constructor,
@@ -3500,6 +3558,182 @@ exports.CaslModule = CaslModule = __decorate([
         exports: [casl_ability_factory_1.CaslAbilityFactory, policies_guard_1.PoliciesGuard],
     })
 ], CaslModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/department/entities/department.entity.ts":
+/*!**************************************************************!*\
+  !*** ./src/modules/department/entities/department.entity.ts ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Department = void 0;
+class Department {
+    props;
+    constructor(props) {
+        this.props = {
+            ...props,
+            createdAt: props.createdAt ?? new Date(),
+            updatedAt: props.updatedAt ?? new Date(),
+        };
+    }
+    get id() {
+        return this.props.id;
+    }
+    get accountId() {
+        return this.props.accountId;
+    }
+    get appId() {
+        return this.props.appId;
+    }
+    get name() {
+        return this.props.name;
+    }
+    get createdAt() {
+        return this.props.createdAt;
+    }
+    get updatedAt() {
+        return this.props.updatedAt;
+    }
+    get deletedAt() {
+        return this.props.deletedAt;
+    }
+    get createdBy() {
+        return this.props.createdBy;
+    }
+    get updatedBy() {
+        return this.props.updatedBy;
+    }
+    get deletedBy() {
+        return this.props.deletedBy;
+    }
+    updateName(newName) {
+        this.props.name = newName;
+        this.touch();
+    }
+    softDelete(byUserId) {
+        this.props.deletedAt = new Date();
+        if (byUserId) {
+            this.props.deletedBy = byUserId;
+        }
+        this.touch();
+    }
+    updateOwner(id) {
+        this.props.createdBy = id;
+        this.touch();
+    }
+    updateUpdatedBy(id) {
+        this.props.updatedBy = id;
+        this.touch();
+    }
+    restore() {
+        this.props.deletedAt = undefined;
+        this.props.deletedBy = undefined;
+        this.touch();
+    }
+    touch(id) {
+        this.props.updatedAt = new Date();
+        if (id) {
+            this.props.updatedBy = id;
+        }
+    }
+}
+exports.Department = Department;
+
+
+/***/ }),
+
+/***/ "./src/modules/department/entities/department.model.ts":
+/*!*************************************************************!*\
+  !*** ./src/modules/department/entities/department.model.ts ***!
+  \*************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Department = void 0;
+const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
+const user_model_1 = __webpack_require__(/*! src/modules/user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let Department = class Department {
+    id;
+    accountId;
+    account;
+    users;
+    name;
+    createdAt;
+    updatedAt;
+    deletedAt;
+    createdBy;
+    updatedBy;
+    deletedBy;
+};
+exports.Department = Department;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], Department.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Department.prototype, "accountId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.departments, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'accountId' }),
+    __metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
+], Department.prototype, "account", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => user_model_1.User, (user) => user.department, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], Department.prototype, "users", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Department.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], Department.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], Department.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], Department.prototype, "deletedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Department.prototype, "createdBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Department.prototype, "updatedBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Department.prototype, "deletedBy", void 0);
+exports.Department = Department = __decorate([
+    (0, typeorm_1.Entity)('departments')
+], Department);
 
 
 /***/ }),
@@ -4540,6 +4774,1007 @@ exports.IntegrationService = IntegrationService = __decorate([
 
 /***/ }),
 
+/***/ "./src/modules/subscription/commands/subscription-created.command.ts":
+/*!***************************************************************************!*\
+  !*** ./src/modules/subscription/commands/subscription-created.command.ts ***!
+  \***************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionCreatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class SubscriptionCreatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.SubscriptionCreatedCommand = SubscriptionCreatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/commands/subscription-removed.command.ts":
+/*!***************************************************************************!*\
+  !*** ./src/modules/subscription/commands/subscription-removed.command.ts ***!
+  \***************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionRemovedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class SubscriptionRemovedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.SubscriptionRemovedCommand = SubscriptionRemovedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/commands/subscription-updated.command.ts":
+/*!***************************************************************************!*\
+  !*** ./src/modules/subscription/commands/subscription-updated.command.ts ***!
+  \***************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionUpdatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class SubscriptionUpdatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.SubscriptionUpdatedCommand = SubscriptionUpdatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/dto/create-subscription.dto.ts":
+/*!*****************************************************************!*\
+  !*** ./src/modules/subscription/dto/create-subscription.dto.ts ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateSubscriptionDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CreateSubscriptionDto {
+    accountId;
+    appId;
+    expression;
+    createdBy;
+    updatedBy;
+}
+exports.CreateSubscriptionDto = CreateSubscriptionDto;
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateSubscriptionDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the app' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateSubscriptionDto.prototype, "appId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The expression of the subscription' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateSubscriptionDto.prototype, "expression", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateSubscriptionDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateSubscriptionDto.prototype, "updatedBy", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/dto/subscription.dto.ts":
+/*!**********************************************************!*\
+  !*** ./src/modules/subscription/dto/subscription.dto.ts ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class SubscriptionDto {
+    constructor(partial) {
+        Object.assign(this, partial);
+    }
+    accountId;
+    expression;
+    createdBy;
+    updatedBy;
+    deletedBy;
+    createdAt;
+    updatedAt;
+    deletedAt;
+}
+exports.SubscriptionDto = SubscriptionDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], SubscriptionDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The expression of the subscription' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], SubscriptionDto.prototype, "expression", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SubscriptionDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SubscriptionDto.prototype, "updatedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SubscriptionDto.prototype, "deletedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], SubscriptionDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], SubscriptionDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], SubscriptionDto.prototype, "deletedAt", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/dto/subscription.mapper.ts":
+/*!*************************************************************!*\
+  !*** ./src/modules/subscription/dto/subscription.mapper.ts ***!
+  \*************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionMapper = void 0;
+const subscription_entity_1 = __webpack_require__(/*! ../entities/subscription.entity */ "./src/modules/subscription/entities/subscription.entity.ts");
+const subscription_dto_1 = __webpack_require__(/*! ./subscription.dto */ "./src/modules/subscription/dto/subscription.dto.ts");
+class SubscriptionMapper {
+    static toInterface(entity) {
+        return new subscription_dto_1.SubscriptionDto(entity.props);
+    }
+    toInterface(entity) {
+        return SubscriptionMapper.toInterface(entity);
+    }
+    static toDomain(model) {
+        return new subscription_entity_1.Subscription({
+            ...model,
+        });
+    }
+    toDomain(model) {
+        return SubscriptionMapper.toDomain(model);
+    }
+    static toPersistence(entity) {
+        return {
+            ...entity.props,
+        };
+    }
+    toPersistence(entity) {
+        return SubscriptionMapper.toPersistence(entity);
+    }
+}
+exports.SubscriptionMapper = SubscriptionMapper;
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/dto/update-subscription.dto.ts":
+/*!*****************************************************************!*\
+  !*** ./src/modules/subscription/dto/update-subscription.dto.ts ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateSubscriptionDto = void 0;
+const mapped_types_1 = __webpack_require__(/*! @nestjs/mapped-types */ "@nestjs/mapped-types");
+const create_subscription_dto_1 = __webpack_require__(/*! ./create-subscription.dto */ "./src/modules/subscription/dto/create-subscription.dto.ts");
+class UpdateSubscriptionDto extends (0, mapped_types_1.PartialType)(create_subscription_dto_1.CreateSubscriptionDto) {
+}
+exports.UpdateSubscriptionDto = UpdateSubscriptionDto;
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/entities/subscription.entity.ts":
+/*!******************************************************************!*\
+  !*** ./src/modules/subscription/entities/subscription.entity.ts ***!
+  \******************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Subscription = void 0;
+class Subscription {
+    props;
+    constructor(props) {
+        this.props = {
+            ...props,
+            createdAt: props.createdAt ?? new Date(),
+            updatedAt: props.updatedAt ?? new Date(),
+        };
+    }
+    get id() {
+        return this.props.id;
+    }
+    get accountId() {
+        return this.props.accountId;
+    }
+    get appId() {
+        return this.props.appId;
+    }
+    get expression() {
+        return this.props.expression;
+    }
+    get createdAt() {
+        return this.props.createdAt;
+    }
+    get updatedAt() {
+        return this.props.updatedAt;
+    }
+    get deletedAt() {
+        return this.props.deletedAt;
+    }
+    get createdBy() {
+        return this.props.createdBy;
+    }
+    get updatedBy() {
+        return this.props.updatedBy;
+    }
+    get deletedBy() {
+        return this.props.deletedBy;
+    }
+    updateExpression(expression) {
+        this.props.expression = expression;
+        this.touch();
+    }
+    softDelete(byUserId) {
+        this.props.deletedAt = new Date();
+        if (byUserId) {
+            this.props.deletedBy = byUserId;
+        }
+        this.touch();
+    }
+    updateOwner(id) {
+        this.props.createdBy = id;
+        this.touch();
+    }
+    updateUpdatedBy(id) {
+        this.props.updatedBy = id;
+        this.touch();
+    }
+    restore() {
+        this.props.deletedAt = undefined;
+        this.props.deletedBy = undefined;
+        this.touch();
+    }
+    touch(id) {
+        this.props.updatedAt = new Date();
+        if (id) {
+            this.props.updatedBy = id;
+        }
+    }
+}
+exports.Subscription = Subscription;
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/entities/subscription.model.ts":
+/*!*****************************************************************!*\
+  !*** ./src/modules/subscription/entities/subscription.model.ts ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Subscription = void 0;
+const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
+const app_model_1 = __webpack_require__(/*! src/modules/app/entities/app.model */ "./src/modules/app/entities/app.model.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let Subscription = class Subscription {
+    id;
+    accountId;
+    account;
+    appId;
+    app;
+    expression;
+    createdAt;
+    updatedAt;
+    deletedAt;
+    createdBy;
+    updatedBy;
+    deletedBy;
+};
+exports.Subscription = Subscription;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], Subscription.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Subscription.prototype, "accountId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (relation) => relation.subscriptions, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'accountId' }),
+    __metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
+], Subscription.prototype, "account", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Subscription.prototype, "appId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => app_model_1.App, (relation) => relation.subscriptions, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'appId' }),
+    __metadata("design:type", typeof (_b = typeof app_model_1.App !== "undefined" && app_model_1.App) === "function" ? _b : Object)
+], Subscription.prototype, "app", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Subscription.prototype, "expression", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], Subscription.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], Subscription.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
+], Subscription.prototype, "deletedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Subscription.prototype, "createdBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Subscription.prototype, "updatedBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Subscription.prototype, "deletedBy", void 0);
+exports.Subscription = Subscription = __decorate([
+    (0, typeorm_1.Entity)('subscriptions')
+], Subscription);
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/handlers/subscription-created.handler.ts":
+/*!***************************************************************************!*\
+  !*** ./src/modules/subscription/handlers/subscription-created.handler.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionCreatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const subscription_created_command_1 = __webpack_require__(/*! ../commands/subscription-created.command */ "./src/modules/subscription/commands/subscription-created.command.ts");
+let SubscriptionCreatedHandler = class SubscriptionCreatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Subscription created handler called', {
+            correlationId: '8adf5d96-ec23-45bc-abf4-3d650c30a76a',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.SubscriptionCreatedHandler = SubscriptionCreatedHandler;
+exports.SubscriptionCreatedHandler = SubscriptionCreatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(subscription_created_command_1.SubscriptionCreatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], SubscriptionCreatedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/handlers/subscription-removed.handler.ts":
+/*!***************************************************************************!*\
+  !*** ./src/modules/subscription/handlers/subscription-removed.handler.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionRemovedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const subscription_removed_command_1 = __webpack_require__(/*! ../commands/subscription-removed.command */ "./src/modules/subscription/commands/subscription-removed.command.ts");
+let SubscriptionRemovedHandler = class SubscriptionRemovedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Subscription removed handler called', {
+            correlationId: '4954e2c3-42c3-4aaf-b9ae-365f15d83ef6',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.SubscriptionRemovedHandler = SubscriptionRemovedHandler;
+exports.SubscriptionRemovedHandler = SubscriptionRemovedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(subscription_removed_command_1.SubscriptionRemovedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], SubscriptionRemovedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/handlers/subscription-updated.handler.ts":
+/*!***************************************************************************!*\
+  !*** ./src/modules/subscription/handlers/subscription-updated.handler.ts ***!
+  \***************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionUpdatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const subscription_updated_command_1 = __webpack_require__(/*! ../commands/subscription-updated.command */ "./src/modules/subscription/commands/subscription-updated.command.ts");
+let SubscriptionUpdatedHandler = class SubscriptionUpdatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Subscription updated handler called', {
+            correlationId: '67a859be-a168-4574-bbc3-c05b27dc4612',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.SubscriptionUpdatedHandler = SubscriptionUpdatedHandler;
+exports.SubscriptionUpdatedHandler = SubscriptionUpdatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(subscription_updated_command_1.SubscriptionUpdatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], SubscriptionUpdatedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/subscription.controller.ts":
+/*!*************************************************************!*\
+  !*** ./src/modules/subscription/subscription.controller.ts ***!
+  \*************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionController = void 0;
+const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const jwt_auth_guard_1 = __webpack_require__(/*! src/guards/jwt-auth.guard */ "./src/guards/jwt-auth.guard.ts");
+const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
+const logging_cache_interceptor_1 = __webpack_require__(/*! src/interceptors/logging-cache.interceptor */ "./src/interceptors/logging-cache.interceptor.ts");
+const casl_ability_factory_1 = __webpack_require__(/*! ../casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
+const subscription_created_command_1 = __webpack_require__(/*! ./commands/subscription-created.command */ "./src/modules/subscription/commands/subscription-created.command.ts");
+const create_subscription_dto_1 = __webpack_require__(/*! ./dto/create-subscription.dto */ "./src/modules/subscription/dto/create-subscription.dto.ts");
+const update_subscription_dto_1 = __webpack_require__(/*! ./dto/update-subscription.dto */ "./src/modules/subscription/dto/update-subscription.dto.ts");
+const subscription_mapper_1 = __webpack_require__(/*! ./dto/subscription.mapper */ "./src/modules/subscription/dto/subscription.mapper.ts");
+const subscription_entity_1 = __webpack_require__(/*! ./entities/subscription.entity */ "./src/modules/subscription/entities/subscription.entity.ts");
+const subscription_service_1 = __webpack_require__(/*! ./subscription.service */ "./src/modules/subscription/subscription.service.ts");
+const subscription_updated_command_1 = __webpack_require__(/*! ./commands/subscription-updated.command */ "./src/modules/subscription/commands/subscription-updated.command.ts");
+const subscription_removed_command_1 = __webpack_require__(/*! ./commands/subscription-removed.command */ "./src/modules/subscription/commands/subscription-removed.command.ts");
+let SubscriptionController = class SubscriptionController {
+    logger;
+    service;
+    mapper;
+    caslAbilityFactory;
+    commandBus;
+    constructor(logger, service, mapper, caslAbilityFactory, commandBus) {
+        this.logger = logger;
+        this.service = service;
+        this.mapper = mapper;
+        this.caslAbilityFactory = caslAbilityFactory;
+        this.commandBus = commandBus;
+    }
+    async create(createSubscriptionDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        if (!ability.can(casl_ability_factory_1.Action.Create, subscription_entity_1.Subscription)) {
+            throw new common_1.UnauthorizedException();
+        }
+        const result = await this.service.create(createSubscriptionDto, req.user.id);
+        void this.commandBus.execute(new subscription_created_command_1.SubscriptionCreatedCommand(result));
+        return this.mapper.toInterface(result);
+    }
+    async findAll(skip = 0, take = 100, req) {
+        const result = await this.service.findAll(skip, take, {
+            accountId: req.user.accountId,
+        });
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        return {
+            ...result,
+            data: result.data
+                .filter((entity) => ability.can(casl_ability_factory_1.Action.Read, entity))
+                .map((entity) => this.mapper.toInterface(entity)),
+        };
+    }
+    async findOne(id, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const app = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Read, app)) {
+            throw new common_1.UnauthorizedException();
+        }
+        return this.mapper.toInterface(app);
+    }
+    async update(id, updateSubscriptionDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const app = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Update, app)) {
+            throw new common_1.UnauthorizedException();
+        }
+        const updated = await this.service.update(id, updateSubscriptionDto, req.user.id);
+        void this.commandBus.execute(new subscription_updated_command_1.SubscriptionUpdatedCommand(updated));
+        return this.mapper.toInterface(updated);
+    }
+    async remove(id, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const entity = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Delete, entity)) {
+            throw new common_1.UnauthorizedException();
+        }
+        await this.service.remove(id, req.user.id);
+        void this.commandBus.execute(new subscription_removed_command_1.SubscriptionRemovedCommand(entity));
+        return entity.id;
+    }
+};
+exports.SubscriptionController = SubscriptionController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Create, subscription_entity_1.Subscription)),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_subscription_dto_1.CreateSubscriptionDto !== "undefined" && create_subscription_dto_1.CreateSubscriptionDto) === "function" ? _f : Object, Object]),
+    __metadata("design:returntype", Promise)
+], SubscriptionController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, subscription_entity_1.Subscription)),
+    (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: Number }),
+    (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
+    __param(0, (0, common_1.Query)('skip')),
+    __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], SubscriptionController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, subscription_entity_1.Subscription)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SubscriptionController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Update, subscription_entity_1.Subscription)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_h = typeof update_subscription_dto_1.UpdateSubscriptionDto !== "undefined" && update_subscription_dto_1.UpdateSubscriptionDto) === "function" ? _h : Object, Object]),
+    __metadata("design:returntype", Promise)
+], SubscriptionController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Delete, subscription_entity_1.Subscription)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SubscriptionController.prototype, "remove", null);
+exports.SubscriptionController = SubscriptionController = __decorate([
+    (0, common_1.Controller)('subscriptions'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.ControllerCacheInterceptor, common_1.ClassSerializerInterceptor),
+    (0, swagger_1.ApiBearerAuth)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, common_1.Inject)(subscription_service_1.SubscriptionService)),
+    __param(2, (0, common_1.Inject)(subscription_mapper_1.SubscriptionMapper)),
+    __param(3, (0, common_1.Inject)(casl_ability_factory_1.CaslAbilityFactory)),
+    __param(4, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof subscription_service_1.SubscriptionService !== "undefined" && subscription_service_1.SubscriptionService) === "function" ? _b : Object, typeof (_c = typeof subscription_mapper_1.SubscriptionMapper !== "undefined" && subscription_mapper_1.SubscriptionMapper) === "function" ? _c : Object, typeof (_d = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _d : Object, typeof (_e = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _e : Object])
+], SubscriptionController);
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/subscription.module.ts":
+/*!*********************************************************!*\
+  !*** ./src/modules/subscription/subscription.module.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionModule = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const casl_module_1 = __webpack_require__(/*! ../casl/casl.module */ "./src/modules/casl/casl.module.ts");
+const user_model_1 = __webpack_require__(/*! ../user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const subscription_mapper_1 = __webpack_require__(/*! ./dto/subscription.mapper */ "./src/modules/subscription/dto/subscription.mapper.ts");
+const subscription_model_1 = __webpack_require__(/*! ./entities/subscription.model */ "./src/modules/subscription/entities/subscription.model.ts");
+const subscription_created_handler_1 = __webpack_require__(/*! ./handlers/subscription-created.handler */ "./src/modules/subscription/handlers/subscription-created.handler.ts");
+const subscription_removed_handler_1 = __webpack_require__(/*! ./handlers/subscription-removed.handler */ "./src/modules/subscription/handlers/subscription-removed.handler.ts");
+const subscription_updated_handler_1 = __webpack_require__(/*! ./handlers/subscription-updated.handler */ "./src/modules/subscription/handlers/subscription-updated.handler.ts");
+const subscription_controller_1 = __webpack_require__(/*! ./subscription.controller */ "./src/modules/subscription/subscription.controller.ts");
+const subscription_service_1 = __webpack_require__(/*! ./subscription.service */ "./src/modules/subscription/subscription.service.ts");
+let SubscriptionModule = class SubscriptionModule {
+};
+exports.SubscriptionModule = SubscriptionModule;
+exports.SubscriptionModule = SubscriptionModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            logging_1.LoggingModule,
+            typeorm_1.TypeOrmModule.forFeature([user_model_1.User, subscription_model_1.Subscription]),
+            casl_module_1.CaslModule,
+        ],
+        controllers: [subscription_controller_1.SubscriptionController],
+        providers: [
+            subscription_mapper_1.SubscriptionMapper,
+            subscription_service_1.SubscriptionService,
+            subscription_created_handler_1.SubscriptionCreatedHandler,
+            subscription_updated_handler_1.SubscriptionUpdatedHandler,
+            subscription_removed_handler_1.SubscriptionRemovedHandler,
+        ],
+        exports: [subscription_service_1.SubscriptionService],
+    })
+], SubscriptionModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/subscription/subscription.service.ts":
+/*!**********************************************************!*\
+  !*** ./src/modules/subscription/subscription.service.ts ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubscriptionService = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const subscription_mapper_1 = __webpack_require__(/*! ./dto/subscription.mapper */ "./src/modules/subscription/dto/subscription.mapper.ts");
+const subscription_model_1 = __webpack_require__(/*! ./entities/subscription.model */ "./src/modules/subscription/entities/subscription.model.ts");
+let SubscriptionService = class SubscriptionService {
+    logger;
+    repo;
+    mapper;
+    constructor(logger, repo, mapper) {
+        this.logger = logger;
+        this.repo = repo;
+        this.mapper = mapper;
+    }
+    async createWithManager(createSubscriptionDto, manager) {
+        const repo = manager.getRepository(subscription_model_1.Subscription);
+        const entity = repo.create({ ...createSubscriptionDto });
+        const result = await repo.save(entity);
+        return this.mapper.toDomain(result);
+    }
+    async create(createSubscriptionDto, createdBy) {
+        const entity = this.repo.create({ ...createSubscriptionDto, createdBy });
+        const result = await this.repo.save(entity);
+        return this.mapper.toDomain(result);
+    }
+    async findAll(skip = 0, take = 100, where) {
+        try {
+            const [entities, count] = await this.repo.findAndCount({
+                skip,
+                take,
+                where,
+            });
+            return {
+                data: entities.map((entity) => this.mapper.toDomain(entity)),
+                pagination: {
+                    total: count,
+                    skip,
+                    take,
+                    hasNextPage: skip + take < count,
+                },
+            };
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findAll.name} encountered an error`, {
+                correlationId: '6d437955-6b3a-417d-825b-3f43dedd8825',
+                err: JSON.stringify(err),
+            });
+            return {
+                data: [],
+                pagination: { total: 0, skip: 0, take, hasNextPage: false },
+            };
+        }
+    }
+    async findOne(id) {
+        try {
+            const entity = await this.repo.findOneBy({ id });
+            if (!entity) {
+                throw new common_1.NotFoundException();
+            }
+            return this.mapper.toDomain(entity);
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOne.name} encountered an error`, {
+                correlationId: '6acb4b57-7592-4f08-869c-b4a14cddd072',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async findOneByExpression(expression, accountId) {
+        try {
+            const model = await this.repo.findOneBy({ expression, accountId });
+            if (!model) {
+                throw new common_1.NotFoundException();
+            }
+            return this.mapper.toDomain(model);
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOneByExpression.name} encountered an error`, {
+                correlationId: '7cce84d8-8f89-4058-8d2e-af450cfad2d3',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async updateWithManager(id, updateSubscriptionDto, manager) {
+        try {
+            const repo = manager.getRepository(subscription_model_1.Subscription);
+            const model = await repo.findOneBy({ id });
+            if (!model) {
+                throw new common_1.NotFoundException();
+            }
+            const entity = this.mapper.toDomain(model);
+            if (updateSubscriptionDto.expression) {
+                entity.updateExpression(updateSubscriptionDto.expression);
+            }
+            if (updateSubscriptionDto.createdBy) {
+                entity.updateOwner(updateSubscriptionDto.createdBy);
+            }
+            if (updateSubscriptionDto.updatedBy) {
+                entity.updateUpdatedBy(updateSubscriptionDto.updatedBy);
+            }
+            await repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.updateWithManager.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async update(id, updateSubscriptionDto, updatedBy) {
+        try {
+            const entity = await this.findOne(id);
+            if (updateSubscriptionDto.expression) {
+                entity.updateExpression(updateSubscriptionDto.expression);
+            }
+            entity.updateUpdatedBy(updatedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.update.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async remove(id, removedBy) {
+        try {
+            const entity = await this.findOne(id);
+            entity.softDelete(removedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.remove.name} encountered an error`, {
+                correlationId: 'b76287ba-c244-475f-adcb-52c6917ba739',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+};
+exports.SubscriptionService = SubscriptionService;
+exports.SubscriptionService = SubscriptionService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, typeorm_1.InjectRepository)(subscription_model_1.Subscription)),
+    __param(2, (0, common_1.Inject)(subscription_mapper_1.SubscriptionMapper)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof subscription_mapper_1.SubscriptionMapper !== "undefined" && subscription_mapper_1.SubscriptionMapper) === "function" ? _c : Object])
+], SubscriptionService);
+
+
+/***/ }),
+
 /***/ "./src/modules/user/commands/user-created.command.ts":
 /*!***********************************************************!*\
   !*** ./src/modules/user/commands/user-created.command.ts ***!
@@ -4630,6 +5865,7 @@ const class_validator_1 = __webpack_require__(/*! class-validator */ "class-vali
 const user_entity_1 = __webpack_require__(/*! ../entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
 class CreateUserDto {
     accountId;
+    departmentId;
     email;
     password;
     name;
@@ -4644,6 +5880,12 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the department' }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "departmentId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The email address of the user' }),
     (0, class_validator_1.IsEmail)(),
@@ -4885,6 +6127,9 @@ class User {
     get accountId() {
         return this.props.accountId;
     }
+    get departmentId() {
+        return this.props.departmentId;
+    }
     get email() {
         return this.props.email;
     }
@@ -4938,6 +6183,10 @@ class User {
         this.props.password = newPassword;
         this.touch();
     }
+    updateDepartment(departmentId) {
+        this.props.departmentId = departmentId;
+        this.touch();
+    }
     softDelete(byUserId) {
         this.props.deletedAt = new Date();
         if (byUserId) {
@@ -4986,10 +6235,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.User = void 0;
 const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
+const department_model_1 = __webpack_require__(/*! src/modules/department/entities/department.model */ "./src/modules/department/entities/department.model.ts");
 const workspace_user_model_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace-user.model */ "./src/modules/workspace/entities/workspace-user.model.ts");
 const workspace_model_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace.model */ "./src/modules/workspace/entities/workspace.model.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
@@ -5000,6 +6250,8 @@ let User = class User {
     account;
     workspaceUsers;
     workspaces;
+    departmentId;
+    department;
     email;
     password;
     role;
@@ -5042,6 +6294,17 @@ __decorate([
     __metadata("design:type", Array)
 ], User.prototype, "workspaces", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "departmentId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => department_model_1.Department, (relation) => relation.users, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'departmentId' }),
+    __metadata("design:type", typeof (_b = typeof department_model_1.Department !== "undefined" && department_model_1.Department) === "function" ? _b : Object)
+], User.prototype, "department", void 0);
+__decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
@@ -5051,7 +6314,7 @@ __decorate([
 ], User.prototype, "password", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'enum', enum: user_entity_1.Role, default: user_entity_1.Role.User }),
-    __metadata("design:type", typeof (_b = typeof user_entity_1.Role !== "undefined" && user_entity_1.Role) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_c = typeof user_entity_1.Role !== "undefined" && user_entity_1.Role) === "function" ? _c : Object)
 ], User.prototype, "role", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
@@ -5063,15 +6326,15 @@ __decorate([
 ], User.prototype, "refresh_token", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
 ], User.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
-    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
 ], User.prototype, "updatedAt", void 0);
 __decorate([
     (0, typeorm_1.DeleteDateColumn)(),
-    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
+    __metadata("design:type", typeof (_f = typeof Date !== "undefined" && Date) === "function" ? _f : Object)
 ], User.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),

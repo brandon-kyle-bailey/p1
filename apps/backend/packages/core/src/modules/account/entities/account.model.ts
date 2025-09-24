@@ -1,4 +1,7 @@
+import { App } from 'src/modules/app/entities/app.model';
 import { Department } from 'src/modules/department/entities/department.model';
+import { Integration } from 'src/modules/integration/entities/integration.model';
+import { Subscription } from 'src/modules/subscription/entities/subscription.model';
 import { User } from 'src/modules/user/entities/user.model';
 import {
   Entity,
@@ -27,6 +30,21 @@ export class Account {
     cascade: true,
   })
   departments?: Department[];
+
+  @OneToMany(() => App, (relation) => relation.account, {
+    cascade: true,
+  })
+  apps?: App[];
+
+  @OneToMany(() => Integration, (relation) => relation.account, {
+    cascade: true,
+  })
+  integrations?: Integration[];
+
+  @OneToMany(() => Subscription, (relation) => relation.account, {
+    cascade: true,
+  })
+  subscriptions?: Subscription[];
 
   @CreateDateColumn()
   createdAt: Date;

@@ -14,6 +14,7 @@ import { App } from 'src/modules/app/entities/app.entity';
 import { Workspace } from 'src/modules/workspace/entities/workspace.entity';
 import { Integration } from 'src/modules/integration/entities/integration.entity';
 import { Department } from 'src/modules/department/entities/department.entity';
+import { Subscription } from 'src/modules/subscription/entities/subscription.entity';
 
 export enum Action {
   Manage = 'manage',
@@ -31,6 +32,7 @@ type Subjects =
       | typeof Workspace
       | typeof Integration
       | typeof Department
+      | typeof Subscription
     >
   | 'all';
 
@@ -51,6 +53,11 @@ export class CaslAbilityFactory {
       can(Action.Update, Account, { createdBy: user.id });
       can(Action.Delete, Account, { createdBy: user.id });
 
+      can(Action.Create, Department);
+      can(Action.Read, Department, { accountId: user.accountId });
+      can(Action.Update, Department, { createdBy: user.id });
+      can(Action.Delete, Department, { createdBy: user.id });
+
       can(Action.Create, App);
       can(Action.Read, App, { accountId: user.accountId });
       can(Action.Update, App, { createdBy: user.id });
@@ -61,10 +68,10 @@ export class CaslAbilityFactory {
       can(Action.Update, Integration, { createdBy: user.id });
       can(Action.Delete, Integration, { createdBy: user.id });
 
-      can(Action.Create, Department);
-      can(Action.Read, Department, { accountId: user.accountId });
-      can(Action.Update, Department, { createdBy: user.id });
-      can(Action.Delete, Department, { createdBy: user.id });
+      can(Action.Create, Subscription);
+      can(Action.Read, Subscription, { accountId: user.accountId });
+      can(Action.Update, Subscription, { createdBy: user.id });
+      can(Action.Delete, Subscription, { createdBy: user.id });
 
       can(Action.Create, Workspace);
       can(Action.Read, Workspace, { accountId: user.accountId });
