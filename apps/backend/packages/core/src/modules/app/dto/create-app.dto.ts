@@ -11,10 +11,12 @@ export class CreateAppDto {
   @IsOptional()
   accountId?: string;
 
+  @ApiProperty({ description: 'The description of the app' })
   @IsString()
   @IsOptional()
   description?: string;
 
+  @ApiProperty({ description: 'The category of the app' })
   @IsEnum(Category)
   @IsOptional()
   category?: Category;
