@@ -10,7 +10,7 @@ import (
 type LogEntry struct {
 	Level         string `json:"level"`
 	Message       string `json:"message"`
-	CorrelationID string `json:"correlationId,omitempty"`
+	CorrelationID string `json:"correlationId"`
 	Timestamp     string `json:"timestamp"`
 }
 

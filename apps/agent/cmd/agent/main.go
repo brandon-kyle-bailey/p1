@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"p1/agent/internal/config"
 	"p1/agent/internal/db"
+	"p1/agent/internal/http"
 	"p1/agent/internal/logger"
 	"p1/agent/internal/tracker"
 	"p1/agent/internal/utils"
@@ -29,6 +30,13 @@ func main() {
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal(err.Error(), "1dba498b-e3e1-46f2-a523-59a66a2f592b")
+	}
+
+	httpClient := http.NewHTTPClient(cfg.APIKey, cfg.SecretKey, *log)
+	err = httpClient.PostJSON("http://bad-url", map[string]string{"test": "hello"})
+	// failing intentionally atm to validate http client works
+	if err != nil {
+		log.Fatal(err.Error(), "0c4dce23-9b20-41dd-bb22-506ad1eed880")
 	}
 
 	dbPath := cfg.DBPath
