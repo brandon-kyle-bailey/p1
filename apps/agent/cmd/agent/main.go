@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"os"
 	"os/signal"
 	"p1/agent/internal/config"
@@ -12,9 +11,10 @@ import (
 	"p1/agent/internal/tracker"
 	"p1/agent/internal/utils"
 	"path/filepath"
+	"reflect"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func main() {
@@ -31,37 +31,35 @@ func main() {
 		log.Fatal(err.Error(), "1dba498b-e3e1-46f2-a523-59a66a2f592b")
 	}
 
-	if !filepath.IsAbs(cfg.DBPath) {
-		p, _ := filepath.Abs(cfg.DBPath)
-		conn, err := sql.Open("sqlite3", p)
-		if err != nil {
-			log.Fatal(fmt.Sprintf("open db: %v", err), "6317723f-68ea-46db-be76-c9d3987dce73")
-		}
-		defer conn.Close()
-
-		if err := db.InitDB(conn); err != nil {
-			log.Fatal(fmt.Sprintf("init db: %v", err), "84e8e1b8-4ea7-4115-a439-5bd20aaf6509")
-		}
+	dbPath := cfg.DBPath
+	if !filepath.IsAbs(dbPath) {
+		dbPath, _ = filepath.Abs(dbPath)
 	}
+	conn, err := sql.Open(cfg.DBProvider, dbPath)
+	if err != nil {
+		log.Fatal(err.Error(), "0cc8248d-2fde-4174-bd18-b16e3b168a26")
+	}
+	defer conn.Close()
 
-	log.Info("Agent started", "f42675d9-0728-4295-94a6-5fc084d3742d")
-	defer log.Info("Agent Stopped", "725fcbc0-b9ef-4ab2-842e-7abe7e9c295d")
+	if err := db.InitDB(conn); err != nil {
+		log.Fatal(err.Error(), "23aae196-bdf4-4b0d-a4b8-e1a9c3ea217b")
+	}
 
 	provider := tracker.NewTrackerProvider()
 	if provider == nil {
-		log.Info("active window provider not available on this platform", "38e1dc35-ae97-49f5-8fab-0d570392c024")
+		log.Fatal("active window provider not available on this platform", "38e1dc35-ae97-49f5-8fab-0d570392c024")
 	}
 
-	ticker := time.NewTicker(time.Duration(cfg.Poll) * time.Second)
+	fingerprint, _ := utils.DeviceFingerprint()
+	ticker := time.NewTicker(time.Duration(cfg.Poll) * time.Millisecond)
 	defer ticker.Stop()
 
+	var previousActivity *db.Activity
 	for {
 		select {
 		case <-ctx.Done():
-			log.Debug("Interrupt invoked. Returning", "40b4f245-0651-4d5c-8cec-ba683177728d")
 			return
 		case <-ticker.C:
-			log.Debug("Ticker invoked", "18adfa2f-53be-40bd-b1be-0305e5e715cb")
 			expression := "unknown"
 			appName := "unknown"
 			if provider != nil {
@@ -72,15 +70,40 @@ func main() {
 					appName = softwareName
 				}
 			}
-			act := db.Activity{
-				ID:         utils.NewUUID(),
-				Timestamp:  time.Now().UTC(),
-				AccountID:  cfg.AccountID,
-				Name:       appName,
-				Title:      expression,
-				Expression: expression,
+			newActivity := db.Activity{
+				ID:                utils.NewUUID(),
+				AccountID:         cfg.AccountID,
+				DeviceFingerprint: fingerprint,
+				Name:              appName,
+				Title:             expression,
+				Expression:        expression,
+				StartTime:         time.Now().UTC(),
 			}
-			log.Debug(fmt.Sprintf("Activity created: %+v", act), "4e7577af-2afa-4475-9baf-86c2804dc2ad")
+			if previousActivity == nil {
+				previousActivity = &newActivity
+				continue
+			}
+			activitiesMatch := reflect.DeepEqual(
+				db.Activity{
+					Name:       previousActivity.Name,
+					Title:      previousActivity.Title,
+					Expression: previousActivity.Expression,
+				},
+				db.Activity{
+					Name:       newActivity.Name,
+					Title:      newActivity.Title,
+					Expression: newActivity.Expression,
+				},
+			)
+			if !activitiesMatch {
+				now := time.Now().UTC()
+				previousActivity.EndTime = now
+				err := db.InsertActivity(conn, *previousActivity)
+				if err != nil {
+					log.Error(err.Error(), "a3db9416-e79f-4551-b125-bda3b37129ba")
+				}
+				previousActivity = &newActivity
+			}
 		}
 	}
 }

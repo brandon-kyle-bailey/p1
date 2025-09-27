@@ -9,22 +9,20 @@ import (
 )
 
 type Config struct {
-	AccountID string
-	Debug     bool
-	Poll      int
-	DBPath    string
+	AccountID  string
+	Debug      bool
+	Poll       int
+	DBProvider string
+	DBPath     string
 }
 
 func Load() (*Config, error) {
-	// Define all flags
 	accountIDFlag := flag.String("account-id", "", "Account ID for RMM")
 	debugFlag := flag.Bool("debug", false, "Enable debug mode")
-	pollFlag := flag.Int("poll", 1, "Ticker polling interval (seconds)")
+	pollFlag := flag.Int("poll", 200, "Ticker polling interval (milliseconds)")
 
-	// Parse once
 	flag.Parse()
 
-	// Env fallback + validation
 	accountID := strings.TrimSpace(*accountIDFlag)
 	if accountID == "" {
 		accountID = strings.TrimSpace(os.Getenv("RMM_ACCOUNT_ID"))
@@ -34,9 +32,10 @@ func Load() (*Config, error) {
 	}
 
 	return &Config{
-		AccountID: accountID,
-		Debug:     *debugFlag,
-		Poll:      *pollFlag,
-		DBPath:    "activities.db",
+		AccountID:  accountID,
+		Debug:      *debugFlag,
+		Poll:       *pollFlag,
+		DBProvider: "sqlite",
+		DBPath:     "activities.db",
 	}, nil
 }

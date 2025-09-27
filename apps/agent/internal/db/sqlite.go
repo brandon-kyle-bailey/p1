@@ -16,7 +16,8 @@ type Activity struct {
 	Name              string       `json:"name"`
 	Title             string       `json:"title"`
 	Expression        string       `json:"expression"`
-	Timestamp         time.Time    `json:"timestamp"`
+	StartTime         time.Time    `json:"start_time"`
+	EndTime           time.Time    `json:"end_time"`
 	CreatedAt         time.Time    `json:"created_at"`
 	UpdatedAt         time.Time    `json:"updated_at"`
 	DeletedAt         sql.NullTime `json:"deleted_at"`
@@ -31,7 +32,8 @@ func InitDB(db *sql.DB) error {
 		name TEXT NOT NULL,
 		title TEXT NOT NULL,
 		expression TEXT NOT NULL,
-		timestamp DATETIME NOT NULL,
+		start_time DATETIME NOT NULL,
+		end_time DATETIME NOT NULL,
 		created_at DATETIME NOT NULL,
 		updated_at DATETIME NOT NULL,
 		deleted_at DATETIME
@@ -44,16 +46,16 @@ func InsertActivity(db *sql.DB, a Activity) error {
 	now := time.Now().UTC()
 	_, err := db.Exec(`
 	INSERT INTO activities (
-		id, account_id, device_fingerprint, name, title, expression, timestamp, created_at, updated_at
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		a.ID, a.AccountID, a.DeviceFingerprint, a.Name, a.Title, a.Expression, a.Timestamp, now, now,
+		id, account_id, device_fingerprint, name, title, expression, start_time, end_time, created_at, updated_at
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		a.ID, a.AccountID, a.DeviceFingerprint, a.Name, a.Title, a.Expression, a.StartTime, a.EndTime, now, now,
 	)
 	return err
 }
 
 func GetActivityByID(db *sql.DB, id string) (Activity, error) {
 	row := db.QueryRow(`
-	SELECT id, account_id, device_fingerprint, name, title, expression, timestamp, created_at, updated_at, deleted_at
+	SELECT id, account_id, device_fingerprint, name, title, expression, start_time, end_time, created_at, updated_at, deleted_at
 	FROM activities WHERE id = ? AND deleted_at IS NULL`, id)
 
 	var a Activity
@@ -64,7 +66,8 @@ func GetActivityByID(db *sql.DB, id string) (Activity, error) {
 		&a.Name,
 		&a.Title,
 		&a.Expression,
-		&a.Timestamp,
+		&a.StartTime,
+		&a.EndTime,
 		&a.CreatedAt,
 		&a.UpdatedAt,
 		&a.DeletedAt,
@@ -79,7 +82,7 @@ func GetActivityByID(db *sql.DB, id string) (Activity, error) {
 
 func GetAllActivities(db *sql.DB) ([]Activity, error) {
 	rows, err := db.Query(`
-	SELECT id, account_id, device_fingerprint, name, title, expression, timestamp, created_at, updated_at, deleted_at
+	SELECT id, account_id, device_fingerprint, name, title, expression, start_time, end_time, created_at, updated_at, deleted_at
 	FROM activities WHERE deleted_at IS NULL`)
 	if err != nil {
 		return nil, err
@@ -96,7 +99,8 @@ func GetAllActivities(db *sql.DB) ([]Activity, error) {
 			&a.Name,
 			&a.Title,
 			&a.Expression,
-			&a.Timestamp,
+			&a.StartTime,
+			&a.EndTime,
 			&a.CreatedAt,
 			&a.UpdatedAt,
 			&a.DeletedAt,
@@ -117,10 +121,11 @@ func UpdateActivity(db *sql.DB, a Activity) error {
 		name = ?, 
 		title = ?, 
 		expression = ?, 
-		timestamp = ?, 
+		start_time = ?, 
+		end_time = ?, 
 		updated_at = ?
 	WHERE id = ? AND deleted_at IS NULL`,
-		a.AccountID, a.DeviceFingerprint, a.Name, a.Title, a.Expression, a.Timestamp, a.UpdatedAt, a.ID,
+		a.AccountID, a.DeviceFingerprint, a.Name, a.Title, a.Expression, a.StartTime, a.EndTime, a.UpdatedAt, a.ID,
 	)
 	return err
 }
