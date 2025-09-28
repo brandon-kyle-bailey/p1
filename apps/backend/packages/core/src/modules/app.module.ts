@@ -31,6 +31,7 @@ import { AiModule } from './ai/ai.module';
 import { Integration } from './integration/entities/integration.model';
 import { Department } from './department/entities/department.model';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { ActivityModule } from './activity/activity.module';
 
 @Module({
   imports: [
@@ -104,6 +105,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
     IntegrationModule,
     SubscriptionModule,
     AiModule,
+    ActivityModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: LoggingThrottlerGuard }],
 })

@@ -9,13 +9,14 @@ import (
 )
 
 type Config struct {
-	AccountID  string
-	Debug      bool
-	Poll       int
-	DBProvider string
-	DBPath     string
-	APIKey     string
-	SecretKey  string
+	AccountID         string
+	Debug             bool
+	Poll              int
+	DBProvider        string
+	DBPath            string
+	IngestionEndpoint string
+	APIKey            string
+	SecretKey         string
 }
 
 func Load() (*Config, error) {
@@ -34,12 +35,13 @@ func Load() (*Config, error) {
 	}
 
 	return &Config{
-		AccountID:  accountID,
-		Debug:      *debugFlag,
-		Poll:       *pollFlag,
-		DBProvider: "sqlite",
-		DBPath:     "activities.db",
-		APIKey:     "900be976-5c0c-47ae-bac7-055718edf1f6",
-		SecretKey:  "4b7ad3ec-a5ab-4f4f-852f-55797db5258a",
+		AccountID:         accountID,
+		Debug:             *debugFlag,
+		Poll:              *pollFlag,
+		DBProvider:        "sqlite",
+		DBPath:            "activities.db",
+		IngestionEndpoint: "http://localhost:3000/",
+		APIKey:            "900be976-5c0c-47ae-bac7-055718edf1f6",
+		SecretKey:         "4b7ad3ec-a5ab-4f4f-852f-55797db5258a",
 	}, nil
 }

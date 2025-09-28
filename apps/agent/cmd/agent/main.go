@@ -33,11 +33,6 @@ func main() {
 	}
 
 	httpClient := http.NewHTTPClient(cfg.APIKey, cfg.SecretKey, *log)
-	err = httpClient.PostJSON("http://bad-url", map[string]string{"test": "hello"})
-	// failing intentionally atm to validate http client works
-	if err != nil {
-		log.Fatal(err.Error(), "0c4dce23-9b20-41dd-bb22-506ad1eed880")
-	}
 
 	dbPath := cfg.DBPath
 	if !filepath.IsAbs(dbPath) {
@@ -109,6 +104,10 @@ func main() {
 				err := db.InsertActivity(conn, *previousActivity)
 				if err != nil {
 					log.Error(err.Error(), "a3db9416-e79f-4551-b125-bda3b37129ba")
+				}
+				err = httpClient.PostJSON(cfg.IngestionEndpoint, previousActivity)
+				if err != nil {
+					log.Fatal(err.Error(), "0c4dce23-9b20-41dd-bb22-506ad1eed880")
 				}
 				previousActivity = &newActivity
 			}

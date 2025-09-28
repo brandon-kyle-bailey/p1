@@ -2,6 +2,7 @@
 package logger
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 	"time"
@@ -40,8 +41,8 @@ func (l *Logger) log(level, msg, correlationID string) {
 		CorrelationID: correlationID,
 		Timestamp:     time.Now().Format(time.RFC3339),
 	}
-	// data, _ := json.Marshal(entry)
-	log.Printf(entry.Message)
+	data, _ := json.Marshal(entry)
+	log.Println(string(data))
 }
 
 func (l *Logger) Info(msg string, correlationID string) {
