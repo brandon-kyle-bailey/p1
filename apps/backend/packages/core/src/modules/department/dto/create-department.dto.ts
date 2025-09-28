@@ -6,10 +6,6 @@ export class CreateDepartmentDto {
   @IsOptional()
   accountId?: string;
 
-  @ApiProperty({ description: 'The id of the app' })
-  @IsUUID()
-  appId: string;
-
   @ApiProperty({ description: 'The name of the workspace' })
   @IsString()
   name: string;

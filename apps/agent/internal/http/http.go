@@ -31,9 +31,8 @@ func NewHTTPClient(apiKey string, secretKey string, logger logger.Logger) *HTTPC
 	}
 }
 
-func (c *HTTPClient) generateSignature(payload []byte, timestamp string) string {
+func (c *HTTPClient) generateSignature(timestamp string) string {
 	mac := hmac.New(sha256.New, []byte(c.SecretKey))
-	mac.Write(payload)
 	mac.Write([]byte(timestamp))
 	return hex.EncodeToString(mac.Sum(nil))
 }
@@ -45,7 +44,7 @@ func (c *HTTPClient) PostJSON(endpoint string, payload any) error {
 	}
 
 	timestamp := fmt.Sprintf("%d", time.Now().UnixMilli())
-	signature := c.generateSignature(data, timestamp)
+	signature := c.generateSignature(timestamp)
 
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(data))
 	if err != nil {
@@ -53,9 +52,9 @@ func (c *HTTPClient) PostJSON(endpoint string, payload any) error {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-API-KEY", c.APIKey)
-	req.Header.Set("X-SIGNATURE", signature)
-	req.Header.Set("X-TIMESTAMP", timestamp)
+	req.Header.Set("x-api-key", c.APIKey)
+	req.Header.Set("x-signature", signature)
+	req.Header.Set("x-timestamp", timestamp)
 
 	resp, err := c.Client.Do(req)
 	if err != nil {

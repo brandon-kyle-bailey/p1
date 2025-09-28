@@ -36,7 +36,7 @@ import { WorkspaceService } from './workspace.service';
 import { WorkspaceRemovedCommand } from './commands/workspace-removed.command';
 import { WorkspaceUpdatedCommand } from './commands/workspace-updated.command';
 
-@Controller('workspaces')
+@Controller({ path: 'workspaces', version: '1' })
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(ControllerCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()

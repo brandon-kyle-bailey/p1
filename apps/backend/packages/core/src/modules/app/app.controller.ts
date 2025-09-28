@@ -36,7 +36,7 @@ import { AppService } from './app.service';
 import { AppRemovedCommand } from './commands/app-removed.command';
 import { AppUpdatedCommand } from './commands/app-updated.command';
 
-@Controller('apps')
+@Controller({ path: 'apps', version: '1' })
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(ControllerCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()

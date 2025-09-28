@@ -36,7 +36,7 @@ import { IntegrationService } from './integration.service';
 import { IntegrationUpdatedCommand } from './commands/integration-updated.command';
 import { IntegrationRemovedCommand } from './commands/integration-removed.command';
 
-@Controller('integrations')
+@Controller({ path: 'integrations', version: '1' })
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(ControllerCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()

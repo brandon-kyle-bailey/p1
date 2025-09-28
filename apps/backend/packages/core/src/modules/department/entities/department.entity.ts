@@ -1,7 +1,6 @@
 export interface DepartmentProps {
   id: string;
   accountId: string;
-  appId: string;
   name: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -28,10 +27,6 @@ export class Department {
 
   get accountId() {
     return this.props.accountId;
-  }
-
-  get appId() {
-    return this.props.appId;
   }
 
   get name() {

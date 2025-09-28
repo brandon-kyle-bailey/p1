@@ -1,19 +1,45 @@
+import { LoggingService } from '@app/logging';
 import { Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { NIL } from 'uuid';
+import { ActivityMapper } from './dto/activity.mapper';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
-import { LoggingService } from '@app/logging';
+import { Activity } from './entities/activity.model';
 
 @Injectable()
 export class ActivityService {
   constructor(
     @Inject(LoggingService) private readonly logger: LoggingService,
+    @InjectRepository(Activity)
+    private readonly repo: Repository<Activity>,
+    @Inject(ActivityMapper)
+    private readonly mapper: ActivityMapper,
   ) {}
-  create(createActivityDto: CreateActivityDto) {
-    this.logger.debug(`${this.constructor.name}.${this.create.name} called`, {
-      correlationId: '73657b37-0ffc-420a-941f-4dc724dab72e',
-      dto: JSON.stringify(createActivityDto),
+  async create(createActivityDto: CreateActivityDto) {
+    const startTime = new Date(createActivityDto.startTime);
+    const endTime = new Date(createActivityDto.endTime);
+    const testDuration = endTime.getTime() - startTime.getTime();
+    this.logger.debug('Creating with inputs', {
+      correlationId: '8348256d-76f8-497d-8cde-8b254a5bd436',
+      activityId: createActivityDto.activityId,
+      rawStartTime: createActivityDto.startTime,
+      startTime,
+      rawEndTime: createActivityDto.endTime,
+      endTime,
+      testDuration,
     });
-    return 'This action adds a new activity';
+    const duration =
+      new Date(createActivityDto.endTime).getTime() -
+      new Date(createActivityDto.startTime).getTime();
+    const entity = this.repo.create({
+      ...createActivityDto,
+      duration,
+      createdBy: NIL,
+    });
+    const result = await this.repo.save(entity);
+    return this.mapper.toDomain(result);
   }
 
   findAll() {

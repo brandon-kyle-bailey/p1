@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
-export class CreateActivityDto {
+export class CreateIncommingActivityDto {
   @ApiProperty({ description: 'The id of the activity' })
   @IsUUID()
   activityId: string;

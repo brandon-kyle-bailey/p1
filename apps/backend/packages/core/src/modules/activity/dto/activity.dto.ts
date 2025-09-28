@@ -9,9 +9,17 @@ export class ActivityDto {
   @IsUUID()
   accountId: string;
 
+  @ApiProperty({ description: 'The source system of the activity' })
+  @IsString()
+  source: string;
+
   @ApiProperty({ description: 'The name of the activity' })
   @IsString()
   name: string;
+
+  @ApiProperty({ description: 'The fingerprint of the device' })
+  @IsString()
+  deviceFingerprint: string;
 
   @ApiProperty({ description: 'The title of the activity' })
   @IsString()

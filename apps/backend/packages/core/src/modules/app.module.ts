@@ -32,6 +32,7 @@ import { Integration } from './integration/entities/integration.model';
 import { Department } from './department/entities/department.model';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { ActivityModule } from './activity/activity.module';
+import { Activity } from './activity/entities/activity.model';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { ActivityModule } from './activity/activity.module';
           Department,
           Workspace,
           WorkspaceUser,
+          Activity,
         ],
         synchronize: true,
         autoLoadEntities: true,

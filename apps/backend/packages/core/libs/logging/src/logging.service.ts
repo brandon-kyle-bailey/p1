@@ -26,11 +26,6 @@ export class LoggingService extends ConsoleLogger implements LoggerService {
         message,
         ...optionalParams,
       );
-      // this.log(`${this.constructor.name}.${this.shipLogs.name}`, {
-      //   correlationId: 'd35e8508-0a4e-4ca7-9953-e81b047acc2e',
-      //   message: JSON.stringify(message),
-      //   optionalParams: JSON.stringify(optionalParams),
-      // });
     } catch (err) {
       this.error(
         `${this.constructor.name}.${this.shipLogs.name} caught an exception`,
@@ -46,19 +41,19 @@ export class LoggingService extends ConsoleLogger implements LoggerService {
   }
   fatal(message: any, ...optionalParams: any[]) {
     super.fatal(message, ...optionalParams);
-    void this.shipLogs(message, optionalParams);
+    // void this.shipLogs(message, optionalParams);
   }
   error(message: any, ...optionalParams: any[]) {
     super.error(message, ...optionalParams);
-    void this.shipLogs(message, optionalParams);
+    // void this.shipLogs(message, optionalParams);
   }
   warn(message: any, ...optionalParams: any[]) {
     super.warn(message, ...optionalParams);
-    void this.shipLogs(message, optionalParams);
+    // void this.shipLogs(message, optionalParams);
   }
   debug(message: any, ...optionalParams: any[]) {
     super.debug(message, ...optionalParams);
-    void this.shipLogs(message, optionalParams);
+    // void this.shipLogs(message, optionalParams);
   }
   verbose(message: any, ...optionalParams: any[]) {
     super.verbose(message, ...optionalParams);

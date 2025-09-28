@@ -21,7 +21,7 @@ import { CreateAccountDto } from '../account/dto/create-account.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { UpdateAccountDto } from '../account/dto/update-account.dto';
 
-@Controller('auth')
+@Controller({ path: 'auth', version: '1' })
 export class AuthController {
   constructor(
     @Inject(LoggingService) private readonly logger: LoggingService,

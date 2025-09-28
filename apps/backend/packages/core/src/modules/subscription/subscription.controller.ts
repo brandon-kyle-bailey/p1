@@ -36,7 +36,7 @@ import { SubscriptionService } from './subscription.service';
 import { SubscriptionUpdatedCommand } from './commands/subscription-updated.command';
 import { SubscriptionRemovedCommand } from './commands/subscription-removed.command';
 
-@Controller('subscriptions')
+@Controller({ path: 'subscriptions', version: '1' })
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(ControllerCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()

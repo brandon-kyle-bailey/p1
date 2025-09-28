@@ -1,11 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
-export class CreateActivityDto {
-  @ApiProperty({ description: 'The id of the activity' })
-  @IsUUID()
-  activityId: string;
-
+export class IncommingActivityDto {
+  constructor(partial: Partial<IncommingActivityDto>) {
+    Object.assign(this, partial);
+  }
   @ApiProperty({ description: 'The id of the account' })
   @IsUUID()
   accountId: string;
@@ -45,4 +44,20 @@ export class CreateActivityDto {
   @IsUUID()
   @IsOptional()
   updatedBy?: string;
+
+  @IsUUID()
+  @IsOptional()
+  deletedBy?: string;
+
+  @IsDateString()
+  @IsOptional()
+  createdAt?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  updatedAt?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  deletedAt?: Date;
 }

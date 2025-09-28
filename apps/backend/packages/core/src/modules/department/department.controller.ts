@@ -36,7 +36,7 @@ import { DepartmentService } from './department.service';
 import { DepartmentUpdatedCommand } from './commands/department-updated.command';
 import { DepartmentRemovedCommand } from './commands/department-removed.command';
 
-@Controller('departments')
+@Controller({ path: 'departments', version: '1' })
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(ControllerCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()

@@ -10,8 +10,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('activities')
-export class Activity {
+@Entity('incomming_activities')
+export class IncommingActivity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

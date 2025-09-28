@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/google/uuid"
 	_ "modernc.org/sqlite"
 )
 
@@ -105,9 +106,20 @@ func main() {
 				if err != nil {
 					log.Error(err.Error(), "a3db9416-e79f-4551-b125-bda3b37129ba")
 				}
-				err = httpClient.PostJSON(cfg.IngestionEndpoint, previousActivity)
+				dto := tracker.ActivityDto{
+					Source:            "agent",
+					ActivityID:        uuid.MustParse(previousActivity.ID).String(),
+					AccountID:         uuid.MustParse(cfg.AccountID).String(),
+					DeviceFingerprint: previousActivity.DeviceFingerprint,
+					Name:              previousActivity.Name,
+					Title:             previousActivity.Title,
+					Expression:        previousActivity.Expression,
+					StartTime:         previousActivity.StartTime.UTC().Format(time.RFC3339Nano),
+					EndTime:           previousActivity.EndTime.UTC().Format(time.RFC3339Nano),
+				}
+				err = httpClient.PostJSON(cfg.IngestionEndpoint, dto)
 				if err != nil {
-					log.Fatal(err.Error(), "0c4dce23-9b20-41dd-bb22-506ad1eed880")
+					log.Error(err.Error(), "0c4dce23-9b20-41dd-bb22-506ad1eed880")
 				}
 				previousActivity = &newActivity
 			}

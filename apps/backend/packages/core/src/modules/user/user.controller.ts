@@ -35,7 +35,7 @@ import { UserService } from './user.service';
 import { UserUpdatedCommand } from './commands/user-updated.command';
 import { UserRemovedCommand } from './commands/user-removed.command';
 
-@Controller('users')
+@Controller({ path: 'users', version: '1' })
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(ControllerCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()

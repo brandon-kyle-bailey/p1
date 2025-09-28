@@ -1,4 +1,4 @@
-export interface ActivityProps {
+export interface IncommingActivityProps {
   id: string;
   accountId: string;
   name: string;
@@ -16,10 +16,10 @@ export interface ActivityProps {
   deletedBy?: string;
 }
 
-export class Activity {
-  props: ActivityProps;
+export class IncommingActivity {
+  props: IncommingActivityProps;
 
-  constructor(props: ActivityProps) {
+  constructor(props: IncommingActivityProps) {
     this.props = {
       ...props,
       createdAt: props.createdAt ?? new Date(),
@@ -87,10 +87,10 @@ export class Activity {
     return this.props.deletedBy;
   }
 
-  softDelete(byActivityId?: string) {
+  softDelete(byIncommingActivityId?: string) {
     this.props.deletedAt = new Date();
-    if (byActivityId) {
-      this.props.deletedBy = byActivityId;
+    if (byIncommingActivityId) {
+      this.props.deletedBy = byIncommingActivityId;
     }
     this.touch();
   }

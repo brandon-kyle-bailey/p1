@@ -37,7 +37,7 @@ import { AccountDto } from './dto/account.dto';
 import { AccountRemovedCommand } from './commands/account-removed.command';
 import { AccountUpdatedCommand } from './commands/account-updated.command';
 
-@Controller('accounts')
+@Controller({ path: 'accounts', version: '1' })
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(ControllerCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()

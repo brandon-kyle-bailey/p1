@@ -27,7 +27,7 @@ async function bootstrap() {
   app.useLogger(new LoggingService('core-service', {}, httpService));
   app.use(compression());
   app.use(helmet());
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.enableCors();
   app.set('trust proxy', 'loopback'); // Trust requests from the loopback address
 
