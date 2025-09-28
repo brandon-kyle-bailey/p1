@@ -70,13 +70,13 @@ export class UserService {
     }
   }
 
-  async findOne(id: string): Promise<UserDomain> {
+  async findOne(id: string): Promise<UserDomain | null> {
     try {
       const entity = await this.repo.findOneBy({ id });
-      if (!entity) {
-        throw new NotFoundException();
+      if (entity) {
+        return this.mapper.toDomain(entity);
       }
-      return this.mapper.toDomain(entity);
+      return null;
     } catch (err: any) {
       this.logger.error(
         `${this.constructor.name}.${this.findOne.name} encountered an error`,
@@ -162,6 +162,9 @@ export class UserService {
   ): Promise<UserDomain> {
     try {
       const entity = await this.findOne(id);
+      if (!entity) {
+        throw new NotFoundException();
+      }
       if (updateUserDto.email) {
         entity.updateEmail(updateUserDto.email);
       }
@@ -195,6 +198,9 @@ export class UserService {
   async remove(id: string, removedBy: string) {
     try {
       const entity = await this.findOne(id);
+      if (!entity) {
+        throw new NotFoundException();
+      }
       entity.softDelete(removedBy);
       await this.repo.update(entity.id, this.mapper.toPersistence(entity));
       return entity;

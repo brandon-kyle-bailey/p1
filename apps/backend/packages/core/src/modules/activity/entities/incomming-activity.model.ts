@@ -23,6 +23,9 @@ export class IncommingActivity {
   @Column({ nullable: false })
   accountId: string;
 
+  @Column({ nullable: true })
+  userId: string;
+
   @ManyToOne(() => Account, (account) => account.users, {
     onDelete: 'CASCADE',
   })
@@ -32,19 +35,19 @@ export class IncommingActivity {
   @OneToOne(() => Activity, (a) => a.incommingActivity)
   activity: Activity;
 
-  @Column()
+  @Column({ nullable: true })
   ipAddress: string;
 
-  @Column()
+  @Column({ nullable: true })
   hostname: string;
 
-  @Column()
+  @Column({ nullable: true })
   macAddress: string;
 
-  @Column()
+  @Column({ nullable: true })
   os: string;
 
-  @Column()
+  @Column({ nullable: true })
   arch: string;
 
   @Column()

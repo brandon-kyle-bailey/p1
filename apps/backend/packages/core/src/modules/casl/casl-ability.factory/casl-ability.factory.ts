@@ -16,6 +16,8 @@ import { Integration } from 'src/modules/integration/entities/integration.entity
 import { Department } from 'src/modules/department/entities/department.entity';
 import { Subscription } from 'src/modules/subscription/entities/subscription.entity';
 import { Device } from 'src/modules/device/entities/device.entity';
+import { IncommingActivity } from 'src/modules/activity/entities/incomming-activity.entity';
+import { IncommingExtensionActivity } from 'src/modules/activity/entities/incomming-extension-activity.entity';
 
 export enum Action {
   Manage = 'manage',
@@ -35,6 +37,8 @@ type Subjects =
       | typeof Department
       | typeof Subscription
       | typeof Device
+      | typeof IncommingActivity
+      | typeof IncommingExtensionActivity
     >
   | 'all';
 
@@ -89,6 +93,9 @@ export class CaslAbilityFactory {
       can(Action.Read, Device, { accountId: user.accountId });
       can(Action.Update, Device, { accountId: user.accountId });
       can(Action.Delete, Device, { createdBy: user.id });
+
+      can(Action.Create, IncommingActivity);
+      can(Action.Create, IncommingExtensionActivity);
     }
 
     return build({

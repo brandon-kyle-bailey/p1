@@ -6,6 +6,7 @@ import { NIL } from 'uuid';
 import { CreateIncommingActivityDto } from './dto/create-incomming-activity.dto';
 import { IncommingActivity } from './entities/incomming-activity.model';
 import { IncommingActivityMapper } from './dto/incomming-activity.mapper';
+import { CreateIncommingExtensionActivityDto } from './dto/create-incomming-extension-activity.dto';
 
 @Injectable()
 export class IncommingActivityService {
@@ -16,9 +17,11 @@ export class IncommingActivityService {
     @Inject(IncommingActivityMapper)
     private readonly mapper: IncommingActivityMapper,
   ) {}
-  async create(createIncommingActivityDto: CreateIncommingActivityDto) {
+  async create(
+    dto: CreateIncommingActivityDto | CreateIncommingExtensionActivityDto,
+  ) {
     const entity = this.repo.create({
-      ...createIncommingActivityDto,
+      ...dto,
       createdBy: NIL,
     });
     const result = await this.repo.save(entity);

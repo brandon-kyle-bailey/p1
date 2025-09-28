@@ -14,11 +14,14 @@ import { IncommingActivityService } from './incomming-activity.service';
 import { UserModule } from '../user/user.module';
 import { AppModule } from '../app/app.module';
 import { DeviceModule } from '../device/device.module';
+import { CaslModule } from '../casl/casl.module';
+import { IncommingExtensionActivityCreatedHandler } from './handlers/incomming-extension-activity-created.handler';
 
 @Module({
   imports: [
     LoggingModule,
     TypeOrmModule.forFeature([Activity, IncommingActivity]),
+    CaslModule,
     UserModule,
     AppModule,
     DeviceModule,
@@ -32,6 +35,7 @@ import { DeviceModule } from '../device/device.module';
     IncommingActivityService,
     ActivityCreatedHandler,
     IncommingActivityCreatedHandler,
+    IncommingExtensionActivityCreatedHandler,
   ],
   exports: [ActivityService],
 })

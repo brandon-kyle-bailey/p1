@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"os"
 	"os/signal"
 	"p1/agent/internal/config"
@@ -135,7 +134,6 @@ func main() {
 					StartTime:          previousActivity.StartTime.UTC().Format(time.RFC3339Nano),
 					EndTime:            previousActivity.EndTime.UTC().Format(time.RFC3339Nano),
 				}
-				fmt.Printf("%s", dto)
 				err = httpClient.PostJSON(cfg.IngestionEndpoint, dto)
 				if err != nil {
 					log.Error(err.Error(), "0c4dce23-9b20-41dd-bb22-506ad1eed880")

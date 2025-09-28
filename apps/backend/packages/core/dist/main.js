@@ -1662,6 +1662,8 @@ const incomming_activity_service_1 = __webpack_require__(/*! ./incomming-activit
 const user_module_1 = __webpack_require__(/*! ../user/user.module */ "./src/modules/user/user.module.ts");
 const app_module_1 = __webpack_require__(/*! ../app/app.module */ "./src/modules/app/app.module.ts");
 const device_module_1 = __webpack_require__(/*! ../device/device.module */ "./src/modules/device/device.module.ts");
+const casl_module_1 = __webpack_require__(/*! ../casl/casl.module */ "./src/modules/casl/casl.module.ts");
+const incomming_extension_activity_created_handler_1 = __webpack_require__(/*! ./handlers/incomming-extension-activity-created.handler */ "./src/modules/activity/handlers/incomming-extension-activity-created.handler.ts");
 let ActivityModule = class ActivityModule {
 };
 exports.ActivityModule = ActivityModule;
@@ -1670,6 +1672,7 @@ exports.ActivityModule = ActivityModule = __decorate([
         imports: [
             logging_1.LoggingModule,
             typeorm_1.TypeOrmModule.forFeature([activity_model_1.Activity, incomming_activity_model_1.IncommingActivity]),
+            casl_module_1.CaslModule,
             user_module_1.UserModule,
             app_module_1.AppModule,
             device_module_1.DeviceModule,
@@ -1683,6 +1686,7 @@ exports.ActivityModule = ActivityModule = __decorate([
             incomming_activity_service_1.IncommingActivityService,
             activity_created_handler_1.ActivityCreatedHandler,
             incomming_activity_created_handler_1.IncommingActivityCreatedHandler,
+            incomming_extension_activity_created_handler_1.IncommingExtensionActivityCreatedHandler,
         ],
         exports: [activity_service_1.ActivityService],
     })
@@ -1811,6 +1815,28 @@ class IncommingActivityCreatedCommand extends cqrs_1.Command {
     }
 }
 exports.IncommingActivityCreatedCommand = IncommingActivityCreatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/activity/commands/incomming-extension-activity-created.command.ts":
+/*!***************************************************************************************!*\
+  !*** ./src/modules/activity/commands/incomming-extension-activity-created.command.ts ***!
+  \***************************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IncommingExtensionActivityCreatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class IncommingExtensionActivityCreatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.IncommingExtensionActivityCreatedCommand = IncommingExtensionActivityCreatedCommand;
 
 
 /***/ }),
@@ -2094,6 +2120,7 @@ const class_validator_1 = __webpack_require__(/*! class-validator */ "class-vali
 class CreateIncommingActivityDto {
     externalActivityId;
     accountId;
+    userId;
     ipAddress;
     hostname;
     macAddress;
@@ -2120,6 +2147,12 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateIncommingActivityDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the user' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateIncommingActivityDto.prototype, "userId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The IP Address of the client' }),
     (0, class_validator_1.IsString)(),
@@ -2194,6 +2227,106 @@ __decorate([
 
 /***/ }),
 
+/***/ "./src/modules/activity/dto/create-incomming-extension-activity.dto.ts":
+/*!*****************************************************************************!*\
+  !*** ./src/modules/activity/dto/create-incomming-extension-activity.dto.ts ***!
+  \*****************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateIncommingExtensionActivityDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CreateIncommingExtensionActivityDto {
+    externalActivityId;
+    accountId;
+    userId;
+    source;
+    name;
+    deviceFingerprint;
+    title;
+    expression;
+    startTime;
+    endTime;
+    createdBy;
+    updatedBy;
+}
+exports.CreateIncommingExtensionActivityDto = CreateIncommingExtensionActivityDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the activity' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateIncommingExtensionActivityDto.prototype, "externalActivityId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateIncommingExtensionActivityDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the user' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateIncommingExtensionActivityDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The source system of the activity' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateIncommingExtensionActivityDto.prototype, "source", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The name of the activity' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateIncommingExtensionActivityDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The fingerprint of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateIncommingExtensionActivityDto.prototype, "deviceFingerprint", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The title of the activity' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateIncommingExtensionActivityDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The expression of the activity' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateIncommingExtensionActivityDto.prototype, "expression", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The start_time of the activity' }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], CreateIncommingExtensionActivityDto.prototype, "startTime", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The end_time of the activity' }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], CreateIncommingExtensionActivityDto.prototype, "endTime", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIncommingExtensionActivityDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIncommingExtensionActivityDto.prototype, "updatedBy", void 0);
+
+
+/***/ }),
+
 /***/ "./src/modules/activity/dto/incomming-activity.dto.ts":
 /*!************************************************************!*\
   !*** ./src/modules/activity/dto/incomming-activity.dto.ts ***!
@@ -2221,6 +2354,7 @@ class IncommingActivityDto {
     }
     externalActivityId;
     accountId;
+    userId;
     ipAddress;
     hostname;
     macAddress;
@@ -2251,6 +2385,12 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], IncommingActivityDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the user' }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], IncommingActivityDto.prototype, "userId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The IP Address of the client' }),
     (0, class_validator_1.IsString)(),
@@ -2653,6 +2793,9 @@ class IncommingActivity {
     get accountId() {
         return this.props.accountId;
     }
+    get userId() {
+        return this.props.userId;
+    }
     get ipAddress() {
         return this.props.ipAddress;
     }
@@ -2765,6 +2908,7 @@ let IncommingActivity = class IncommingActivity {
     id;
     externalActivityId;
     accountId;
+    userId;
     account;
     activity;
     ipAddress;
@@ -2801,6 +2945,10 @@ __decorate([
     __metadata("design:type", String)
 ], IncommingActivity.prototype, "accountId", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], IncommingActivity.prototype, "userId", void 0);
+__decorate([
     (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.users, {
         onDelete: 'CASCADE',
     }),
@@ -2812,23 +2960,23 @@ __decorate([
     __metadata("design:type", typeof (_b = typeof activity_model_1.Activity !== "undefined" && activity_model_1.Activity) === "function" ? _b : Object)
 ], IncommingActivity.prototype, "activity", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], IncommingActivity.prototype, "ipAddress", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], IncommingActivity.prototype, "hostname", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], IncommingActivity.prototype, "macAddress", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], IncommingActivity.prototype, "os", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], IncommingActivity.prototype, "arch", void 0);
 __decorate([
@@ -2890,6 +3038,107 @@ __decorate([
 exports.IncommingActivity = IncommingActivity = __decorate([
     (0, typeorm_1.Entity)('incomming_activities')
 ], IncommingActivity);
+
+
+/***/ }),
+
+/***/ "./src/modules/activity/entities/incomming-extension-activity.entity.ts":
+/*!******************************************************************************!*\
+  !*** ./src/modules/activity/entities/incomming-extension-activity.entity.ts ***!
+  \******************************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IncommingExtensionActivity = void 0;
+class IncommingExtensionActivity {
+    props;
+    constructor(props) {
+        this.props = {
+            ...props,
+            createdAt: props.createdAt ?? new Date(),
+            updatedAt: props.updatedAt ?? new Date(),
+        };
+    }
+    get id() {
+        return this.props.id;
+    }
+    get externalActivityId() {
+        return this.props.externalActivityId;
+    }
+    get accountId() {
+        return this.props.accountId;
+    }
+    get userId() {
+        return this.props.userId;
+    }
+    get name() {
+        return this.props.name;
+    }
+    get source() {
+        return this.props.source;
+    }
+    get deviceFingerprint() {
+        return this.props.deviceFingerprint;
+    }
+    get title() {
+        return this.props.title;
+    }
+    get expression() {
+        return this.props.expression;
+    }
+    get startTime() {
+        return this.props.startTime;
+    }
+    get endTime() {
+        return this.props.endTime;
+    }
+    get createdAt() {
+        return this.props.createdAt;
+    }
+    get updatedAt() {
+        return this.props.updatedAt;
+    }
+    get deletedAt() {
+        return this.props.deletedAt;
+    }
+    get createdBy() {
+        return this.props.createdBy;
+    }
+    get updatedBy() {
+        return this.props.updatedBy;
+    }
+    get deletedBy() {
+        return this.props.deletedBy;
+    }
+    softDelete(byIncommingExtensionActivityId) {
+        this.props.deletedAt = new Date();
+        if (byIncommingExtensionActivityId) {
+            this.props.deletedBy = byIncommingExtensionActivityId;
+        }
+        this.touch();
+    }
+    updateOwner(id) {
+        this.props.createdBy = id;
+        this.touch();
+    }
+    updateUpdatedBy(id) {
+        this.props.updatedBy = id;
+        this.touch();
+    }
+    restore() {
+        this.props.deletedAt = undefined;
+        this.props.deletedBy = undefined;
+        this.touch();
+    }
+    touch(id) {
+        this.props.updatedAt = new Date();
+        if (id) {
+            this.props.updatedBy = id;
+        }
+    }
+}
+exports.IncommingExtensionActivity = IncommingExtensionActivity;
 
 
 /***/ }),
@@ -3054,6 +3303,90 @@ exports.IncommingActivityCreatedHandler = IncommingActivityCreatedHandler = __de
 
 /***/ }),
 
+/***/ "./src/modules/activity/handlers/incomming-extension-activity-created.handler.ts":
+/*!***************************************************************************************!*\
+  !*** ./src/modules/activity/handlers/incomming-extension-activity-created.handler.ts ***!
+  \***************************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IncommingExtensionActivityCreatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const app_service_1 = __webpack_require__(/*! src/modules/app/app.service */ "./src/modules/app/app.service.ts");
+const create_app_dto_1 = __webpack_require__(/*! src/modules/app/dto/create-app.dto */ "./src/modules/app/dto/create-app.dto.ts");
+const uuid_1 = __webpack_require__(/*! uuid */ "uuid");
+const activity_service_1 = __webpack_require__(/*! ../activity.service */ "./src/modules/activity/activity.service.ts");
+const incomming_extension_activity_created_command_1 = __webpack_require__(/*! ../commands/incomming-extension-activity-created.command */ "./src/modules/activity/commands/incomming-extension-activity-created.command.ts");
+const create_activity_dto_1 = __webpack_require__(/*! ../dto/create-activity.dto */ "./src/modules/activity/dto/create-activity.dto.ts");
+let IncommingExtensionActivityCreatedHandler = class IncommingExtensionActivityCreatedHandler {
+    logger;
+    appService;
+    activityService;
+    constructor(logger, appService, activityService) {
+        this.logger = logger;
+        this.appService = appService;
+        this.activityService = activityService;
+    }
+    async execute(command) {
+        try {
+            const { id, accountId, userId, name, title, source, expression, startTime, endTime, } = command.entity;
+            let foundApp = await this.appService.findOneByName(name, accountId);
+            if (!foundApp) {
+                const createAppDto = new create_app_dto_1.CreateAppDto();
+                createAppDto.name = name;
+                createAppDto.accountId = accountId;
+                foundApp = await this.appService.create(createAppDto, uuid_1.NIL);
+            }
+            const createActivityDto = new create_activity_dto_1.CreateActivityDto();
+            createActivityDto.accountId = accountId;
+            createActivityDto.incommingActivityId = id;
+            createActivityDto.appId = foundApp.id;
+            createActivityDto.userId = userId;
+            createActivityDto.source = source;
+            createActivityDto.startTime = startTime;
+            createActivityDto.endTime = endTime;
+            createActivityDto.createdBy = userId ?? uuid_1.NIL;
+            createActivityDto.description = `User visited ${expression} in window ${title} of ${name}`;
+            await this.activityService.create(createActivityDto);
+        }
+        catch (error) {
+            this.logger.error(error, {
+                correlationId: 'dd447c82-4e60-4b6e-b856-f356ca5c39cb',
+            });
+        }
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.IncommingExtensionActivityCreatedHandler = IncommingExtensionActivityCreatedHandler;
+exports.IncommingExtensionActivityCreatedHandler = IncommingExtensionActivityCreatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(incomming_extension_activity_created_command_1.IncommingExtensionActivityCreatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, common_1.Inject)(app_service_1.AppService)),
+    __param(2, (0, common_1.Inject)(activity_service_1.ActivityService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _b : Object, typeof (_c = typeof activity_service_1.ActivityService !== "undefined" && activity_service_1.ActivityService) === "function" ? _c : Object])
+], IncommingExtensionActivityCreatedHandler);
+
+
+/***/ }),
+
 /***/ "./src/modules/activity/incomming-activity.controller.ts":
 /*!***************************************************************!*\
   !*** ./src/modules/activity/incomming-activity.controller.ts ***!
@@ -3073,7 +3406,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IncommingActivityController = void 0;
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
@@ -3081,25 +3414,43 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const api_auth_guard_1 = __webpack_require__(/*! src/guards/api-auth.guard */ "./src/guards/api-auth.guard.ts");
+const jwt_auth_guard_1 = __webpack_require__(/*! src/guards/jwt-auth.guard */ "./src/guards/jwt-auth.guard.ts");
+const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
 const logging_cache_interceptor_1 = __webpack_require__(/*! src/interceptors/logging-cache.interceptor */ "./src/interceptors/logging-cache.interceptor.ts");
+const casl_ability_factory_1 = __webpack_require__(/*! ../casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
+const user_entity_1 = __webpack_require__(/*! ../user/entities/user.entity */ "./src/modules/user/entities/user.entity.ts");
 const incomming_activity_created_command_1 = __webpack_require__(/*! ./commands/incomming-activity-created.command */ "./src/modules/activity/commands/incomming-activity-created.command.ts");
+const incomming_extension_activity_created_command_1 = __webpack_require__(/*! ./commands/incomming-extension-activity-created.command */ "./src/modules/activity/commands/incomming-extension-activity-created.command.ts");
 const create_incomming_activity_dto_1 = __webpack_require__(/*! ./dto/create-incomming-activity.dto */ "./src/modules/activity/dto/create-incomming-activity.dto.ts");
+const create_incomming_extension_activity_dto_1 = __webpack_require__(/*! ./dto/create-incomming-extension-activity.dto */ "./src/modules/activity/dto/create-incomming-extension-activity.dto.ts");
 const incomming_activity_mapper_1 = __webpack_require__(/*! ./dto/incomming-activity.mapper */ "./src/modules/activity/dto/incomming-activity.mapper.ts");
+const incomming_extension_activity_entity_1 = __webpack_require__(/*! ./entities/incomming-extension-activity.entity */ "./src/modules/activity/entities/incomming-extension-activity.entity.ts");
 const incomming_activity_service_1 = __webpack_require__(/*! ./incomming-activity.service */ "./src/modules/activity/incomming-activity.service.ts");
 let IncommingActivityController = class IncommingActivityController {
     logger;
     service;
     mapper;
+    caslAbilityFactory;
     commandBus;
-    constructor(logger, service, mapper, commandBus) {
+    constructor(logger, service, mapper, caslAbilityFactory, commandBus) {
         this.logger = logger;
         this.service = service;
         this.mapper = mapper;
+        this.caslAbilityFactory = caslAbilityFactory;
         this.commandBus = commandBus;
     }
-    async create(dto) {
+    async agent(dto) {
         const result = await this.service.create(dto);
         void this.commandBus.execute(new incomming_activity_created_command_1.IncommingActivityCreatedCommand(result));
+        return this.mapper.toInterface(result);
+    }
+    async extension(dto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        if (!ability.can(casl_ability_factory_1.Action.Create, user_entity_1.User)) {
+            throw new common_1.UnauthorizedException();
+        }
+        const result = await this.service.create(dto);
+        void this.commandBus.execute(new incomming_extension_activity_created_command_1.IncommingExtensionActivityCreatedCommand(result));
         return this.mapper.toInterface(result);
     }
     remove(id) {
@@ -3108,7 +3459,7 @@ let IncommingActivityController = class IncommingActivityController {
 };
 exports.IncommingActivityController = IncommingActivityController;
 __decorate([
-    (0, common_1.Post)(),
+    (0, common_1.Post)('agent'),
     (0, common_1.UseGuards)(api_auth_guard_1.ApiKeyGuard),
     (0, swagger_1.ApiHeader)({
         name: 'x-api-key',
@@ -3127,9 +3478,19 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof create_incomming_activity_dto_1.CreateIncommingActivityDto !== "undefined" && create_incomming_activity_dto_1.CreateIncommingActivityDto) === "function" ? _e : Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_incomming_activity_dto_1.CreateIncommingActivityDto !== "undefined" && create_incomming_activity_dto_1.CreateIncommingActivityDto) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
-], IncommingActivityController.prototype, "create", null);
+], IncommingActivityController.prototype, "agent", null);
+__decorate([
+    (0, common_1.Post)('extension'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Create, incomming_extension_activity_entity_1.IncommingExtensionActivity)),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_g = typeof create_incomming_extension_activity_dto_1.CreateIncommingExtensionActivityDto !== "undefined" && create_incomming_extension_activity_dto_1.CreateIncommingExtensionActivityDto) === "function" ? _g : Object, Object]),
+    __metadata("design:returntype", Promise)
+], IncommingActivityController.prototype, "extension", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
@@ -3143,8 +3504,9 @@ exports.IncommingActivityController = IncommingActivityController = __decorate([
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(incomming_activity_service_1.IncommingActivityService)),
     __param(2, (0, common_1.Inject)(incomming_activity_mapper_1.IncommingActivityMapper)),
-    __param(3, (0, common_1.Inject)(cqrs_1.CommandBus)),
-    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof incomming_activity_service_1.IncommingActivityService !== "undefined" && incomming_activity_service_1.IncommingActivityService) === "function" ? _b : Object, typeof (_c = typeof incomming_activity_mapper_1.IncommingActivityMapper !== "undefined" && incomming_activity_mapper_1.IncommingActivityMapper) === "function" ? _c : Object, typeof (_d = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _d : Object])
+    __param(3, (0, common_1.Inject)(casl_ability_factory_1.CaslAbilityFactory)),
+    __param(4, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof incomming_activity_service_1.IncommingActivityService !== "undefined" && incomming_activity_service_1.IncommingActivityService) === "function" ? _b : Object, typeof (_c = typeof incomming_activity_mapper_1.IncommingActivityMapper !== "undefined" && incomming_activity_mapper_1.IncommingActivityMapper) === "function" ? _c : Object, typeof (_d = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _d : Object, typeof (_e = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _e : Object])
 ], IncommingActivityController);
 
 
@@ -3188,9 +3550,9 @@ let IncommingActivityService = class IncommingActivityService {
         this.repo = repo;
         this.mapper = mapper;
     }
-    async create(createIncommingActivityDto) {
+    async create(dto) {
         const entity = this.repo.create({
-            ...createIncommingActivityDto,
+            ...dto,
             createdBy: uuid_1.NIL,
         });
         const result = await this.repo.save(entity);
@@ -5062,20 +5424,31 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtStrategy = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const passport_1 = __webpack_require__(/*! @nestjs/passport */ "@nestjs/passport");
 const passport_jwt_1 = __webpack_require__(/*! passport-jwt */ "passport-jwt");
+const user_service_1 = __webpack_require__(/*! ../user/user.service */ "./src/modules/user/user.service.ts");
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
-    constructor() {
+    userService;
+    constructor(userService) {
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
             secretOrKey: '7ac54472-4dcf-4fa1-be39-8967d47d02d6',
         });
+        this.userService = userService;
     }
-    validate(payload) {
+    async validate(payload) {
+        const foundUsser = await this.userService.findOne(payload.sub);
+        if (!foundUsser) {
+            throw new common_1.UnauthorizedException();
+        }
         return {
             id: payload.sub,
             email: payload.username,
@@ -5087,7 +5460,8 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
 exports.JwtStrategy = JwtStrategy;
 exports.JwtStrategy = JwtStrategy = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
+    __param(0, (0, common_1.Inject)(user_service_1.UserService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
 ], JwtStrategy);
 
 
@@ -5176,6 +5550,8 @@ const integration_entity_1 = __webpack_require__(/*! src/modules/integration/ent
 const department_entity_1 = __webpack_require__(/*! src/modules/department/entities/department.entity */ "./src/modules/department/entities/department.entity.ts");
 const subscription_entity_1 = __webpack_require__(/*! src/modules/subscription/entities/subscription.entity */ "./src/modules/subscription/entities/subscription.entity.ts");
 const device_entity_1 = __webpack_require__(/*! src/modules/device/entities/device.entity */ "./src/modules/device/entities/device.entity.ts");
+const incomming_activity_entity_1 = __webpack_require__(/*! src/modules/activity/entities/incomming-activity.entity */ "./src/modules/activity/entities/incomming-activity.entity.ts");
+const incomming_extension_activity_entity_1 = __webpack_require__(/*! src/modules/activity/entities/incomming-extension-activity.entity */ "./src/modules/activity/entities/incomming-extension-activity.entity.ts");
 var Action;
 (function (Action) {
     Action["Manage"] = "manage";
@@ -5228,6 +5604,8 @@ let CaslAbilityFactory = class CaslAbilityFactory {
             can(Action.Read, device_entity_1.Device, { accountId: user.accountId });
             can(Action.Update, device_entity_1.Device, { accountId: user.accountId });
             can(Action.Delete, device_entity_1.Device, { createdBy: user.id });
+            can(Action.Create, incomming_activity_entity_1.IncommingActivity);
+            can(Action.Create, incomming_extension_activity_entity_1.IncommingExtensionActivity);
         }
         return build({
             detectSubjectType: (item) => item.constructor,
@@ -9652,10 +10030,10 @@ let UserService = class UserService {
     async findOne(id) {
         try {
             const entity = await this.repo.findOneBy({ id });
-            if (!entity) {
-                throw new common_1.NotFoundException();
+            if (entity) {
+                return this.mapper.toDomain(entity);
             }
-            return this.mapper.toDomain(entity);
+            return null;
         }
         catch (err) {
             this.logger.error(`${this.constructor.name}.${this.findOne.name} encountered an error`, {
@@ -9724,6 +10102,9 @@ let UserService = class UserService {
     async update(id, updateUserDto, updatedBy) {
         try {
             const entity = await this.findOne(id);
+            if (!entity) {
+                throw new common_1.NotFoundException();
+            }
             if (updateUserDto.email) {
                 entity.updateEmail(updateUserDto.email);
             }
@@ -9754,6 +10135,9 @@ let UserService = class UserService {
     async remove(id, removedBy) {
         try {
             const entity = await this.findOne(id);
+            if (!entity) {
+                throw new common_1.NotFoundException();
+            }
             entity.softDelete(removedBy);
             await this.repo.update(entity.id, this.mapper.toPersistence(entity));
             return entity;

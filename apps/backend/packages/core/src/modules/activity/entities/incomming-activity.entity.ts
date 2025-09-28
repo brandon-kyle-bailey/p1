@@ -2,6 +2,7 @@ export interface IncommingActivityProps {
   id: string;
   externalActivityId: string;
   accountId: string;
+  userId: string;
   ipAddress: string;
   hostname: string;
   macAddress: string;
@@ -43,6 +44,10 @@ export class IncommingActivity {
 
   get accountId() {
     return this.props.accountId;
+  }
+
+  get userId() {
+    return this.props.userId;
   }
 
   get ipAddress() {

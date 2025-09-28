@@ -14,6 +14,11 @@ export class IncommingActivityDto {
   @IsUUID()
   accountId: string;
 
+  @ApiProperty({ description: 'The id of the user' })
+  @IsUUID()
+  @IsOptional()
+  userId: string;
+
   @ApiProperty({ description: 'The IP Address of the client' })
   @IsString()
   ipAddress: string;

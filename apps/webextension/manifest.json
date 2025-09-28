@@ -1,28 +1,25 @@
 {
   "manifest_version": 2,
   "name": "webextension",
-  "version": "0.1",
   "description": "webextension description",
+  "version": "1.0.0",
+  "permissions": ["tabs", "storage", "<all_urls>"],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
   "content_scripts": [
     {
-      "matches": ["https://developer.mozilla.org/*"],
+      "matches": ["<all_urls>"],
       "js": ["content.js"]
     }
   ],
-  "permissions": [],
-  "icons": [
-    {
-      "src": "icon.png"
-    }
-  ],
   "browser_action": {
-    "default_title": "webextension (browserAction)",
-    "default_icon": {
-      "64": "icon.png"
-    }
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
   },
-  "background": {
-    "scripts": ["background.js"]
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
   }
 }
-
