@@ -1,6 +1,16 @@
 let previousActivity = null;
 let deviceFingerprint = null;
 
+function getBrowserName() {
+  const ua = navigator.userAgent;
+  if (ua.includes("Firefox/")) return "Firefox";
+  if (ua.includes("Edg/")) return "Edge";
+  if (ua.includes("OPR/") || ua.includes("Opera/")) return "Opera";
+  if (ua.includes("Chrome/")) return "Chrome";
+  if (ua.includes("Safari/")) return "Safari";
+  return "Unknown";
+}
+
 async function init() {
   console.log("Initializing background script");
 
@@ -17,7 +27,7 @@ async function init() {
 
 async function createActivity(tab) {
 
-  const browserName = getBrowserName(); // function below
+  const browserName = getBrowserName();
 
   return {
     id: crypto.randomUUID(),
@@ -92,16 +102,6 @@ async function sendActivity(activity) {
   } catch (err) {
     console.error("Failed to send activity:", err);
   }
-}
-
-function getBrowserName() {
-  const ua = navigator.userAgent;
-  if (ua.includes("Firefox/")) return "Firefox";
-  if (ua.includes("Edg/")) return "Edge";
-  if (ua.includes("OPR/") || ua.includes("Opera/")) return "Opera";
-  if (ua.includes("Chrome/")) return "Chrome";
-  if (ua.includes("Safari/")) return "Safari";
-  return "Unknown";
 }
 
 init();
