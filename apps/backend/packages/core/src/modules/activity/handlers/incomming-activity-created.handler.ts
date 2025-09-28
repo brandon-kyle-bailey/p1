@@ -40,6 +40,8 @@ export class IncommingActivityCreatedHandler
         startTime,
         endTime,
       } = command.entity;
+
+      // app discovery
       let foundApp = await this.appService.findOneByName(name, accountId);
       if (!foundApp) {
         const createAppDto = new CreateAppDto();
@@ -48,6 +50,7 @@ export class IncommingActivityCreatedHandler
         foundApp = await this.appService.create(createAppDto, NIL);
       }
 
+      // device discovery
       let foundDevice = await this.deviceService.findOneBy({
         hostname,
         macAddress,
@@ -67,6 +70,7 @@ export class IncommingActivityCreatedHandler
         foundDevice = await this.deviceService.create(createDeviceDto, NIL);
       }
 
+      // activity creation
       const createActivityDto = new CreateActivityDto();
       createActivityDto.accountId = accountId;
       createActivityDto.incommingActivityId = id;

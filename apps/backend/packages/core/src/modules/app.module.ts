@@ -11,7 +11,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountModule } from './account/account.module';
 import { Account } from './account/entities/account.model';
 import { HealthModule } from './health/health.module';
-
 import KeyvRedis from '@keyv/redis';
 import { APP_GUARD } from '@nestjs/core';
 import { CacheableMemory } from 'cacheable';

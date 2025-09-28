@@ -193,21 +193,27 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LoggingService = void 0;
 const axios_1 = __webpack_require__(/*! @nestjs/axios */ "@nestjs/axios");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const rxjs_1 = __webpack_require__(/*! rxjs */ "rxjs");
 let LoggingService = class LoggingService extends common_1.ConsoleLogger {
     httpService;
-    constructor(context, options, httpService) {
+    configService;
+    _logShippingEndpoint;
+    constructor(context, options, httpService, configService) {
         super(context, options);
         this.httpService = httpService;
+        this.configService = configService;
+        this._logShippingEndpoint =
+            this.configService.get('LOG_SHIPPING_URL') ?? '';
     }
     async shipLogs(message, ...optionalParams) {
         try {
-            await (0, rxjs_1.lastValueFrom)(this.httpService.get('https://dummyjson.com/posts'));
+            await (0, rxjs_1.lastValueFrom)(this.httpService.post(this._logShippingEndpoint));
             this.log(`${this.constructor.name}.${this.shipLogs.name}`, message, ...optionalParams);
         }
         catch (err) {
@@ -240,7 +246,8 @@ exports.LoggingService = LoggingService;
 exports.LoggingService = LoggingService = __decorate([
     (0, common_1.Injectable)(),
     __param(2, (0, common_1.Inject)(axios_1.HttpService)),
-    __metadata("design:paramtypes", [String, Object, typeof (_a = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _a : Object])
+    __param(3, (0, common_1.Inject)(config_1.ConfigService)),
+    __metadata("design:paramtypes", [String, Object, typeof (_a = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
 ], LoggingService);
 
 
@@ -320,9 +327,6 @@ let ApiKeyGuard = class ApiKeyGuard {
     }
     canActivate(context) {
         const req = context.switchToHttp().getRequest();
-        this.logger.debug('can activate api-auth with request body:', {
-            body: req.body,
-        });
         const apiKey = req.headers['x-api-key'];
         const signature = req.headers['x-signature'];
         const timestamp = req.headers['x-timestamp'];
@@ -436,12 +440,7 @@ let LoggingThrottlerGuard = class LoggingThrottlerGuard extends throttler_1.Thro
         this.logger = logger;
     }
     async canActivate(context) {
-        const allowed = await super.canActivate(context);
-        this.logger.debug(`${this.constructor.name}.${this.canActivate.name}`, {
-            correlationId: 'a4b5ece4-dcae-43f7-838b-e75b241b9e2e',
-            allowed,
-        });
-        return allowed;
+        return await super.canActivate(context);
     }
 };
 exports.LoggingThrottlerGuard = LoggingThrottlerGuard;
@@ -496,10 +495,6 @@ let PoliciesGuard = class PoliciesGuard {
         const { user } = context
             .switchToHttp()
             .getRequest();
-        this.logger.debug(`${this.constructor.name}.${this.canActivate.name}`, {
-            correlationId: '75be8396-f6b7-42fd-b413-67efae3d889c',
-            user: JSON.stringify(user),
-        });
         const ability = await this.caslAbilityFactory.createForUser(user.sub);
         return policyHandlers.every((handler) => this.execPolicyHandler(handler, ability));
     }
@@ -557,12 +552,7 @@ let ControllerCacheInterceptor = class ControllerCacheInterceptor extends cache_
             .switchToHttp()
             .getRequest();
         const userId = request.user?.id;
-        const key = userId ? `${userId}:${baseKey}` : baseKey;
-        this.logger.debug(`${this.constructor.name}.${this.trackBy.name}`, {
-            correlationId: '159b8055-b731-46f3-88e8-0ede0576a2e8',
-            key,
-        });
-        return key;
+        return userId ? `${userId}:${baseKey}` : baseKey;
     }
 };
 exports.ControllerCacheInterceptor = ControllerCacheInterceptor;
@@ -602,7 +592,7 @@ async function bootstrap() {
         type: common_1.VersioningType.URI,
     });
     app.setGlobalPrefix('api/core');
-    app.useLogger(new logging_1.LoggingService('core-service', {}, httpService));
+    app.useLogger(new logging_1.LoggingService('core-service', {}, httpService, configService));
     app.use((0, compression_1.default)());
     app.use((0, helmet_1.default)());
     app.useGlobalPipes(new common_1.ValidationPipe({ transform: true }));
@@ -1740,17 +1730,6 @@ let ActivityService = class ActivityService {
         this.mapper = mapper;
     }
     async create(createActivityDto) {
-        const startTime = new Date(createActivityDto.startTime);
-        const endTime = new Date(createActivityDto.endTime);
-        const testDuration = endTime.getTime() - startTime.getTime();
-        this.logger.debug('Creating with inputs', {
-            correlationId: '8348256d-76f8-497d-8cde-8b254a5bd436',
-            rawStartTime: createActivityDto.startTime,
-            startTime,
-            rawEndTime: createActivityDto.endTime,
-            endTime,
-            testDuration,
-        });
         const duration = new Date(createActivityDto.endTime).getTime() -
             new Date(createActivityDto.startTime).getTime();
         const entity = this.repo.create({
@@ -2881,7 +2860,7 @@ __decorate([
     __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
 ], IncommingActivity.prototype, "endTime", void 0);
 __decorate([
-    (0, typeorm_1.Column)('int'),
+    (0, typeorm_1.Column)('int', { nullable: true }),
     __metadata("design:type", Number)
 ], IncommingActivity.prototype, "duration", void 0);
 __decorate([
@@ -3012,33 +2991,10 @@ let IncommingActivityCreatedHandler = class IncommingActivityCreatedHandler {
         this.deviceService = deviceService;
     }
     async execute(command) {
-        this.logger.debug('IncommingActivity created handler called', {
-            correlationId: '51287cb5-e91d-481f-bff6-5f4e89770440',
-            command: JSON.stringify(command),
-        });
         try {
             const { id, accountId, ipAddress, hostname, macAddress, os, arch, name, deviceFingerprint, title, source, expression, startTime, endTime, } = command.entity;
-            this.logger.debug('incomming activity created handler object values:', {
-                id,
-                accountId,
-                ipAddress,
-                hostname,
-                macAddress,
-                os,
-                arch,
-                name,
-                deviceFingerprint,
-                title,
-                source,
-                expression,
-                startTime,
-                endTime,
-            });
             let foundApp = await this.appService.findOneByName(name, accountId);
             if (!foundApp) {
-                this.logger.debug('No app found for name. Triggering app discovery', {
-                    correlationId: 'eff30d59-32e0-42ff-963f-b40fbd6bb862',
-                });
                 const createAppDto = new create_app_dto_1.CreateAppDto();
                 createAppDto.name = name;
                 createAppDto.accountId = accountId;
@@ -3051,9 +3007,6 @@ let IncommingActivityCreatedHandler = class IncommingActivityCreatedHandler {
                 arch,
             });
             if (!foundDevice) {
-                this.logger.debug('No device found for activity, creating one', {
-                    correlationId: '9ab22e51-bf69-4e2b-bf71-b8897b6a29d9',
-                });
                 const createDeviceDto = new create_device_dto_1.CreateDeviceDto();
                 createDeviceDto.accountId = accountId;
                 createDeviceDto.arch = arch;
@@ -3145,9 +3098,6 @@ let IncommingActivityController = class IncommingActivityController {
         this.commandBus = commandBus;
     }
     async create(dto) {
-        this.logger.debug(`${this.constructor.name}.${this.create.name} called`, {
-            dto: JSON.stringify(dto),
-        });
         const result = await this.service.create(dto);
         void this.commandBus.execute(new incomming_activity_created_command_1.IncommingActivityCreatedCommand(result));
         return this.mapper.toInterface(result);
@@ -3239,22 +3189,8 @@ let IncommingActivityService = class IncommingActivityService {
         this.mapper = mapper;
     }
     async create(createIncommingActivityDto) {
-        const startTime = new Date(createIncommingActivityDto.startTime);
-        const endTime = new Date(createIncommingActivityDto.endTime);
-        const testDuration = endTime.getTime() - startTime.getTime();
-        this.logger.debug('Creating with inputs', {
-            correlationId: '8348256d-76f8-497d-8cde-8b254a5bd436',
-            rawStartTime: createIncommingActivityDto.startTime,
-            startTime,
-            rawEndTime: createIncommingActivityDto.endTime,
-            endTime,
-            testDuration,
-        });
-        const duration = new Date(createIncommingActivityDto.endTime).getTime() -
-            new Date(createIncommingActivityDto.startTime).getTime();
         const entity = this.repo.create({
             ...createIncommingActivityDto,
-            duration,
             createdBy: uuid_1.NIL,
         });
         const result = await this.repo.save(entity);
@@ -3330,7 +3266,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AiService = void 0;
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
@@ -3342,10 +3278,12 @@ const uuid_1 = __webpack_require__(/*! uuid */ "uuid");
 let AiService = class AiService {
     configService;
     logger;
+    cacheManager;
     _instance;
-    constructor(configService, logger) {
+    constructor(configService, logger, cacheManager) {
         this.configService = configService;
         this.logger = logger;
+        this.cacheManager = cacheManager;
         const apiKey = this.configService.get('OPENAI_API_KEY');
         this._instance = new openai_1.default({ apiKey });
     }
@@ -3406,7 +3344,8 @@ exports.AiService = AiService = __decorate([
     (0, common_1.UseInterceptors)(cache_manager_1.CacheInterceptor),
     __param(0, (0, common_1.Inject)(config_1.ConfigService)),
     __param(1, (0, common_1.Inject)(logging_1.LoggingService)),
-    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object, typeof (_b = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _b : Object])
+    __param(2, (0, common_1.Inject)(cache_manager_1.CACHE_MANAGER)),
+    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object, typeof (_b = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _b : Object, typeof (_c = typeof Cache !== "undefined" && Cache) === "function" ? _c : Object])
 ], AiService);
 
 
@@ -3869,10 +3808,6 @@ let AppService = class AppService {
     }
     async findOneByName(name, accountId) {
         try {
-            this.logger.debug('find one app by name, inputs:', {
-                name,
-                accountId,
-            });
             const model = await this.repo.findOneBy({ name, accountId });
             if (model) {
                 return this.mapper.toDomain(model);
@@ -4545,7 +4480,7 @@ let AppCreatedHandler = class AppCreatedHandler {
                     id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
                     conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
                     timestamp: Date.now(),
-                    content: `Short description for ${command.entity.name} dont include name`,
+                    content: `Short description for ${command.entity.name} software. dont include name`,
                     contentType: 'text',
                     debug: false,
                 }),
@@ -4554,7 +4489,7 @@ let AppCreatedHandler = class AppCreatedHandler {
                     id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
                     conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
                     timestamp: Date.now(),
-                    content: `return category that best suites ${command.entity.name}: ${Object.keys(app_entity_1.Category).join(',')}`,
+                    content: `return category that best suites software ${command.entity.name}: ${Object.keys(app_entity_1.Category).join(',')}`,
                     contentType: 'text',
                     debug: false,
                 }),

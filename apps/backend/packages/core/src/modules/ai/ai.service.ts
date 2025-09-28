@@ -1,5 +1,5 @@
 import { LoggingService } from '@app/logging';
-import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
+import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
 import {
   Inject,
   Injectable,
@@ -42,6 +42,7 @@ export class AiService {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
     @Inject(LoggingService) private readonly logger: LoggingService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
     this._instance = new OpenAI({ apiKey });

@@ -21,14 +21,6 @@ export class ControllerCacheInterceptor extends CacheInterceptor {
       .switchToHttp()
       .getRequest<Request & { user?: User }>();
     const userId = request.user?.id;
-
-    const key = userId ? `${userId}:${baseKey}` : baseKey;
-
-    this.logger.debug(`${this.constructor.name}.${this.trackBy.name}`, {
-      correlationId: '159b8055-b731-46f3-88e8-0ede0576a2e8',
-      key,
-    });
-
-    return key;
+    return userId ? `${userId}:${baseKey}` : baseKey;
   }
 }

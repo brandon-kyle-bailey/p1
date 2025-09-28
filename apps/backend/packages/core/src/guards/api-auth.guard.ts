@@ -18,24 +18,15 @@ export class ApiKeyGuard implements CanActivate {
     @Inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
-  /**
-   * Verify that the provided signature matches the expected signature.
-   * @param secret - secret key
-   * @param signature - signature sent in the request
-   * @param timestamp - timestamp sent in the request
-   * @returns true if valid, false otherwise
-   */
   private _verifySignature(
     secret: string,
     signature: string,
     timestamp: string,
   ): boolean {
-    // compute expected signature: HMAC-SHA256 of the timestamp
     const hmac = crypto.createHmac('sha256', secret);
-    hmac.update(timestamp); // or include more of the request payload if desired
+    hmac.update(timestamp);
     const expectedSignature = hmac.digest('hex');
 
-    // constant-time comparison to prevent timing attacks
     return crypto.timingSafeEqual(
       Buffer.from(signature),
       Buffer.from(expectedSignature),
@@ -44,12 +35,6 @@ export class ApiKeyGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const req: Request = context.switchToHttp().getRequest();
 
-    this.logger.debug('can activate api-auth with request body:', {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      body: req.body!,
-    });
-
-    // extract headers
     const apiKey: string = req.headers['x-api-key'] as string;
     const signature: string = req.headers['x-signature'] as string;
     const timestamp: string = req.headers['x-timestamp'] as string;
@@ -65,12 +50,10 @@ export class ApiKeyGuard implements CanActivate {
       throw new UnauthorizedException('Request expired');
     }
 
-    // validate signature (HMAC or similar)
     if (!this._verifySignature(internalSecret, signature, timestamp)) {
       throw new UnauthorizedException('Invalid signature');
     }
 
-    // optionally attach info to request
     req.user = { apiKey };
 
     return true;

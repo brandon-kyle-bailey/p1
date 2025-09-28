@@ -18,17 +18,6 @@ export class ActivityService {
     private readonly mapper: ActivityMapper,
   ) {}
   async create(createActivityDto: CreateActivityDto) {
-    const startTime = new Date(createActivityDto.startTime);
-    const endTime = new Date(createActivityDto.endTime);
-    const testDuration = endTime.getTime() - startTime.getTime();
-    this.logger.debug('Creating with inputs', {
-      correlationId: '8348256d-76f8-497d-8cde-8b254a5bd436',
-      rawStartTime: createActivityDto.startTime,
-      startTime,
-      rawEndTime: createActivityDto.endTime,
-      endTime,
-      testDuration,
-    });
     const duration =
       new Date(createActivityDto.endTime).getTime() -
       new Date(createActivityDto.startTime).getTime();

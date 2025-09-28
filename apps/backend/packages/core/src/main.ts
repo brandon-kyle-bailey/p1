@@ -24,7 +24,9 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   app.setGlobalPrefix('api/core');
-  app.useLogger(new LoggingService('core-service', {}, httpService));
+  app.useLogger(
+    new LoggingService('core-service', {}, httpService, configService),
+  );
   app.use(compression());
   app.use(helmet());
   app.useGlobalPipes(new ValidationPipe({ transform: true }));

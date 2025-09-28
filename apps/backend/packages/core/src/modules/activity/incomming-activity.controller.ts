@@ -50,9 +50,6 @@ export class IncommingActivityController {
     required: true,
   })
   async create(@Body() dto: CreateIncommingActivityDto) {
-    this.logger.debug(`${this.constructor.name}.${this.create.name} called`, {
-      dto: JSON.stringify(dto),
-    });
     const result = await this.service.create(dto);
     void this.commandBus.execute(new IncommingActivityCreatedCommand(result));
     return this.mapper.toInterface(result);

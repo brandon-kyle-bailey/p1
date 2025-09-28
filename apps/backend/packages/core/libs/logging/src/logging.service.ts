@@ -7,20 +7,25 @@ import {
   Injectable,
   LoggerService,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class LoggingService extends ConsoleLogger implements LoggerService {
+  private _logShippingEndpoint: string;
   constructor(
     context: string,
     options: ConsoleLoggerOptions,
     @Inject(HttpService) private readonly httpService: HttpService,
+    @Inject(ConfigService) private readonly configService: ConfigService,
   ) {
     super(context, options);
+    this._logShippingEndpoint =
+      this.configService.get<string>('LOG_SHIPPING_URL') ?? '';
   }
   async shipLogs(message: any, ...optionalParams: any[]) {
     try {
-      await lastValueFrom(this.httpService.get('https://dummyjson.com/posts'));
+      await lastValueFrom(this.httpService.post(this._logShippingEndpoint));
       this.log(
         `${this.constructor.name}.${this.shipLogs.name}`,
         message,

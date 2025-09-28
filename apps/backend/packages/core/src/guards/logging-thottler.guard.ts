@@ -19,11 +19,6 @@ export class LoggingThrottlerGuard extends ThrottlerGuard {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const allowed = await super.canActivate(context);
-    this.logger.debug(`${this.constructor.name}.${this.canActivate.name}`, {
-      correlationId: 'a4b5ece4-dcae-43f7-838b-e75b241b9e2e',
-      allowed,
-    });
-    return allowed;
+    return await super.canActivate(context);
   }
 }

@@ -68,8 +68,8 @@ export class IncommingActivity {
   @Column({ type: 'timestamp' })
   endTime: Date;
 
-  @Column('int')
-  duration: number;
+  @Column('int', { nullable: true })
+  duration?: number;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -96,10 +96,6 @@ export class AppService {
     accountId: string,
   ): Promise<AppDomain | null> {
     try {
-      this.logger.debug('find one app by name, inputs:', {
-        name,
-        accountId,
-      });
       const model = await this.repo.findOneBy({ name, accountId });
       if (model) {
         return this.mapper.toDomain(model);
