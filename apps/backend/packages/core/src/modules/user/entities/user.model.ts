@@ -16,11 +16,18 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Role } from './user.entity';
+import { Activity } from 'src/modules/activity/entities/activity.model';
+import { Device } from 'src/modules/device/entities/device.model';
 
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @OneToMany(() => Device, (device) => device.user, {
+    cascade: true,
+  })
+  devices?: Device[];
 
   @Column({ nullable: false })
   accountId: string;
@@ -50,6 +57,11 @@ export class User {
   })
   @JoinColumn({ name: 'departmentId' })
   department?: Department;
+
+  @OneToMany(() => Activity, (activity) => activity.user, {
+    cascade: true,
+  })
+  activities?: Activity[];
 
   @Column({ unique: true })
   email: string;

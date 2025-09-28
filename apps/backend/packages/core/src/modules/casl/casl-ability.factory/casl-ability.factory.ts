@@ -15,6 +15,7 @@ import { Workspace } from 'src/modules/workspace/entities/workspace.entity';
 import { Integration } from 'src/modules/integration/entities/integration.entity';
 import { Department } from 'src/modules/department/entities/department.entity';
 import { Subscription } from 'src/modules/subscription/entities/subscription.entity';
+import { Device } from 'src/modules/device/entities/device.entity';
 
 export enum Action {
   Manage = 'manage',
@@ -33,6 +34,7 @@ type Subjects =
       | typeof Integration
       | typeof Department
       | typeof Subscription
+      | typeof Device
     >
   | 'all';
 
@@ -82,6 +84,11 @@ export class CaslAbilityFactory {
       can(Action.Read, User, { accountId: user.accountId });
       can(Action.Update, User, { id: user.id });
       can(Action.Delete, User, { createdBy: user.id });
+
+      can(Action.Create, Device);
+      can(Action.Read, Device, { accountId: user.accountId });
+      can(Action.Update, Device, { accountId: user.accountId });
+      can(Action.Delete, Device, { createdBy: user.id });
     }
 
     return build({

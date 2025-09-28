@@ -1,5 +1,7 @@
+import { Activity } from 'src/modules/activity/entities/activity.model';
 import { App } from 'src/modules/app/entities/app.model';
 import { Department } from 'src/modules/department/entities/department.model';
+import { Device } from 'src/modules/device/entities/device.model';
 import { Integration } from 'src/modules/integration/entities/integration.model';
 import { Subscription } from 'src/modules/subscription/entities/subscription.model';
 import { User } from 'src/modules/user/entities/user.model';
@@ -25,6 +27,16 @@ export class Account {
     cascade: true,
   })
   users?: User[];
+
+  @OneToMany(() => Activity, (activity) => activity.account, {
+    cascade: true,
+  })
+  activities?: Activity[];
+
+  @OneToMany(() => Device, (device) => device.account, {
+    cascade: true,
+  })
+  devices?: Device[];
 
   @OneToMany(() => Department, (relation) => relation.account, {
     cascade: true,

@@ -11,11 +11,17 @@ import { ActivityCreatedHandler } from './handlers/activity-created.handler';
 import { IncommingActivityCreatedHandler } from './handlers/incomming-activity-created.handler';
 import { IncommingActivityController } from './incomming-activity.controller';
 import { IncommingActivityService } from './incomming-activity.service';
+import { UserModule } from '../user/user.module';
+import { AppModule } from '../app/app.module';
+import { DeviceModule } from '../device/device.module';
 
 @Module({
   imports: [
     LoggingModule,
     TypeOrmModule.forFeature([Activity, IncommingActivity]),
+    UserModule,
+    AppModule,
+    DeviceModule,
   ],
   controllers: [IncommingActivityController],
   providers: [

@@ -23,7 +23,6 @@ export class ActivityService {
     const testDuration = endTime.getTime() - startTime.getTime();
     this.logger.debug('Creating with inputs', {
       correlationId: '8348256d-76f8-497d-8cde-8b254a5bd436',
-      activityId: createActivityDto.activityId,
       rawStartTime: createActivityDto.startTime,
       startTime,
       rawEndTime: createActivityDto.endTime,
@@ -36,6 +35,7 @@ export class ActivityService {
     const entity = this.repo.create({
       ...createActivityDto,
       duration,
+      description: `${createActivityDto.description} for ${duration}ms`,
       createdBy: NIL,
     });
     const result = await this.repo.save(entity);

@@ -7,46 +7,44 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
-import { AppMapper } from './dto/app.mapper';
-import { CreateAppDto } from './dto/create-app.dto';
-import { UpdateAppDto } from './dto/update-app.dto';
-import { App as AppDomain } from './entities/app.entity';
-import { App } from './entities/app.model';
+import { CreateDeviceDto } from './dto/create-device.dto';
+import { DeviceMapper } from './dto/device.mapper';
+import { UpdateDeviceDto } from './dto/update-device.dto';
+import { Device as DeviceDomain } from './entities/device.entity';
+import { Device } from './entities/device.model';
 
 @Injectable()
-export class AppService {
+export class DeviceService {
   constructor(
     @Inject(LoggingService)
     private readonly logger: LoggingService,
-    @InjectRepository(App)
-    private readonly repo: Repository<App>,
-    @Inject(AppMapper)
-    private readonly mapper: AppMapper,
+    @InjectRepository(Device)
+    private readonly repo: Repository<Device>,
+    @Inject(DeviceMapper)
+    private readonly mapper: DeviceMapper,
   ) {}
 
-  async createWithManager(createAppDto: CreateAppDto, manager: EntityManager) {
-    const repo = manager.getRepository(App);
-    const entity = repo.create({ ...createAppDto });
+  async createWithManager(
+    createDeviceDto: CreateDeviceDto,
+    manager: EntityManager,
+  ) {
+    const repo = manager.getRepository(Device);
+    const entity = repo.create({ ...createDeviceDto });
     const result = await repo.save(entity);
     return this.mapper.toDomain(result);
   }
 
-  async create(createAppDto: CreateAppDto, createdBy: string) {
-    const entity = this.repo.create({ ...createAppDto, createdBy });
+  async create(createDeviceDto: CreateDeviceDto, createdBy: string) {
+    const entity = this.repo.create({ ...createDeviceDto, createdBy });
     const result = await this.repo.save(entity);
     return this.mapper.toDomain(result);
   }
 
-  async findAll(
-    skip: number = 0,
-    take: number = 100,
-    where: FindOptionsWhere<App>,
-  ) {
+  async findAll(skip: number = 0, take: number = 100) {
     try {
       const [entities, count] = await this.repo.findAndCount({
         skip,
         take,
-        where,
       });
       return {
         data: entities.map((entity) => this.mapper.toDomain(entity)),
@@ -61,7 +59,7 @@ export class AppService {
       this.logger.error(
         `${this.constructor.name}.${this.findAll.name} encountered an error`,
         {
-          correlationId: '6d437955-6b3a-417d-825b-3f43dedd8825',
+          correlationId: 'eb9e90e0-6394-484c-a431-6a79eb56468e',
           err: JSON.stringify(err),
         },
       );
@@ -72,7 +70,28 @@ export class AppService {
     }
   }
 
-  async findOne(id: string): Promise<AppDomain> {
+  async findOneBy(
+    where: FindOptionsWhere<Device>,
+  ): Promise<DeviceDomain | null> {
+    try {
+      const model = await this.repo.findOneBy(where);
+      if (model) {
+        return this.mapper.toDomain(model);
+      }
+      return null;
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.findOne.name} encountered an error`,
+        {
+          correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+          err: JSON.stringify(err),
+        },
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async findOne(id: string): Promise<DeviceDomain> {
     try {
       const entity = await this.repo.findOneBy({ id });
       if (!entity) {
@@ -83,33 +102,7 @@ export class AppService {
       this.logger.error(
         `${this.constructor.name}.${this.findOne.name} encountered an error`,
         {
-          correlationId: '6acb4b57-7592-4f08-869c-b4a14cddd072',
-          err: JSON.stringify(err),
-        },
-      );
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async findOneByName(
-    name: string,
-    accountId: string,
-  ): Promise<AppDomain | null> {
-    try {
-      this.logger.debug('find one app by name, inputs:', {
-        name,
-        accountId,
-      });
-      const model = await this.repo.findOneBy({ name, accountId });
-      if (model) {
-        return this.mapper.toDomain(model);
-      }
-      return null;
-    } catch (err: any) {
-      this.logger.error(
-        `${this.constructor.name}.${this.findOneByName.name} encountered an error`,
-        {
-          correlationId: '7cce84d8-8f89-4058-8d2e-af450cfad2d3',
+          correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
           err: JSON.stringify(err),
         },
       );
@@ -119,24 +112,18 @@ export class AppService {
 
   async updateWithManager(
     id: string,
-    updateAppDto: UpdateAppDto,
+    updateDeviceDto: UpdateDeviceDto,
     manager: EntityManager,
-  ): Promise<AppDomain> {
+  ): Promise<DeviceDomain> {
     try {
-      const repo = manager.getRepository(App);
+      const repo = manager.getRepository(Device);
       const model = await repo.findOneBy({ id });
       if (!model) {
         throw new NotFoundException();
       }
       const entity = this.mapper.toDomain(model);
-      if (updateAppDto.name) {
-        entity.updateName(updateAppDto.name);
-      }
-      if (updateAppDto.createdBy) {
-        entity.updateOwner(updateAppDto.createdBy);
-      }
-      if (updateAppDto.updatedBy) {
-        entity.updateUpdatedBy(updateAppDto.updatedBy);
+      if (updateDeviceDto.userId) {
+        entity.updateUserId(updateDeviceDto.userId);
       }
       await repo.update(entity.id, this.mapper.toPersistence(entity));
       return entity;
@@ -154,19 +141,13 @@ export class AppService {
 
   async update(
     id: string,
-    updateAppDto: UpdateAppDto,
+    updateDeviceDto: UpdateDeviceDto,
     updatedBy: string,
-  ): Promise<AppDomain> {
+  ): Promise<DeviceDomain> {
     try {
       const entity = await this.findOne(id);
-      if (updateAppDto.name) {
-        entity.updateName(updateAppDto.name);
-      }
-      if (updateAppDto.description) {
-        entity.updateDescription(updateAppDto.description);
-      }
-      if (updateAppDto.category) {
-        entity.updateDescription(updateAppDto.category);
+      if (updateDeviceDto.userId) {
+        entity.updateUserId(updateDeviceDto.userId);
       }
       entity.updateUpdatedBy(updatedBy);
       await this.repo.update(entity.id, this.mapper.toPersistence(entity));

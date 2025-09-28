@@ -44,6 +44,11 @@ export class ApiKeyGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const req: Request = context.switchToHttp().getRequest();
 
+    this.logger.debug('can activate api-auth with request body:', {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      body: req.body!,
+    });
+
     // extract headers
     const apiKey: string = req.headers['x-api-key'] as string;
     const signature: string = req.headers['x-signature'] as string;

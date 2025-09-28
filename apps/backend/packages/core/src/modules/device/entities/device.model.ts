@@ -1,4 +1,5 @@
 import { Account } from 'src/modules/account/entities/account.model';
+import { User } from 'src/modules/user/entities/user.model';
 import {
   Column,
   CreateDateColumn,
@@ -6,70 +7,50 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Activity } from './activity.model';
 
-@Entity('incomming_activities')
-export class IncommingActivity {
+@Entity('devices')
+export class Device {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ nullable: false })
-  externalActivityId: string;
-
-  @Column({ nullable: false })
   accountId: string;
 
-  @ManyToOne(() => Account, (account) => account.users, {
+  @ManyToOne(() => Account, (account) => account.devices, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
-  @OneToOne(() => Activity, (a) => a.incommingActivity)
-  activity: Activity;
+  @Column({ nullable: true })
+  userId: string;
 
-  @Column()
+  @ManyToOne(() => User, (user) => user.devices, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @Column({ nullable: false })
   ipAddress: string;
 
-  @Column()
+  @Column({ nullable: false })
   hostname: string;
 
-  @Column()
+  @Column({ nullable: false })
   macAddress: string;
 
-  @Column()
+  @Column({ nullable: false })
   os: string;
 
-  @Column()
+  @Column({ nullable: false })
   arch: string;
 
-  @Column()
-  name: string;
-
-  @Column()
-  title: string;
-
-  @Column()
-  expression: string;
-
-  @Column()
-  deviceFingerprint: string;
-
-  @Column()
-  source: string;
-
-  @Column({ type: 'timestamp' })
-  startTime: Date;
-
-  @Column({ type: 'timestamp' })
-  endTime: Date;
-
-  @Column('int')
-  duration: number;
+  @Column({ nullable: false })
+  fingerprint: string;
 
   @CreateDateColumn()
   createdAt: Date;

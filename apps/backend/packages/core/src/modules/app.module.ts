@@ -33,6 +33,9 @@ import { Department } from './department/entities/department.model';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { ActivityModule } from './activity/activity.module';
 import { Activity } from './activity/entities/activity.model';
+import { IncommingActivity } from './activity/entities/incomming-activity.model';
+import { DeviceModule } from './device/device.module';
+import { Device } from './device/entities/device.model';
 
 @Module({
   imports: [
@@ -58,6 +61,8 @@ import { Activity } from './activity/entities/activity.model';
           Workspace,
           WorkspaceUser,
           Activity,
+          IncommingActivity,
+          Device,
         ],
         synchronize: true,
         autoLoadEntities: true,
@@ -108,6 +113,7 @@ import { Activity } from './activity/entities/activity.model';
     SubscriptionModule,
     AiModule,
     ActivityModule,
+    DeviceModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: LoggingThrottlerGuard }],
 })

@@ -22,7 +22,6 @@ export class IncommingActivityService {
     const testDuration = endTime.getTime() - startTime.getTime();
     this.logger.debug('Creating with inputs', {
       correlationId: '8348256d-76f8-497d-8cde-8b254a5bd436',
-      activityId: createIncommingActivityDto.activityId,
       rawStartTime: createIncommingActivityDto.startTime,
       startTime,
       rawEndTime: createIncommingActivityDto.endTime,

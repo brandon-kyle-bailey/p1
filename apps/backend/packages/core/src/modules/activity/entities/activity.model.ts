@@ -1,4 +1,6 @@
 import { Account } from 'src/modules/account/entities/account.model';
+import { App } from 'src/modules/app/entities/app.model';
+import { User } from 'src/modules/user/entities/user.model';
 import {
   Column,
   CreateDateColumn,
@@ -6,9 +8,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { IncommingActivity } from './incomming-activity.model';
 
 @Entity('activities')
 export class Activity {
@@ -16,25 +20,43 @@ export class Activity {
   id: string;
 
   @Column({ nullable: false })
+  incommingActivityId: string;
+
+  @OneToOne(() => IncommingActivity, (ia) => ia.activity, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'incommingActivityId' })
+  incommingActivity: IncommingActivity;
+
+  @Column({ nullable: false })
   accountId: string;
 
-  @ManyToOne(() => Account, (account) => account.users, {
+  @Column({ nullable: true })
+  userId?: string;
+
+  @Column({ nullable: false })
+  description: string;
+
+  @Column({ nullable: false })
+  appId: string;
+
+  @ManyToOne(() => Account, (account) => account.activities, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
-  @Column()
-  name: string;
+  @ManyToOne(() => User, (user) => user.activities, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
-  @Column()
-  title: string;
-
-  @Column()
-  expression: string;
-
-  @Column()
-  deviceFingerprint: string;
+  @ManyToOne(() => App, (app) => app.activities, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'appId' })
+  app: App;
 
   @Column()
   source: string;

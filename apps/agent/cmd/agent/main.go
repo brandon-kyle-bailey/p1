@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"os"
 	"os/signal"
 	"p1/agent/internal/config"
@@ -106,17 +107,35 @@ func main() {
 				if err != nil {
 					log.Error(err.Error(), "a3db9416-e79f-4551-b125-bda3b37129ba")
 				}
-				dto := tracker.ActivityDto{
-					Source:            "agent",
-					ActivityID:        uuid.MustParse(previousActivity.ID).String(),
-					AccountID:         uuid.MustParse(cfg.AccountID).String(),
-					DeviceFingerprint: previousActivity.DeviceFingerprint,
-					Name:              previousActivity.Name,
-					Title:             previousActivity.Title,
-					Expression:        previousActivity.Expression,
-					StartTime:         previousActivity.StartTime.UTC().Format(time.RFC3339Nano),
-					EndTime:           previousActivity.EndTime.UTC().Format(time.RFC3339Nano),
+				ipAddress, err := utils.IPAddress()
+				if err != nil {
+					log.Error(err.Error(), "c71e12b9-0c42-4640-9ec0-9c5d2264768b")
 				}
+				hostname, err := utils.Hostname()
+				if err != nil {
+					log.Error(err.Error(), "492b3308-1f3e-4b89-899e-4f974e61f546")
+				}
+				macAddress, err := utils.MacAddress()
+				if err != nil {
+					log.Error(err.Error(), "35e53dd5-8ead-497c-89db-2a31dff8df48")
+				}
+				dto := tracker.IncommingActivityDto{
+					Source:             "agent",
+					IPAddress:          ipAddress,
+					Hostname:           hostname,
+					MacAddress:         macAddress,
+					Os:                 utils.OperatingSystem(),
+					Arch:               utils.Architecture(),
+					ExternalActivityID: uuid.MustParse(previousActivity.ID).String(),
+					AccountID:          uuid.MustParse(cfg.AccountID).String(),
+					DeviceFingerprint:  previousActivity.DeviceFingerprint,
+					Name:               previousActivity.Name,
+					Title:              previousActivity.Title,
+					Expression:         previousActivity.Expression,
+					StartTime:          previousActivity.StartTime.UTC().Format(time.RFC3339Nano),
+					EndTime:            previousActivity.EndTime.UTC().Format(time.RFC3339Nano),
+				}
+				fmt.Printf("%s", dto)
 				err = httpClient.PostJSON(cfg.IngestionEndpoint, dto)
 				if err != nil {
 					log.Error(err.Error(), "0c4dce23-9b20-41dd-bb22-506ad1eed880")

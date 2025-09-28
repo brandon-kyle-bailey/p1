@@ -1,6 +1,12 @@
 export interface IncommingActivityProps {
   id: string;
+  externalActivityId: string;
   accountId: string;
+  ipAddress: string;
+  hostname: string;
+  macAddress: string;
+  os: string;
+  arch: string;
   name: string;
   deviceFingerprint: string;
   title: string;
@@ -31,8 +37,28 @@ export class IncommingActivity {
     return this.props.id;
   }
 
+  get externalActivityId() {
+    return this.props.externalActivityId;
+  }
+
   get accountId() {
     return this.props.accountId;
+  }
+
+  get ipAddress() {
+    return this.props.ipAddress;
+  }
+  get hostname() {
+    return this.props.hostname;
+  }
+  get macAddress() {
+    return this.props.macAddress;
+  }
+  get os() {
+    return this.props.os;
+  }
+  get arch() {
+    return this.props.arch;
   }
 
   get name() {

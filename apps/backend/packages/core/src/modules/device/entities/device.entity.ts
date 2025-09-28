@@ -1,14 +1,13 @@
-export interface ActivityProps {
+export interface DeviceProps {
   id: string;
-  source: string;
-  incommingActivityId: string;
   accountId: string;
+  ipAddress: string;
+  hostname: string;
+  macAddress: string;
+  os: string;
+  arch: string;
+  fingerprint: string;
   userId?: string;
-  appId: string;
-  description: string;
-  startTime: Date;
-  endTime: Date;
-  duration: number;
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
@@ -17,10 +16,10 @@ export interface ActivityProps {
   deletedBy?: string;
 }
 
-export class Activity {
-  props: ActivityProps;
+export class Device {
+  props: DeviceProps;
 
-  constructor(props: ActivityProps) {
+  constructor(props: DeviceProps) {
     this.props = {
       ...props,
       createdAt: props.createdAt ?? new Date(),
@@ -28,20 +27,8 @@ export class Activity {
     };
   }
 
-  get incommingActivityId() {
-    return this.props.incommingActivityId;
-  }
-
-  get description() {
-    return this.props.description;
-  }
-
   get id() {
     return this.props.id;
-  }
-
-  get source() {
-    return this.props.source;
   }
 
   get accountId() {
@@ -51,17 +38,20 @@ export class Activity {
   get userId() {
     return this.props.userId;
   }
-
-  get duration() {
-    return this.props.duration;
+  get ipAddress() {
+    return this.props.ipAddress;
   }
-
-  get startTime() {
-    return this.props.startTime;
+  get hostname() {
+    return this.props.hostname;
   }
-
-  get endTime() {
-    return this.props.endTime;
+  get macAddress() {
+    return this.props.macAddress;
+  }
+  get os() {
+    return this.props.os;
+  }
+  get arch() {
+    return this.props.arch;
   }
 
   get createdAt() {
@@ -88,10 +78,15 @@ export class Activity {
     return this.props.deletedBy;
   }
 
-  softDelete(byActivityId?: string) {
+  updateUserId(userId: string) {
+    this.props.userId = userId;
+    this.touch();
+  }
+
+  softDelete(byDeviceId?: string) {
     this.props.deletedAt = new Date();
-    if (byActivityId) {
-      this.props.deletedBy = byActivityId;
+    if (byDeviceId) {
+      this.props.deletedBy = byDeviceId;
     }
     this.touch();
   }

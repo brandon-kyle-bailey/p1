@@ -3,27 +3,27 @@ import { App as AppModel } from '../entities/app.model';
 import { AppDto } from './app.dto';
 
 export class AppMapper {
-  static toInterface(user: AppDomain): AppDto {
-    return new AppDto(user.props);
+  static toInterface(app: AppDomain): AppDto {
+    return new AppDto(app.props);
   }
-  toInterface(user: AppDomain): AppDto {
-    return AppMapper.toInterface(user);
+  toInterface(app: AppDomain): AppDto {
+    return AppMapper.toInterface(app);
   }
-  static toDomain(user: AppModel): AppDomain {
+  static toDomain(app: AppModel): AppDomain {
     return new AppDomain({
-      ...user,
+      ...app,
     });
   }
-  toDomain(user: AppModel): AppDomain {
-    return AppMapper.toDomain(user);
+  toDomain(app: AppModel): AppDomain {
+    return AppMapper.toDomain(app);
   }
 
-  static toPersistence(user: AppDomain) {
+  static toPersistence(app: AppDomain) {
     return {
-      ...user.props,
+      ...app.props,
     };
   }
-  toPersistence(user: AppDomain) {
-    return AppMapper.toPersistence(user);
+  toPersistence(app: AppDomain) {
+    return AppMapper.toPersistence(app);
   }
 }

@@ -320,6 +320,9 @@ let ApiKeyGuard = class ApiKeyGuard {
     }
     canActivate(context) {
         const req = context.switchToHttp().getRequest();
+        this.logger.debug('can activate api-auth with request body:', {
+            body: req.body,
+        });
         const apiKey = req.headers['x-api-key'];
         const signature = req.headers['x-signature'];
         const timestamp = req.headers['x-timestamp'];
@@ -1375,8 +1378,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Account = void 0;
+const activity_model_1 = __webpack_require__(/*! src/modules/activity/entities/activity.model */ "./src/modules/activity/entities/activity.model.ts");
 const app_model_1 = __webpack_require__(/*! src/modules/app/entities/app.model */ "./src/modules/app/entities/app.model.ts");
 const department_model_1 = __webpack_require__(/*! src/modules/department/entities/department.model */ "./src/modules/department/entities/department.model.ts");
+const device_model_1 = __webpack_require__(/*! src/modules/device/entities/device.model */ "./src/modules/device/entities/device.model.ts");
 const integration_model_1 = __webpack_require__(/*! src/modules/integration/entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
 const subscription_model_1 = __webpack_require__(/*! src/modules/subscription/entities/subscription.model */ "./src/modules/subscription/entities/subscription.model.ts");
 const user_model_1 = __webpack_require__(/*! src/modules/user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
@@ -1385,6 +1390,8 @@ let Account = class Account {
     id;
     name;
     users;
+    activities;
+    devices;
     departments;
     apps;
     integrations;
@@ -1411,6 +1418,18 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], Account.prototype, "users", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => activity_model_1.Activity, (activity) => activity.account, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], Account.prototype, "activities", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => device_model_1.Device, (device) => device.account, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], Account.prototype, "devices", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => department_model_1.Department, (relation) => relation.account, {
         cascade: true,
@@ -1650,6 +1669,9 @@ const activity_created_handler_1 = __webpack_require__(/*! ./handlers/activity-c
 const incomming_activity_created_handler_1 = __webpack_require__(/*! ./handlers/incomming-activity-created.handler */ "./src/modules/activity/handlers/incomming-activity-created.handler.ts");
 const incomming_activity_controller_1 = __webpack_require__(/*! ./incomming-activity.controller */ "./src/modules/activity/incomming-activity.controller.ts");
 const incomming_activity_service_1 = __webpack_require__(/*! ./incomming-activity.service */ "./src/modules/activity/incomming-activity.service.ts");
+const user_module_1 = __webpack_require__(/*! ../user/user.module */ "./src/modules/user/user.module.ts");
+const app_module_1 = __webpack_require__(/*! ../app/app.module */ "./src/modules/app/app.module.ts");
+const device_module_1 = __webpack_require__(/*! ../device/device.module */ "./src/modules/device/device.module.ts");
 let ActivityModule = class ActivityModule {
 };
 exports.ActivityModule = ActivityModule;
@@ -1658,6 +1680,9 @@ exports.ActivityModule = ActivityModule = __decorate([
         imports: [
             logging_1.LoggingModule,
             typeorm_1.TypeOrmModule.forFeature([activity_model_1.Activity, incomming_activity_model_1.IncommingActivity]),
+            user_module_1.UserModule,
+            app_module_1.AppModule,
+            device_module_1.DeviceModule,
         ],
         controllers: [incomming_activity_controller_1.IncommingActivityController],
         providers: [
@@ -1720,7 +1745,6 @@ let ActivityService = class ActivityService {
         const testDuration = endTime.getTime() - startTime.getTime();
         this.logger.debug('Creating with inputs', {
             correlationId: '8348256d-76f8-497d-8cde-8b254a5bd436',
-            activityId: createActivityDto.activityId,
             rawStartTime: createActivityDto.startTime,
             startTime,
             rawEndTime: createActivityDto.endTime,
@@ -1732,6 +1756,7 @@ let ActivityService = class ActivityService {
         const entity = this.repo.create({
             ...createActivityDto,
             duration,
+            description: `${createActivityDto.description} for ${duration}ms`,
             createdBy: uuid_1.NIL,
         });
         const result = await this.repo.save(entity);
@@ -1836,14 +1861,15 @@ class ActivityDto {
     constructor(partial) {
         Object.assign(this, partial);
     }
+    incommingActivityId;
     accountId;
+    userId;
+    appId;
     source;
-    name;
-    deviceFingerprint;
-    title;
-    expression;
+    description;
     startTime;
     endTime;
+    duration;
     createdBy;
     updatedBy;
     deletedBy;
@@ -1853,35 +1879,35 @@ class ActivityDto {
 }
 exports.ActivityDto = ActivityDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the incomming activity id' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], ActivityDto.prototype, "incommingActivityId", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], ActivityDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the user' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], ActivityDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the app' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], ActivityDto.prototype, "appId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The source system of the activity' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ActivityDto.prototype, "source", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'The name of the activity' }),
+    (0, swagger_1.ApiProperty)({ description: 'The description of the activity' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], ActivityDto.prototype, "name", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'The fingerprint of the device' }),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], ActivityDto.prototype, "deviceFingerprint", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'The title of the activity' }),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], ActivityDto.prototype, "title", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'The expression of the activity' }),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], ActivityDto.prototype, "expression", void 0);
+], ActivityDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The start_time of the activity' }),
     (0, class_validator_1.IsDateString)(),
@@ -1892,6 +1918,11 @@ __decorate([
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
 ], ActivityDto.prototype, "endTime", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The duration of the activity' }),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], ActivityDto.prototype, "duration", void 0);
 __decorate([
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
@@ -1966,6 +1997,100 @@ exports.ActivityMapper = ActivityMapper;
 
 /***/ }),
 
+/***/ "./src/modules/activity/dto/create-activity.dto.ts":
+/*!*********************************************************!*\
+  !*** ./src/modules/activity/dto/create-activity.dto.ts ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateActivityDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CreateActivityDto {
+    incommingActivityId;
+    accountId;
+    userId;
+    appId;
+    source;
+    description;
+    startTime;
+    endTime;
+    duration;
+    createdBy;
+    updatedBy;
+}
+exports.CreateActivityDto = CreateActivityDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the incomming activity id' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateActivityDto.prototype, "incommingActivityId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateActivityDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the user' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateActivityDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the app' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateActivityDto.prototype, "appId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The source system of the activity' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateActivityDto.prototype, "source", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The description of the activity' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateActivityDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The start_time of the activity' }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], CreateActivityDto.prototype, "startTime", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The end_time of the activity' }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], CreateActivityDto.prototype, "endTime", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The duration of the activity' }),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateActivityDto.prototype, "duration", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateActivityDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateActivityDto.prototype, "updatedBy", void 0);
+
+
+/***/ }),
+
 /***/ "./src/modules/activity/dto/create-incomming-activity.dto.ts":
 /*!*******************************************************************!*\
   !*** ./src/modules/activity/dto/create-incomming-activity.dto.ts ***!
@@ -1988,8 +2113,13 @@ exports.CreateIncommingActivityDto = void 0;
 const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
 class CreateIncommingActivityDto {
-    activityId;
+    externalActivityId;
     accountId;
+    ipAddress;
+    hostname;
+    macAddress;
+    os;
+    arch;
     source;
     name;
     deviceFingerprint;
@@ -2005,12 +2135,37 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The id of the activity' }),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
-], CreateIncommingActivityDto.prototype, "activityId", void 0);
+], CreateIncommingActivityDto.prototype, "externalActivityId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateIncommingActivityDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The IP Address of the client' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateIncommingActivityDto.prototype, "ipAddress", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The hostname of the client' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateIncommingActivityDto.prototype, "hostname", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The mac address of the client' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateIncommingActivityDto.prototype, "macAddress", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The operating system of the client' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateIncommingActivityDto.prototype, "os", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The architecture of the client' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateIncommingActivityDto.prototype, "arch", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'The source system of the activity' }),
     (0, class_validator_1.IsString)(),
@@ -2085,7 +2240,13 @@ class IncommingActivityDto {
     constructor(partial) {
         Object.assign(this, partial);
     }
+    externalActivityId;
     accountId;
+    ipAddress;
+    hostname;
+    macAddress;
+    os;
+    arch;
     source;
     name;
     deviceFingerprint;
@@ -2102,12 +2263,42 @@ class IncommingActivityDto {
 }
 exports.IncommingActivityDto = IncommingActivityDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The id of the activity' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], IncommingActivityDto.prototype, "externalActivityId", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ description: 'The id of the account' }),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], IncommingActivityDto.prototype, "accountId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'The source system of the activity' }),
+    (0, swagger_1.ApiProperty)({ description: 'The IP Address of the client' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], IncommingActivityDto.prototype, "ipAddress", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The hostname of the client' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], IncommingActivityDto.prototype, "hostname", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The mac address of the client' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], IncommingActivityDto.prototype, "macAddress", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The operating system of the client' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], IncommingActivityDto.prototype, "os", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The architecture of the client' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], IncommingActivityDto.prototype, "arch", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The source of the activity' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], IncommingActivityDto.prototype, "source", void 0);
@@ -2233,26 +2424,26 @@ class Activity {
             updatedAt: props.updatedAt ?? new Date(),
         };
     }
+    get incommingActivityId() {
+        return this.props.incommingActivityId;
+    }
+    get description() {
+        return this.props.description;
+    }
     get id() {
         return this.props.id;
-    }
-    get accountId() {
-        return this.props.accountId;
-    }
-    get name() {
-        return this.props.name;
     }
     get source() {
         return this.props.source;
     }
-    get deviceFingerprint() {
-        return this.props.deviceFingerprint;
+    get accountId() {
+        return this.props.accountId;
     }
-    get title() {
-        return this.props.title;
+    get userId() {
+        return this.props.userId;
     }
-    get expression() {
-        return this.props.expression;
+    get duration() {
+        return this.props.duration;
     }
     get startTime() {
         return this.props.startTime;
@@ -2326,19 +2517,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Activity = void 0;
 const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
+const app_model_1 = __webpack_require__(/*! src/modules/app/entities/app.model */ "./src/modules/app/entities/app.model.ts");
+const user_model_1 = __webpack_require__(/*! src/modules/user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const incomming_activity_model_1 = __webpack_require__(/*! ./incomming-activity.model */ "./src/modules/activity/entities/incomming-activity.model.ts");
 let Activity = class Activity {
     id;
+    incommingActivityId;
+    incommingActivity;
     accountId;
+    userId;
+    description;
+    appId;
     account;
-    name;
-    title;
-    expression;
-    deviceFingerprint;
+    user;
+    app;
     source;
     startTime;
     endTime;
@@ -2358,41 +2555,62 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ nullable: false }),
     __metadata("design:type", String)
+], Activity.prototype, "incommingActivityId", void 0);
+__decorate([
+    (0, typeorm_1.OneToOne)(() => incomming_activity_model_1.IncommingActivity, (ia) => ia.activity, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'incommingActivityId' }),
+    __metadata("design:type", typeof (_a = typeof incomming_activity_model_1.IncommingActivity !== "undefined" && incomming_activity_model_1.IncommingActivity) === "function" ? _a : Object)
+], Activity.prototype, "incommingActivity", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
 ], Activity.prototype, "accountId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.users, {
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Activity.prototype, "userId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Activity.prototype, "description", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Activity.prototype, "appId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.activities, {
         onDelete: 'CASCADE',
     }),
     (0, typeorm_1.JoinColumn)({ name: 'accountId' }),
-    __metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_b = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _b : Object)
 ], Activity.prototype, "account", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Activity.prototype, "name", void 0);
+    (0, typeorm_1.ManyToOne)(() => user_model_1.User, (user) => user.activities, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
+    __metadata("design:type", typeof (_c = typeof user_model_1.User !== "undefined" && user_model_1.User) === "function" ? _c : Object)
+], Activity.prototype, "user", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Activity.prototype, "title", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Activity.prototype, "expression", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Activity.prototype, "deviceFingerprint", void 0);
+    (0, typeorm_1.ManyToOne)(() => app_model_1.App, (app) => app.activities, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'appId' }),
+    __metadata("design:type", typeof (_d = typeof app_model_1.App !== "undefined" && app_model_1.App) === "function" ? _d : Object)
+], Activity.prototype, "app", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Activity.prototype, "source", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp' }),
-    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
 ], Activity.prototype, "startTime", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp' }),
-    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_f = typeof Date !== "undefined" && Date) === "function" ? _f : Object)
 ], Activity.prototype, "endTime", void 0);
 __decorate([
     (0, typeorm_1.Column)('int'),
@@ -2400,15 +2618,15 @@ __decorate([
 ], Activity.prototype, "duration", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_g = typeof Date !== "undefined" && Date) === "function" ? _g : Object)
 ], Activity.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
-    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
+    __metadata("design:type", typeof (_h = typeof Date !== "undefined" && Date) === "function" ? _h : Object)
 ], Activity.prototype, "updatedAt", void 0);
 __decorate([
     (0, typeorm_1.DeleteDateColumn)(),
-    __metadata("design:type", typeof (_f = typeof Date !== "undefined" && Date) === "function" ? _f : Object)
+    __metadata("design:type", typeof (_j = typeof Date !== "undefined" && Date) === "function" ? _j : Object)
 ], Activity.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
@@ -2450,8 +2668,26 @@ class IncommingActivity {
     get id() {
         return this.props.id;
     }
+    get externalActivityId() {
+        return this.props.externalActivityId;
+    }
     get accountId() {
         return this.props.accountId;
+    }
+    get ipAddress() {
+        return this.props.ipAddress;
+    }
+    get hostname() {
+        return this.props.hostname;
+    }
+    get macAddress() {
+        return this.props.macAddress;
+    }
+    get os() {
+        return this.props.os;
+    }
+    get arch() {
+        return this.props.arch;
     }
     get name() {
         return this.props.name;
@@ -2540,15 +2776,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IncommingActivity = void 0;
 const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+const activity_model_1 = __webpack_require__(/*! ./activity.model */ "./src/modules/activity/entities/activity.model.ts");
 let IncommingActivity = class IncommingActivity {
     id;
+    externalActivityId;
     accountId;
     account;
+    activity;
+    ipAddress;
+    hostname;
+    macAddress;
+    os;
+    arch;
     name;
     title;
     expression;
@@ -2572,6 +2816,10 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ nullable: false }),
     __metadata("design:type", String)
+], IncommingActivity.prototype, "externalActivityId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
 ], IncommingActivity.prototype, "accountId", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.users, {
@@ -2580,6 +2828,30 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'accountId' }),
     __metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
 ], IncommingActivity.prototype, "account", void 0);
+__decorate([
+    (0, typeorm_1.OneToOne)(() => activity_model_1.Activity, (a) => a.incommingActivity),
+    __metadata("design:type", typeof (_b = typeof activity_model_1.Activity !== "undefined" && activity_model_1.Activity) === "function" ? _b : Object)
+], IncommingActivity.prototype, "activity", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], IncommingActivity.prototype, "ipAddress", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], IncommingActivity.prototype, "hostname", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], IncommingActivity.prototype, "macAddress", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], IncommingActivity.prototype, "os", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], IncommingActivity.prototype, "arch", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
@@ -2602,11 +2874,11 @@ __decorate([
 ], IncommingActivity.prototype, "source", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp' }),
-    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
 ], IncommingActivity.prototype, "startTime", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp' }),
-    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
 ], IncommingActivity.prototype, "endTime", void 0);
 __decorate([
     (0, typeorm_1.Column)('int'),
@@ -2614,15 +2886,15 @@ __decorate([
 ], IncommingActivity.prototype, "duration", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
 ], IncommingActivity.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
-    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
+    __metadata("design:type", typeof (_f = typeof Date !== "undefined" && Date) === "function" ? _f : Object)
 ], IncommingActivity.prototype, "updatedAt", void 0);
 __decorate([
     (0, typeorm_1.DeleteDateColumn)(),
-    __metadata("design:type", typeof (_f = typeof Date !== "undefined" && Date) === "function" ? _f : Object)
+    __metadata("design:type", typeof (_g = typeof Date !== "undefined" && Date) === "function" ? _g : Object)
 ], IncommingActivity.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
@@ -2714,24 +2986,103 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IncommingActivityCreatedHandler = void 0;
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const app_service_1 = __webpack_require__(/*! src/modules/app/app.service */ "./src/modules/app/app.service.ts");
+const create_app_dto_1 = __webpack_require__(/*! src/modules/app/dto/create-app.dto */ "./src/modules/app/dto/create-app.dto.ts");
+const device_service_1 = __webpack_require__(/*! src/modules/device/device.service */ "./src/modules/device/device.service.ts");
+const create_device_dto_1 = __webpack_require__(/*! src/modules/device/dto/create-device.dto */ "./src/modules/device/dto/create-device.dto.ts");
+const uuid_1 = __webpack_require__(/*! uuid */ "uuid");
+const activity_service_1 = __webpack_require__(/*! ../activity.service */ "./src/modules/activity/activity.service.ts");
 const incomming_activity_created_command_1 = __webpack_require__(/*! ../commands/incomming-activity-created.command */ "./src/modules/activity/commands/incomming-activity-created.command.ts");
+const create_activity_dto_1 = __webpack_require__(/*! ../dto/create-activity.dto */ "./src/modules/activity/dto/create-activity.dto.ts");
 let IncommingActivityCreatedHandler = class IncommingActivityCreatedHandler {
     logger;
-    constructor(logger) {
+    appService;
+    activityService;
+    deviceService;
+    constructor(logger, appService, activityService, deviceService) {
         this.logger = logger;
+        this.appService = appService;
+        this.activityService = activityService;
+        this.deviceService = deviceService;
     }
     async execute(command) {
         this.logger.debug('IncommingActivity created handler called', {
             correlationId: '51287cb5-e91d-481f-bff6-5f4e89770440',
             command: JSON.stringify(command),
         });
-        await new Promise((res) => res(true));
+        try {
+            const { id, accountId, ipAddress, hostname, macAddress, os, arch, name, deviceFingerprint, title, source, expression, startTime, endTime, } = command.entity;
+            this.logger.debug('incomming activity created handler object values:', {
+                id,
+                accountId,
+                ipAddress,
+                hostname,
+                macAddress,
+                os,
+                arch,
+                name,
+                deviceFingerprint,
+                title,
+                source,
+                expression,
+                startTime,
+                endTime,
+            });
+            let foundApp = await this.appService.findOneByName(name, accountId);
+            if (!foundApp) {
+                this.logger.debug('No app found for name. Triggering app discovery', {
+                    correlationId: 'eff30d59-32e0-42ff-963f-b40fbd6bb862',
+                });
+                const createAppDto = new create_app_dto_1.CreateAppDto();
+                createAppDto.name = name;
+                createAppDto.accountId = accountId;
+                foundApp = await this.appService.create(createAppDto, uuid_1.NIL);
+            }
+            let foundDevice = await this.deviceService.findOneBy({
+                hostname,
+                macAddress,
+                os,
+                arch,
+            });
+            if (!foundDevice) {
+                this.logger.debug('No device found for activity, creating one', {
+                    correlationId: '9ab22e51-bf69-4e2b-bf71-b8897b6a29d9',
+                });
+                const createDeviceDto = new create_device_dto_1.CreateDeviceDto();
+                createDeviceDto.accountId = accountId;
+                createDeviceDto.arch = arch;
+                createDeviceDto.hostname = hostname;
+                createDeviceDto.ipAddress = ipAddress;
+                createDeviceDto.os = os;
+                createDeviceDto.macAddress = macAddress;
+                createDeviceDto.fingerprint = deviceFingerprint;
+                foundDevice = await this.deviceService.create(createDeviceDto, uuid_1.NIL);
+            }
+            const createActivityDto = new create_activity_dto_1.CreateActivityDto();
+            createActivityDto.accountId = accountId;
+            createActivityDto.incommingActivityId = id;
+            createActivityDto.appId = foundApp.id;
+            if (foundDevice.userId) {
+                createActivityDto.userId = foundDevice.userId;
+            }
+            createActivityDto.source = source;
+            createActivityDto.startTime = startTime;
+            createActivityDto.endTime = endTime;
+            createActivityDto.createdBy = foundDevice.userId ?? uuid_1.NIL;
+            createActivityDto.description = `User visited ${expression} in window ${title} of ${name}`;
+            await this.activityService.create(createActivityDto);
+        }
+        catch (error) {
+            this.logger.error(error, {
+                correlationId: 'dd447c82-4e60-4b6e-b856-f356ca5c39cb',
+            });
+        }
         return {
             actionId: crypto.randomUUID(),
         };
@@ -2741,7 +3092,10 @@ exports.IncommingActivityCreatedHandler = IncommingActivityCreatedHandler;
 exports.IncommingActivityCreatedHandler = IncommingActivityCreatedHandler = __decorate([
     (0, cqrs_1.CommandHandler)(incomming_activity_created_command_1.IncommingActivityCreatedCommand),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
-    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+    __param(1, (0, common_1.Inject)(app_service_1.AppService)),
+    __param(2, (0, common_1.Inject)(activity_service_1.ActivityService)),
+    __param(3, (0, common_1.Inject)(device_service_1.DeviceService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _b : Object, typeof (_c = typeof activity_service_1.ActivityService !== "undefined" && activity_service_1.ActivityService) === "function" ? _c : Object, typeof (_d = typeof device_service_1.DeviceService !== "undefined" && device_service_1.DeviceService) === "function" ? _d : Object])
 ], IncommingActivityCreatedHandler);
 
 
@@ -2890,7 +3244,6 @@ let IncommingActivityService = class IncommingActivityService {
         const testDuration = endTime.getTime() - startTime.getTime();
         this.logger.debug('Creating with inputs', {
             correlationId: '8348256d-76f8-497d-8cde-8b254a5bd436',
-            activityId: createIncommingActivityDto.activityId,
             rawStartTime: createIncommingActivityDto.startTime,
             startTime,
             rawEndTime: createIncommingActivityDto.endTime,
@@ -3111,6 +3464,9 @@ const department_model_1 = __webpack_require__(/*! ./department/entities/departm
 const subscription_module_1 = __webpack_require__(/*! ./subscription/subscription.module */ "./src/modules/subscription/subscription.module.ts");
 const activity_module_1 = __webpack_require__(/*! ./activity/activity.module */ "./src/modules/activity/activity.module.ts");
 const activity_model_1 = __webpack_require__(/*! ./activity/entities/activity.model */ "./src/modules/activity/entities/activity.model.ts");
+const incomming_activity_model_1 = __webpack_require__(/*! ./activity/entities/incomming-activity.model */ "./src/modules/activity/entities/incomming-activity.model.ts");
+const device_module_1 = __webpack_require__(/*! ./device/device.module */ "./src/modules/device/device.module.ts");
+const device_model_1 = __webpack_require__(/*! ./device/entities/device.model */ "./src/modules/device/entities/device.model.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -3139,6 +3495,8 @@ exports.AppModule = AppModule = __decorate([
                         workspace_model_1.Workspace,
                         workspace_user_model_1.WorkspaceUser,
                         activity_model_1.Activity,
+                        incomming_activity_model_1.IncommingActivity,
+                        device_model_1.Device,
                     ],
                     synchronize: true,
                     autoLoadEntities: true,
@@ -3185,6 +3543,7 @@ exports.AppModule = AppModule = __decorate([
             subscription_module_1.SubscriptionModule,
             ai_module_1.AiModule,
             activity_module_1.ActivityModule,
+            device_module_1.DeviceModule,
         ],
         providers: [{ provide: core_1.APP_GUARD, useClass: logging_thottler_guard_1.LoggingThrottlerGuard }],
     })
@@ -3508,13 +3867,17 @@ let AppService = class AppService {
             throw new common_1.InternalServerErrorException();
         }
     }
-    async findOneByName(name) {
+    async findOneByName(name, accountId) {
         try {
-            const model = await this.repo.findOneBy({ name });
-            if (!model) {
-                throw new common_1.NotFoundException();
+            this.logger.debug('find one app by name, inputs:', {
+                name,
+                accountId,
+            });
+            const model = await this.repo.findOneBy({ name, accountId });
+            if (model) {
+                return this.mapper.toDomain(model);
             }
-            return this.mapper.toDomain(model);
+            return null;
         }
         catch (err) {
             this.logger.error(`${this.constructor.name}.${this.findOneByName.name} encountered an error`, {
@@ -3775,27 +4138,27 @@ exports.AppMapper = void 0;
 const app_entity_1 = __webpack_require__(/*! ../entities/app.entity */ "./src/modules/app/entities/app.entity.ts");
 const app_dto_1 = __webpack_require__(/*! ./app.dto */ "./src/modules/app/dto/app.dto.ts");
 class AppMapper {
-    static toInterface(user) {
-        return new app_dto_1.AppDto(user.props);
+    static toInterface(app) {
+        return new app_dto_1.AppDto(app.props);
     }
-    toInterface(user) {
-        return AppMapper.toInterface(user);
+    toInterface(app) {
+        return AppMapper.toInterface(app);
     }
-    static toDomain(user) {
+    static toDomain(app) {
         return new app_entity_1.App({
-            ...user,
+            ...app,
         });
     }
-    toDomain(user) {
-        return AppMapper.toDomain(user);
+    toDomain(app) {
+        return AppMapper.toDomain(app);
     }
-    static toPersistence(user) {
+    static toPersistence(app) {
         return {
-            ...user.props,
+            ...app.props,
         };
     }
-    toPersistence(user) {
-        return AppMapper.toPersistence(user);
+    toPersistence(app) {
+        return AppMapper.toPersistence(app);
     }
 }
 exports.AppMapper = AppMapper;
@@ -4034,12 +4397,14 @@ const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const app_entity_1 = __webpack_require__(/*! ./app.entity */ "./src/modules/app/entities/app.entity.ts");
 const integration_model_1 = __webpack_require__(/*! src/modules/integration/entities/integration.model */ "./src/modules/integration/entities/integration.model.ts");
 const subscription_model_1 = __webpack_require__(/*! src/modules/subscription/entities/subscription.model */ "./src/modules/subscription/entities/subscription.model.ts");
+const activity_model_1 = __webpack_require__(/*! src/modules/activity/entities/activity.model */ "./src/modules/activity/entities/activity.model.ts");
 let App = class App {
     id;
     accountId;
     account;
     integrations;
     subscriptions;
+    activities;
     name;
     category;
     description;
@@ -4078,6 +4443,12 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], App.prototype, "subscriptions", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => activity_model_1.Activity, (activity) => activity.app, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], App.prototype, "activities", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
@@ -4869,6 +5240,7 @@ const workspace_entity_1 = __webpack_require__(/*! src/modules/workspace/entitie
 const integration_entity_1 = __webpack_require__(/*! src/modules/integration/entities/integration.entity */ "./src/modules/integration/entities/integration.entity.ts");
 const department_entity_1 = __webpack_require__(/*! src/modules/department/entities/department.entity */ "./src/modules/department/entities/department.entity.ts");
 const subscription_entity_1 = __webpack_require__(/*! src/modules/subscription/entities/subscription.entity */ "./src/modules/subscription/entities/subscription.entity.ts");
+const device_entity_1 = __webpack_require__(/*! src/modules/device/entities/device.entity */ "./src/modules/device/entities/device.entity.ts");
 var Action;
 (function (Action) {
     Action["Manage"] = "manage";
@@ -4917,6 +5289,10 @@ let CaslAbilityFactory = class CaslAbilityFactory {
             can(Action.Read, user_entity_1.User, { accountId: user.accountId });
             can(Action.Update, user_entity_1.User, { id: user.id });
             can(Action.Delete, user_entity_1.User, { createdBy: user.id });
+            can(Action.Create, device_entity_1.Device);
+            can(Action.Read, device_entity_1.Device, { accountId: user.accountId });
+            can(Action.Update, device_entity_1.Device, { accountId: user.accountId });
+            can(Action.Delete, device_entity_1.Device, { createdBy: user.id });
         }
         return build({
             detectSubjectType: (item) => item.constructor,
@@ -5139,6 +5515,1123 @@ __decorate([
 exports.Department = Department = __decorate([
     (0, typeorm_1.Entity)('departments')
 ], Department);
+
+
+/***/ }),
+
+/***/ "./src/modules/device/commands/device-created.command.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/device/commands/device-created.command.ts ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeviceCreatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class DeviceCreatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.DeviceCreatedCommand = DeviceCreatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/device/commands/device-removed.command.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/device/commands/device-removed.command.ts ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeviceRemovedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class DeviceRemovedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.DeviceRemovedCommand = DeviceRemovedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/device/commands/device-updated.command.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/device/commands/device-updated.command.ts ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeviceUpdatedCommand = void 0;
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+class DeviceUpdatedCommand extends cqrs_1.Command {
+    entity;
+    constructor(entity) {
+        super();
+        this.entity = entity;
+    }
+}
+exports.DeviceUpdatedCommand = DeviceUpdatedCommand;
+
+
+/***/ }),
+
+/***/ "./src/modules/device/device.controller.ts":
+/*!*************************************************!*\
+  !*** ./src/modules/device/device.controller.ts ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeviceController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const jwt_auth_guard_1 = __webpack_require__(/*! src/guards/jwt-auth.guard */ "./src/guards/jwt-auth.guard.ts");
+const policies_guard_1 = __webpack_require__(/*! src/guards/policies.guard */ "./src/guards/policies.guard.ts");
+const logging_cache_interceptor_1 = __webpack_require__(/*! src/interceptors/logging-cache.interceptor */ "./src/interceptors/logging-cache.interceptor.ts");
+const casl_ability_factory_1 = __webpack_require__(/*! ../casl/casl-ability.factory/casl-ability.factory */ "./src/modules/casl/casl-ability.factory/casl-ability.factory.ts");
+const device_service_1 = __webpack_require__(/*! ./device.service */ "./src/modules/device/device.service.ts");
+const create_device_dto_1 = __webpack_require__(/*! ./dto/create-device.dto */ "./src/modules/device/dto/create-device.dto.ts");
+const update_device_dto_1 = __webpack_require__(/*! ./dto/update-device.dto */ "./src/modules/device/dto/update-device.dto.ts");
+const device_entity_1 = __webpack_require__(/*! ./entities/device.entity */ "./src/modules/device/entities/device.entity.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const device_mapper_1 = __webpack_require__(/*! ./dto/device.mapper */ "./src/modules/device/dto/device.mapper.ts");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
+const device_created_command_1 = __webpack_require__(/*! ./commands/device-created.command */ "./src/modules/device/commands/device-created.command.ts");
+const device_updated_command_1 = __webpack_require__(/*! ./commands/device-updated.command */ "./src/modules/device/commands/device-updated.command.ts");
+const device_removed_command_1 = __webpack_require__(/*! ./commands/device-removed.command */ "./src/modules/device/commands/device-removed.command.ts");
+let DeviceController = class DeviceController {
+    logger;
+    service;
+    mapper;
+    caslAbilityFactory;
+    commandBus;
+    constructor(logger, service, mapper, caslAbilityFactory, commandBus) {
+        this.logger = logger;
+        this.service = service;
+        this.mapper = mapper;
+        this.caslAbilityFactory = caslAbilityFactory;
+        this.commandBus = commandBus;
+    }
+    async create(createDeviceDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        if (!ability.can(casl_ability_factory_1.Action.Create, device_entity_1.Device)) {
+            throw new common_1.UnauthorizedException();
+        }
+        const result = await this.service.create(createDeviceDto, req.user.id);
+        void this.commandBus.execute(new device_created_command_1.DeviceCreatedCommand(result));
+        return this.mapper.toInterface(result);
+    }
+    async findAll(skip = 0, take = 100, req) {
+        const result = await this.service.findAll(skip, take);
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        return {
+            ...result,
+            data: result.data
+                .filter((entity) => ability.can(casl_ability_factory_1.Action.Read, entity))
+                .map((entity) => this.mapper.toInterface(entity)),
+        };
+    }
+    async findOne(id, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const user = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Read, user)) {
+            throw new common_1.UnauthorizedException();
+        }
+        return this.mapper.toInterface(user);
+    }
+    async update(id, updateDeviceDto, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const user = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Update, user)) {
+            throw new common_1.UnauthorizedException();
+        }
+        const updated = await this.service.update(id, updateDeviceDto, req.user.id);
+        void this.commandBus.execute(new device_updated_command_1.DeviceUpdatedCommand(updated));
+        return this.mapper.toInterface(updated);
+    }
+    async remove(id, req) {
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        const user = await this.service.findOne(id);
+        if (!ability.can(casl_ability_factory_1.Action.Delete, user)) {
+            throw new common_1.UnauthorizedException();
+        }
+        await this.service.remove(id, req.user.id);
+        void this.commandBus.execute(new device_removed_command_1.DeviceRemovedCommand(user));
+        return user.id;
+    }
+};
+exports.DeviceController = DeviceController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Create, device_entity_1.Device)),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_f = typeof create_device_dto_1.CreateDeviceDto !== "undefined" && create_device_dto_1.CreateDeviceDto) === "function" ? _f : Object, Object]),
+    __metadata("design:returntype", Promise)
+], DeviceController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, device_entity_1.Device)),
+    (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: Number }),
+    (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
+    __param(0, (0, common_1.Query)('skip')),
+    __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], DeviceController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, device_entity_1.Device)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], DeviceController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Update, device_entity_1.Device)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_h = typeof update_device_dto_1.UpdateDeviceDto !== "undefined" && update_device_dto_1.UpdateDeviceDto) === "function" ? _h : Object, Object]),
+    __metadata("design:returntype", Promise)
+], DeviceController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Delete, device_entity_1.Device)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], DeviceController.prototype, "remove", null);
+exports.DeviceController = DeviceController = __decorate([
+    (0, common_1.Controller)({ path: 'devices', version: '1' }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
+    (0, common_1.UseInterceptors)(logging_cache_interceptor_1.ControllerCacheInterceptor, common_1.ClassSerializerInterceptor),
+    (0, swagger_1.ApiBearerAuth)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, common_1.Inject)(device_service_1.DeviceService)),
+    __param(2, (0, common_1.Inject)(device_mapper_1.DeviceMapper)),
+    __param(3, (0, common_1.Inject)(casl_ability_factory_1.CaslAbilityFactory)),
+    __param(4, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof device_service_1.DeviceService !== "undefined" && device_service_1.DeviceService) === "function" ? _b : Object, typeof (_c = typeof device_mapper_1.DeviceMapper !== "undefined" && device_mapper_1.DeviceMapper) === "function" ? _c : Object, typeof (_d = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _d : Object, typeof (_e = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _e : Object])
+], DeviceController);
+
+
+/***/ }),
+
+/***/ "./src/modules/device/device.module.ts":
+/*!*********************************************!*\
+  !*** ./src/modules/device/device.module.ts ***!
+  \*********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeviceModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const device_service_1 = __webpack_require__(/*! ./device.service */ "./src/modules/device/device.service.ts");
+const device_controller_1 = __webpack_require__(/*! ./device.controller */ "./src/modules/device/device.controller.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const device_model_1 = __webpack_require__(/*! ./entities/device.model */ "./src/modules/device/entities/device.model.ts");
+const casl_module_1 = __webpack_require__(/*! ../casl/casl.module */ "./src/modules/casl/casl.module.ts");
+const device_mapper_1 = __webpack_require__(/*! ./dto/device.mapper */ "./src/modules/device/dto/device.mapper.ts");
+const device_created_handler_1 = __webpack_require__(/*! ./handlers/device-created.handler */ "./src/modules/device/handlers/device-created.handler.ts");
+const device_removed_handler_1 = __webpack_require__(/*! ./handlers/device-removed.handler */ "./src/modules/device/handlers/device-removed.handler.ts");
+const device_updated_handler_1 = __webpack_require__(/*! ./handlers/device-updated.handler */ "./src/modules/device/handlers/device-updated.handler.ts");
+let DeviceModule = class DeviceModule {
+};
+exports.DeviceModule = DeviceModule;
+exports.DeviceModule = DeviceModule = __decorate([
+    (0, common_1.Module)({
+        imports: [logging_1.LoggingModule, typeorm_1.TypeOrmModule.forFeature([device_model_1.Device]), casl_module_1.CaslModule],
+        controllers: [device_controller_1.DeviceController],
+        providers: [
+            device_mapper_1.DeviceMapper,
+            device_service_1.DeviceService,
+            device_created_handler_1.DeviceCreatedHandler,
+            device_updated_handler_1.DeviceUpdatedHandler,
+            device_removed_handler_1.DeviceRemovedHandler,
+        ],
+        exports: [device_service_1.DeviceService],
+    })
+], DeviceModule);
+
+
+/***/ }),
+
+/***/ "./src/modules/device/device.service.ts":
+/*!**********************************************!*\
+  !*** ./src/modules/device/device.service.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeviceService = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const typeorm_1 = __webpack_require__(/*! @nestjs/typeorm */ "@nestjs/typeorm");
+const typeorm_2 = __webpack_require__(/*! typeorm */ "typeorm");
+const device_mapper_1 = __webpack_require__(/*! ./dto/device.mapper */ "./src/modules/device/dto/device.mapper.ts");
+const device_model_1 = __webpack_require__(/*! ./entities/device.model */ "./src/modules/device/entities/device.model.ts");
+let DeviceService = class DeviceService {
+    logger;
+    repo;
+    mapper;
+    constructor(logger, repo, mapper) {
+        this.logger = logger;
+        this.repo = repo;
+        this.mapper = mapper;
+    }
+    async createWithManager(createDeviceDto, manager) {
+        const repo = manager.getRepository(device_model_1.Device);
+        const entity = repo.create({ ...createDeviceDto });
+        const result = await repo.save(entity);
+        return this.mapper.toDomain(result);
+    }
+    async create(createDeviceDto, createdBy) {
+        const entity = this.repo.create({ ...createDeviceDto, createdBy });
+        const result = await this.repo.save(entity);
+        return this.mapper.toDomain(result);
+    }
+    async findAll(skip = 0, take = 100) {
+        try {
+            const [entities, count] = await this.repo.findAndCount({
+                skip,
+                take,
+            });
+            return {
+                data: entities.map((entity) => this.mapper.toDomain(entity)),
+                pagination: {
+                    total: count,
+                    skip,
+                    take,
+                    hasNextPage: skip + take < count,
+                },
+            };
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findAll.name} encountered an error`, {
+                correlationId: 'eb9e90e0-6394-484c-a431-6a79eb56468e',
+                err: JSON.stringify(err),
+            });
+            return {
+                data: [],
+                pagination: { total: 0, skip: 0, take, hasNextPage: false },
+            };
+        }
+    }
+    async findOneBy(where) {
+        try {
+            const model = await this.repo.findOneBy(where);
+            if (model) {
+                return this.mapper.toDomain(model);
+            }
+            return null;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOne.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async findOne(id) {
+        try {
+            const entity = await this.repo.findOneBy({ id });
+            if (!entity) {
+                throw new common_1.NotFoundException();
+            }
+            return this.mapper.toDomain(entity);
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findOne.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async updateWithManager(id, updateDeviceDto, manager) {
+        try {
+            const repo = manager.getRepository(device_model_1.Device);
+            const model = await repo.findOneBy({ id });
+            if (!model) {
+                throw new common_1.NotFoundException();
+            }
+            const entity = this.mapper.toDomain(model);
+            if (updateDeviceDto.userId) {
+                entity.updateUserId(updateDeviceDto.userId);
+            }
+            await repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.updateWithManager.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async update(id, updateDeviceDto, updatedBy) {
+        try {
+            const entity = await this.findOne(id);
+            if (updateDeviceDto.userId) {
+                entity.updateUserId(updateDeviceDto.userId);
+            }
+            entity.updateUpdatedBy(updatedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.update.name} encountered an error`, {
+                correlationId: '6befde88-ff55-4a59-9c7b-8b47a5980dd4',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+    async remove(id, removedBy) {
+        try {
+            const entity = await this.findOne(id);
+            entity.softDelete(removedBy);
+            await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+            return entity;
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.remove.name} encountered an error`, {
+                correlationId: 'b76287ba-c244-475f-adcb-52c6917ba739',
+                err: JSON.stringify(err),
+            });
+            throw new common_1.InternalServerErrorException();
+        }
+    }
+};
+exports.DeviceService = DeviceService;
+exports.DeviceService = DeviceService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, typeorm_1.InjectRepository)(device_model_1.Device)),
+    __param(2, (0, common_1.Inject)(device_mapper_1.DeviceMapper)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof device_mapper_1.DeviceMapper !== "undefined" && device_mapper_1.DeviceMapper) === "function" ? _c : Object])
+], DeviceService);
+
+
+/***/ }),
+
+/***/ "./src/modules/device/dto/create-device.dto.ts":
+/*!*****************************************************!*\
+  !*** ./src/modules/device/dto/create-device.dto.ts ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateDeviceDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CreateDeviceDto {
+    accountId;
+    ipAddress;
+    hostname;
+    macAddress;
+    os;
+    arch;
+    fingerprint;
+    userId;
+    createdBy;
+    updatedBy;
+    deletedBy;
+    createdAt;
+    updatedAt;
+    deletedAt;
+}
+exports.CreateDeviceDto = CreateDeviceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The ID of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The IP address of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "ipAddress", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The hostname of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "hostname", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The mac address of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "macAddress", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The os of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "os", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The arch of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "arch", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The fingerprint of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "fingerprint", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The ID address of the user' }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "userId", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "updatedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "deletedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], CreateDeviceDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], CreateDeviceDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], CreateDeviceDto.prototype, "deletedAt", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/device/dto/device.dto.ts":
+/*!**********************************************!*\
+  !*** ./src/modules/device/dto/device.dto.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeviceDto = void 0;
+const swagger_1 = __webpack_require__(/*! @nestjs/swagger */ "@nestjs/swagger");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class DeviceDto {
+    constructor(partial) {
+        Object.assign(this, partial);
+    }
+    accountId;
+    ipAddress;
+    hostname;
+    macAddress;
+    os;
+    arch;
+    fingerprint;
+    userId;
+    createdBy;
+    updatedBy;
+    deletedBy;
+    createdAt;
+    updatedAt;
+    deletedAt;
+}
+exports.DeviceDto = DeviceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The ID of the account' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], DeviceDto.prototype, "accountId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The IP address of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DeviceDto.prototype, "ipAddress", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The hostname of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DeviceDto.prototype, "hostname", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The mac address of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DeviceDto.prototype, "macAddress", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The os of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DeviceDto.prototype, "os", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The arch of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DeviceDto.prototype, "arch", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The fingerprint of the device' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DeviceDto.prototype, "fingerprint", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'The ID address of the user' }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], DeviceDto.prototype, "userId", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], DeviceDto.prototype, "createdBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], DeviceDto.prototype, "updatedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], DeviceDto.prototype, "deletedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], DeviceDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], DeviceDto.prototype, "updatedAt", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], DeviceDto.prototype, "deletedAt", void 0);
+
+
+/***/ }),
+
+/***/ "./src/modules/device/dto/device.mapper.ts":
+/*!*************************************************!*\
+  !*** ./src/modules/device/dto/device.mapper.ts ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeviceMapper = void 0;
+const device_entity_1 = __webpack_require__(/*! ../entities/device.entity */ "./src/modules/device/entities/device.entity.ts");
+const device_dto_1 = __webpack_require__(/*! ./device.dto */ "./src/modules/device/dto/device.dto.ts");
+class DeviceMapper {
+    static toInterface(device) {
+        return new device_dto_1.DeviceDto(device.props);
+    }
+    toInterface(device) {
+        return DeviceMapper.toInterface(device);
+    }
+    static toDomain(device) {
+        return new device_entity_1.Device({
+            ...device,
+        });
+    }
+    toDomain(device) {
+        return DeviceMapper.toDomain(device);
+    }
+    static toPersistence(device) {
+        return {
+            ...device.props,
+        };
+    }
+    toPersistence(device) {
+        return DeviceMapper.toPersistence(device);
+    }
+}
+exports.DeviceMapper = DeviceMapper;
+
+
+/***/ }),
+
+/***/ "./src/modules/device/dto/update-device.dto.ts":
+/*!*****************************************************!*\
+  !*** ./src/modules/device/dto/update-device.dto.ts ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateDeviceDto = void 0;
+const mapped_types_1 = __webpack_require__(/*! @nestjs/mapped-types */ "@nestjs/mapped-types");
+const create_device_dto_1 = __webpack_require__(/*! ./create-device.dto */ "./src/modules/device/dto/create-device.dto.ts");
+class UpdateDeviceDto extends (0, mapped_types_1.PartialType)(create_device_dto_1.CreateDeviceDto) {
+}
+exports.UpdateDeviceDto = UpdateDeviceDto;
+
+
+/***/ }),
+
+/***/ "./src/modules/device/entities/device.entity.ts":
+/*!******************************************************!*\
+  !*** ./src/modules/device/entities/device.entity.ts ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Device = void 0;
+class Device {
+    props;
+    constructor(props) {
+        this.props = {
+            ...props,
+            createdAt: props.createdAt ?? new Date(),
+            updatedAt: props.updatedAt ?? new Date(),
+        };
+    }
+    get id() {
+        return this.props.id;
+    }
+    get accountId() {
+        return this.props.accountId;
+    }
+    get userId() {
+        return this.props.userId;
+    }
+    get ipAddress() {
+        return this.props.ipAddress;
+    }
+    get hostname() {
+        return this.props.hostname;
+    }
+    get macAddress() {
+        return this.props.macAddress;
+    }
+    get os() {
+        return this.props.os;
+    }
+    get arch() {
+        return this.props.arch;
+    }
+    get createdAt() {
+        return this.props.createdAt;
+    }
+    get updatedAt() {
+        return this.props.updatedAt;
+    }
+    get deletedAt() {
+        return this.props.deletedAt;
+    }
+    get createdBy() {
+        return this.props.createdBy;
+    }
+    get updatedBy() {
+        return this.props.updatedBy;
+    }
+    get deletedBy() {
+        return this.props.deletedBy;
+    }
+    updateUserId(userId) {
+        this.props.userId = userId;
+        this.touch();
+    }
+    softDelete(byDeviceId) {
+        this.props.deletedAt = new Date();
+        if (byDeviceId) {
+            this.props.deletedBy = byDeviceId;
+        }
+        this.touch();
+    }
+    updateOwner(id) {
+        this.props.createdBy = id;
+        this.touch();
+    }
+    updateUpdatedBy(id) {
+        this.props.updatedBy = id;
+        this.touch();
+    }
+    restore() {
+        this.props.deletedAt = undefined;
+        this.props.deletedBy = undefined;
+        this.touch();
+    }
+    touch(id) {
+        this.props.updatedAt = new Date();
+        if (id) {
+            this.props.updatedBy = id;
+        }
+    }
+}
+exports.Device = Device;
+
+
+/***/ }),
+
+/***/ "./src/modules/device/entities/device.model.ts":
+/*!*****************************************************!*\
+  !*** ./src/modules/device/entities/device.model.ts ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Device = void 0;
+const account_model_1 = __webpack_require__(/*! src/modules/account/entities/account.model */ "./src/modules/account/entities/account.model.ts");
+const user_model_1 = __webpack_require__(/*! src/modules/user/entities/user.model */ "./src/modules/user/entities/user.model.ts");
+const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
+let Device = class Device {
+    id;
+    accountId;
+    account;
+    userId;
+    user;
+    ipAddress;
+    hostname;
+    macAddress;
+    os;
+    arch;
+    fingerprint;
+    createdAt;
+    updatedAt;
+    deletedAt;
+    createdBy;
+    updatedBy;
+    deletedBy;
+};
+exports.Device = Device;
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    __metadata("design:type", String)
+], Device.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Device.prototype, "accountId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => account_model_1.Account, (account) => account.devices, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'accountId' }),
+    __metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
+], Device.prototype, "account", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Device.prototype, "userId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_model_1.User, (user) => user.devices, {
+        onDelete: 'CASCADE',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
+    __metadata("design:type", typeof (_b = typeof user_model_1.User !== "undefined" && user_model_1.User) === "function" ? _b : Object)
+], Device.prototype, "user", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Device.prototype, "ipAddress", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Device.prototype, "hostname", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Device.prototype, "macAddress", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Device.prototype, "os", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Device.prototype, "arch", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Device.prototype, "fingerprint", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], Device.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], Device.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
+], Device.prototype, "deletedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Device.prototype, "createdBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Device.prototype, "updatedBy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Device.prototype, "deletedBy", void 0);
+exports.Device = Device = __decorate([
+    (0, typeorm_1.Entity)('devices')
+], Device);
+
+
+/***/ }),
+
+/***/ "./src/modules/device/handlers/device-created.handler.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/device/handlers/device-created.handler.ts ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeviceCreatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const device_created_command_1 = __webpack_require__(/*! ../commands/device-created.command */ "./src/modules/device/commands/device-created.command.ts");
+let DeviceCreatedHandler = class DeviceCreatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Device created handler called', {
+            correlationId: '23b10edb-86ee-45fe-ba6c-43ff8200c57f',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.DeviceCreatedHandler = DeviceCreatedHandler;
+exports.DeviceCreatedHandler = DeviceCreatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(device_created_command_1.DeviceCreatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], DeviceCreatedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/device/handlers/device-removed.handler.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/device/handlers/device-removed.handler.ts ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeviceRemovedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const device_removed_command_1 = __webpack_require__(/*! ../commands/device-removed.command */ "./src/modules/device/commands/device-removed.command.ts");
+let DeviceRemovedHandler = class DeviceRemovedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Device removed handler called', {
+            correlationId: '23b10edb-86ee-45fe-ba6c-43ff8200c57f',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.DeviceRemovedHandler = DeviceRemovedHandler;
+exports.DeviceRemovedHandler = DeviceRemovedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(device_removed_command_1.DeviceRemovedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], DeviceRemovedHandler);
+
+
+/***/ }),
+
+/***/ "./src/modules/device/handlers/device-updated.handler.ts":
+/*!***************************************************************!*\
+  !*** ./src/modules/device/handlers/device-updated.handler.ts ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeviceUpdatedHandler = void 0;
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cqrs_1 = __webpack_require__(/*! @nestjs/cqrs */ "@nestjs/cqrs");
+const device_updated_command_1 = __webpack_require__(/*! ../commands/device-updated.command */ "./src/modules/device/commands/device-updated.command.ts");
+let DeviceUpdatedHandler = class DeviceUpdatedHandler {
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
+    async execute(command) {
+        this.logger.debug('Device updated handler called', {
+            correlationId: '23b10edb-86ee-45fe-ba6c-43ff8200c57f',
+            command: JSON.stringify(command),
+        });
+        await new Promise((res) => res(true));
+        return {
+            actionId: crypto.randomUUID(),
+        };
+    }
+};
+exports.DeviceUpdatedHandler = DeviceUpdatedHandler;
+exports.DeviceUpdatedHandler = DeviceUpdatedHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(device_updated_command_1.DeviceUpdatedCommand),
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object])
+], DeviceUpdatedHandler);
 
 
 /***/ }),
@@ -7649,14 +9142,18 @@ const workspace_user_model_1 = __webpack_require__(/*! src/modules/workspace/ent
 const workspace_model_1 = __webpack_require__(/*! src/modules/workspace/entities/workspace.model */ "./src/modules/workspace/entities/workspace.model.ts");
 const typeorm_1 = __webpack_require__(/*! typeorm */ "typeorm");
 const user_entity_1 = __webpack_require__(/*! ./user.entity */ "./src/modules/user/entities/user.entity.ts");
+const activity_model_1 = __webpack_require__(/*! src/modules/activity/entities/activity.model */ "./src/modules/activity/entities/activity.model.ts");
+const device_model_1 = __webpack_require__(/*! src/modules/device/entities/device.model */ "./src/modules/device/entities/device.model.ts");
 let User = class User {
     id;
+    devices;
     accountId;
     account;
     workspaceUsers;
     workspaces;
     departmentId;
     department;
+    activities;
     email;
     password;
     role;
@@ -7674,6 +9171,12 @@ __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
     __metadata("design:type", String)
 ], User.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => device_model_1.Device, (device) => device.user, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], User.prototype, "devices", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: false }),
     __metadata("design:type", String)
@@ -7709,6 +9212,12 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'departmentId' }),
     __metadata("design:type", typeof (_b = typeof department_model_1.Department !== "undefined" && department_model_1.Department) === "function" ? _b : Object)
 ], User.prototype, "department", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => activity_model_1.Activity, (activity) => activity.user, {
+        cascade: true,
+    }),
+    __metadata("design:type", Array)
+], User.prototype, "activities", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)

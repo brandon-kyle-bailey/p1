@@ -5,28 +5,43 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"net"
+	"net/http"
 	"os"
 	"runtime"
 )
+
+func IPAddress() (string, error) {
+	resp, err := http.Get("https://api.ipify.org")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
+}
 
 func Hostname() (string, error) {
 	return os.Hostname()
 }
 
-func macAddress() (string, error) {
-	macAddress := ""
+func MacAddress() (string, error) {
 	interfaces, err := net.Interfaces()
 	if err != nil {
 		return "", err
 	}
 	for _, i := range interfaces {
-		if len(i.HardwareAddr) == 0 {
-			continue
+		if len(i.HardwareAddr) > 0 {
+			return i.HardwareAddr.String(), nil
 		}
-		macAddress += i.HardwareAddr.String()
 	}
-	return macAddress, nil
+	return "", nil
 }
 
 func OperatingSystem() string {
@@ -38,11 +53,20 @@ func Architecture() string {
 }
 
 func DeviceFingerprint() (string, error) {
-	hostname, _ := Hostname()
-	macAddress, _ := macAddress()
+	hostname, err := Hostname()
+	if err != nil {
+		return "", err
+	}
+
+	mac, err := MacAddress()
+	if err != nil {
+		return "", err
+	}
+
 	os := OperatingSystem()
 	arch := Architecture()
-	fingerprint := fmt.Sprintf("%s:%s:%s:%s", hostname, macAddress, os, arch)
+
+	fingerprint := fmt.Sprintf("%s:%s:%s:%s", hostname, mac, os, arch)
 	hash := sha256.Sum256([]byte(fingerprint))
 	return hex.EncodeToString(hash[:]), nil
 }

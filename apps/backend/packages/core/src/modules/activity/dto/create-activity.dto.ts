@@ -1,34 +1,36 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class CreateActivityDto {
-  @ApiProperty({ description: 'The id of the activity' })
+  @ApiProperty({ description: 'The id of the incomming activity id' })
   @IsUUID()
-  activityId: string;
+  incommingActivityId: string;
 
   @ApiProperty({ description: 'The id of the account' })
   @IsUUID()
   accountId: string;
 
+  @ApiProperty({ description: 'The id of the user' })
+  @IsUUID()
+  userId: string;
+
+  @ApiProperty({ description: 'The id of the app' })
+  @IsUUID()
+  appId: string;
+
   @ApiProperty({ description: 'The source system of the activity' })
   @IsString()
   source: string;
 
-  @ApiProperty({ description: 'The name of the activity' })
+  @ApiProperty({ description: 'The description of the activity' })
   @IsString()
-  name: string;
-
-  @ApiProperty({ description: 'The fingerprint of the device' })
-  @IsString()
-  deviceFingerprint: string;
-
-  @ApiProperty({ description: 'The title of the activity' })
-  @IsString()
-  title: string;
-
-  @ApiProperty({ description: 'The expression of the activity' })
-  @IsString()
-  expression: string;
+  description: string;
 
   @ApiProperty({ description: 'The start_time of the activity' })
   @IsDateString()
@@ -37,6 +39,10 @@ export class CreateActivityDto {
   @ApiProperty({ description: 'The end_time of the activity' })
   @IsDateString()
   endTime: Date;
+
+  @ApiProperty({ description: 'The duration of the activity' })
+  @IsNumber()
+  duration: number;
 
   @IsUUID()
   @IsOptional()
