@@ -22,7 +22,31 @@ export const data = {
       title: "Dashboard",
       url: WebRoutes.Dashboard,
       icon: SquareTerminal,
-      isActive: true,
+      isActive: false,
+    },
+    {
+      title: "Account",
+      url: WebRoutes.Account,
+      icon: SquareTerminal,
+      isActive: false,
+    },
+    {
+      title: "Apps",
+      url: WebRoutes.Apps,
+      icon: SquareTerminal,
+      isActive: false,
+    },
+    {
+      title: "Devices",
+      url: WebRoutes.Devices,
+      icon: SquareTerminal,
+      isActive: false,
+    },
+    {
+      title: "Workspaces",
+      url: WebRoutes.Workspaces,
+      icon: SquareTerminal,
+      isActive: false,
     },
   ],
 };

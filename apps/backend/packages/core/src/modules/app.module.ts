@@ -80,9 +80,9 @@ import { Device } from './device/entities/device.model';
         );
         return {
           stores: [
-            new Keyv({ store: new KeyvRedis(redisUrl), ttl: 60_000 }),
+            new Keyv({ store: new KeyvRedis(redisUrl), ttl: 5_000 }),
             new Keyv({
-              store: new CacheableMemory({ ttl: 60000, lruSize: 5000 }),
+              store: new CacheableMemory({ ttl: 5_000, lruSize: 5_000 }),
             }),
           ],
         };
@@ -94,7 +94,7 @@ import { Device } from './device/entities/device.model';
     ThrottlerModule.forRoot({
       throttlers: [
         {
-          limit: 10,
+          limit: 9999999999,
           ttl: 6000,
         },
       ],

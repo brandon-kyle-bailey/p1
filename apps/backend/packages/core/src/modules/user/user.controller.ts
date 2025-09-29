@@ -7,6 +7,7 @@ import {
   Delete,
   Get,
   Inject,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -95,6 +96,9 @@ export class UserController {
   async findOne(@Param('id') id: string, @Request() req: { user: UserDomain }) {
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     const user = await this.service.findOne(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
     if (!ability.can(Action.Read, user)) {
       throw new UnauthorizedException();
     }
@@ -112,6 +116,9 @@ export class UserController {
   ) {
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     const user = await this.service.findOne(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
     if (!ability.can(Action.Update, user)) {
       throw new UnauthorizedException();
     }
@@ -127,6 +134,9 @@ export class UserController {
   async remove(@Param('id') id: string, @Request() req: { user: UserDomain }) {
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     const user = await this.service.findOne(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
     if (!ability.can(Action.Delete, user)) {
       throw new UnauthorizedException();
     }

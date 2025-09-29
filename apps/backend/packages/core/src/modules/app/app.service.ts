@@ -162,7 +162,7 @@ export class AppService {
         entity.updateDescription(updateAppDto.description);
       }
       if (updateAppDto.category) {
-        entity.updateDescription(updateAppDto.category);
+        entity.updateCategory(updateAppDto.category);
       }
       entity.updateUpdatedBy(updatedBy);
       await this.repo.update(entity.id, this.mapper.toPersistence(entity));

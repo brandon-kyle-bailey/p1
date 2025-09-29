@@ -1664,6 +1664,7 @@ const app_module_1 = __webpack_require__(/*! ../app/app.module */ "./src/modules
 const device_module_1 = __webpack_require__(/*! ../device/device.module */ "./src/modules/device/device.module.ts");
 const casl_module_1 = __webpack_require__(/*! ../casl/casl.module */ "./src/modules/casl/casl.module.ts");
 const incomming_extension_activity_created_handler_1 = __webpack_require__(/*! ./handlers/incomming-extension-activity-created.handler */ "./src/modules/activity/handlers/incomming-extension-activity-created.handler.ts");
+const auth_module_1 = __webpack_require__(/*! ../auth/auth.module */ "./src/modules/auth/auth.module.ts");
 let ActivityModule = class ActivityModule {
 };
 exports.ActivityModule = ActivityModule;
@@ -1676,6 +1677,7 @@ exports.ActivityModule = ActivityModule = __decorate([
             user_module_1.UserModule,
             app_module_1.AppModule,
             device_module_1.DeviceModule,
+            auth_module_1.AuthModule,
         ],
         controllers: [incomming_activity_controller_1.IncommingActivityController],
         providers: [
@@ -1745,8 +1747,34 @@ let ActivityService = class ActivityService {
         const result = await this.repo.save(entity);
         return this.mapper.toDomain(result);
     }
-    findAll() {
-        return `This action returns all activity`;
+    async findAll(skip = 0, take = 100, where, sortField = 'startTime', sortOrder = 'desc') {
+        try {
+            const [entities, count] = await this.repo.findAndCount({
+                skip,
+                take,
+                where,
+                order: { [sortField]: sortOrder.toUpperCase() },
+            });
+            return {
+                data: entities.map((entity) => this.mapper.toDomain(entity)),
+                pagination: {
+                    total: count,
+                    skip,
+                    take,
+                    hasNextPage: skip + take < count,
+                },
+            };
+        }
+        catch (err) {
+            this.logger.error(`${this.constructor.name}.${this.findAll.name} encountered an error`, {
+                correlationId: '6d437955-6b3a-417d-825b-3f43dedd8825',
+                err: JSON.stringify(err),
+            });
+            return {
+                data: [],
+                pagination: { total: 0, skip: 0, take, hasNextPage: false },
+            };
+        }
     }
     findOne(id) {
         return `This action returns a #${id} activity`;
@@ -3214,7 +3242,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IncommingActivityCreatedHandler = void 0;
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
@@ -3228,16 +3256,20 @@ const uuid_1 = __webpack_require__(/*! uuid */ "uuid");
 const activity_service_1 = __webpack_require__(/*! ../activity.service */ "./src/modules/activity/activity.service.ts");
 const incomming_activity_created_command_1 = __webpack_require__(/*! ../commands/incomming-activity-created.command */ "./src/modules/activity/commands/incomming-activity-created.command.ts");
 const create_activity_dto_1 = __webpack_require__(/*! ../dto/create-activity.dto */ "./src/modules/activity/dto/create-activity.dto.ts");
+const app_created_command_1 = __webpack_require__(/*! src/modules/app/commands/app-created.command */ "./src/modules/app/commands/app-created.command.ts");
+const device_created_command_1 = __webpack_require__(/*! src/modules/device/commands/device-created.command */ "./src/modules/device/commands/device-created.command.ts");
 let IncommingActivityCreatedHandler = class IncommingActivityCreatedHandler {
     logger;
     appService;
     activityService;
     deviceService;
-    constructor(logger, appService, activityService, deviceService) {
+    commandBus;
+    constructor(logger, appService, activityService, deviceService, commandBus) {
         this.logger = logger;
         this.appService = appService;
         this.activityService = activityService;
         this.deviceService = deviceService;
+        this.commandBus = commandBus;
     }
     async execute(command) {
         try {
@@ -3248,8 +3280,10 @@ let IncommingActivityCreatedHandler = class IncommingActivityCreatedHandler {
                 createAppDto.name = name;
                 createAppDto.accountId = accountId;
                 foundApp = await this.appService.create(createAppDto, uuid_1.NIL);
+                void this.commandBus.execute(new app_created_command_1.AppCreatedCommand(foundApp));
             }
             let foundDevice = await this.deviceService.findOneBy({
+                accountId,
                 hostname,
                 macAddress,
                 os,
@@ -3265,6 +3299,7 @@ let IncommingActivityCreatedHandler = class IncommingActivityCreatedHandler {
                 createDeviceDto.macAddress = macAddress;
                 createDeviceDto.fingerprint = deviceFingerprint;
                 foundDevice = await this.deviceService.create(createDeviceDto, uuid_1.NIL);
+                void this.commandBus.execute(new device_created_command_1.DeviceCreatedCommand(foundDevice));
             }
             const createActivityDto = new create_activity_dto_1.CreateActivityDto();
             createActivityDto.accountId = accountId;
@@ -3297,7 +3332,8 @@ exports.IncommingActivityCreatedHandler = IncommingActivityCreatedHandler = __de
     __param(1, (0, common_1.Inject)(app_service_1.AppService)),
     __param(2, (0, common_1.Inject)(activity_service_1.ActivityService)),
     __param(3, (0, common_1.Inject)(device_service_1.DeviceService)),
-    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _b : Object, typeof (_c = typeof activity_service_1.ActivityService !== "undefined" && activity_service_1.ActivityService) === "function" ? _c : Object, typeof (_d = typeof device_service_1.DeviceService !== "undefined" && device_service_1.DeviceService) === "function" ? _d : Object])
+    __param(4, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _b : Object, typeof (_c = typeof activity_service_1.ActivityService !== "undefined" && activity_service_1.ActivityService) === "function" ? _c : Object, typeof (_d = typeof device_service_1.DeviceService !== "undefined" && device_service_1.DeviceService) === "function" ? _d : Object, typeof (_e = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _e : Object])
 ], IncommingActivityCreatedHandler);
 
 
@@ -3322,7 +3358,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IncommingExtensionActivityCreatedHandler = void 0;
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
@@ -3334,14 +3370,17 @@ const uuid_1 = __webpack_require__(/*! uuid */ "uuid");
 const activity_service_1 = __webpack_require__(/*! ../activity.service */ "./src/modules/activity/activity.service.ts");
 const incomming_extension_activity_created_command_1 = __webpack_require__(/*! ../commands/incomming-extension-activity-created.command */ "./src/modules/activity/commands/incomming-extension-activity-created.command.ts");
 const create_activity_dto_1 = __webpack_require__(/*! ../dto/create-activity.dto */ "./src/modules/activity/dto/create-activity.dto.ts");
+const app_created_command_1 = __webpack_require__(/*! src/modules/app/commands/app-created.command */ "./src/modules/app/commands/app-created.command.ts");
 let IncommingExtensionActivityCreatedHandler = class IncommingExtensionActivityCreatedHandler {
     logger;
     appService;
     activityService;
-    constructor(logger, appService, activityService) {
+    commandBus;
+    constructor(logger, appService, activityService, commandBus) {
         this.logger = logger;
         this.appService = appService;
         this.activityService = activityService;
+        this.commandBus = commandBus;
     }
     async execute(command) {
         try {
@@ -3352,6 +3391,7 @@ let IncommingExtensionActivityCreatedHandler = class IncommingExtensionActivityC
                 createAppDto.name = name;
                 createAppDto.accountId = accountId;
                 foundApp = await this.appService.create(createAppDto, uuid_1.NIL);
+                void this.commandBus.execute(new app_created_command_1.AppCreatedCommand(foundApp));
             }
             const createActivityDto = new create_activity_dto_1.CreateActivityDto();
             createActivityDto.accountId = accountId;
@@ -3381,7 +3421,8 @@ exports.IncommingExtensionActivityCreatedHandler = IncommingExtensionActivityCre
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
     __param(1, (0, common_1.Inject)(app_service_1.AppService)),
     __param(2, (0, common_1.Inject)(activity_service_1.ActivityService)),
-    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _b : Object, typeof (_c = typeof activity_service_1.ActivityService !== "undefined" && activity_service_1.ActivityService) === "function" ? _c : Object])
+    __param(3, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _b : Object, typeof (_c = typeof activity_service_1.ActivityService !== "undefined" && activity_service_1.ActivityService) === "function" ? _c : Object, typeof (_d = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _d : Object])
 ], IncommingExtensionActivityCreatedHandler);
 
 
@@ -3406,7 +3447,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IncommingActivityController = void 0;
 const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
@@ -3426,18 +3467,41 @@ const create_incomming_extension_activity_dto_1 = __webpack_require__(/*! ./dto/
 const incomming_activity_mapper_1 = __webpack_require__(/*! ./dto/incomming-activity.mapper */ "./src/modules/activity/dto/incomming-activity.mapper.ts");
 const incomming_extension_activity_entity_1 = __webpack_require__(/*! ./entities/incomming-extension-activity.entity */ "./src/modules/activity/entities/incomming-extension-activity.entity.ts");
 const incomming_activity_service_1 = __webpack_require__(/*! ./incomming-activity.service */ "./src/modules/activity/incomming-activity.service.ts");
+const activity_service_1 = __webpack_require__(/*! ./activity.service */ "./src/modules/activity/activity.service.ts");
+const activity_mapper_1 = __webpack_require__(/*! ./dto/activity.mapper */ "./src/modules/activity/dto/activity.mapper.ts");
+const activity_entity_1 = __webpack_require__(/*! ./entities/activity.entity */ "./src/modules/activity/entities/activity.entity.ts");
+const dtos_1 = __webpack_require__(/*! @app/dtos */ "./libs/dtos/src/index.ts");
 let IncommingActivityController = class IncommingActivityController {
     logger;
+    activityService;
+    activityMapper;
     service;
     mapper;
     caslAbilityFactory;
     commandBus;
-    constructor(logger, service, mapper, caslAbilityFactory, commandBus) {
+    constructor(logger, activityService, activityMapper, service, mapper, caslAbilityFactory, commandBus) {
         this.logger = logger;
+        this.activityService = activityService;
+        this.activityMapper = activityMapper;
         this.service = service;
         this.mapper = mapper;
         this.caslAbilityFactory = caslAbilityFactory;
         this.commandBus = commandBus;
+    }
+    async findAll(skip = 0, take = 100, sortField = 'startTime', sortOrder = 'desc', req) {
+        if (!['asc', 'desc'].includes(sortOrder)) {
+            sortOrder = 'desc';
+        }
+        const result = await this.activityService.findAll(skip, take, {
+            accountId: req.user.accountId,
+        }, sortField ? sortField : undefined, sortOrder);
+        const ability = await this.caslAbilityFactory.createForUser(req.user.id);
+        return {
+            ...result,
+            data: result.data
+                .filter((entity) => ability.can(casl_ability_factory_1.Action.Read, entity))
+                .map((entity) => this.activityMapper.toInterface(entity)),
+        };
     }
     async agent(dto) {
         const result = await this.service.create(dto);
@@ -3459,6 +3523,35 @@ let IncommingActivityController = class IncommingActivityController {
 };
 exports.IncommingActivityController = IncommingActivityController;
 __decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
+    (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Read, activity_entity_1.Activity)),
+    (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({
+        name: 'sortField',
+        required: false,
+        type: String,
+        example: 'startTime',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'sortOrder',
+        required: false,
+        type: String,
+        example: 'asc',
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: dtos_1.FindAllResponseDto }),
+    __param(0, (0, common_1.Query)('skip')),
+    __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Query)('sortField')),
+    __param(3, (0, common_1.Query)('sortOrder')),
+    __param(4, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String, String, Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], IncommingActivityController.prototype, "findAll", null);
+__decorate([
     (0, common_1.Post)('agent'),
     (0, common_1.UseGuards)(api_auth_guard_1.ApiKeyGuard),
     (0, swagger_1.ApiHeader)({
@@ -3478,17 +3571,18 @@ __decorate([
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof create_incomming_activity_dto_1.CreateIncommingActivityDto !== "undefined" && create_incomming_activity_dto_1.CreateIncommingActivityDto) === "function" ? _f : Object]),
+    __metadata("design:paramtypes", [typeof (_j = typeof create_incomming_activity_dto_1.CreateIncommingActivityDto !== "undefined" && create_incomming_activity_dto_1.CreateIncommingActivityDto) === "function" ? _j : Object]),
     __metadata("design:returntype", Promise)
 ], IncommingActivityController.prototype, "agent", null);
 __decorate([
     (0, common_1.Post)('extension'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, policies_guard_1.PoliciesGuard),
     (0, policies_guard_1.CheckPolicies)((ability) => ability.can(casl_ability_factory_1.Action.Create, incomming_extension_activity_entity_1.IncommingExtensionActivity)),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof create_incomming_extension_activity_dto_1.CreateIncommingExtensionActivityDto !== "undefined" && create_incomming_extension_activity_dto_1.CreateIncommingExtensionActivityDto) === "function" ? _g : Object, Object]),
+    __metadata("design:paramtypes", [typeof (_k = typeof create_incomming_extension_activity_dto_1.CreateIncommingExtensionActivityDto !== "undefined" && create_incomming_extension_activity_dto_1.CreateIncommingExtensionActivityDto) === "function" ? _k : Object, Object]),
     __metadata("design:returntype", Promise)
 ], IncommingActivityController.prototype, "extension", null);
 __decorate([
@@ -3502,11 +3596,13 @@ exports.IncommingActivityController = IncommingActivityController = __decorate([
     (0, common_1.Controller)({ path: 'activities', version: '1' }),
     (0, common_1.UseInterceptors)(logging_cache_interceptor_1.ControllerCacheInterceptor, common_1.ClassSerializerInterceptor),
     __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
-    __param(1, (0, common_1.Inject)(incomming_activity_service_1.IncommingActivityService)),
-    __param(2, (0, common_1.Inject)(incomming_activity_mapper_1.IncommingActivityMapper)),
-    __param(3, (0, common_1.Inject)(casl_ability_factory_1.CaslAbilityFactory)),
-    __param(4, (0, common_1.Inject)(cqrs_1.CommandBus)),
-    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof incomming_activity_service_1.IncommingActivityService !== "undefined" && incomming_activity_service_1.IncommingActivityService) === "function" ? _b : Object, typeof (_c = typeof incomming_activity_mapper_1.IncommingActivityMapper !== "undefined" && incomming_activity_mapper_1.IncommingActivityMapper) === "function" ? _c : Object, typeof (_d = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _d : Object, typeof (_e = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _e : Object])
+    __param(1, (0, common_1.Inject)(activity_service_1.ActivityService)),
+    __param(2, (0, common_1.Inject)(activity_mapper_1.ActivityMapper)),
+    __param(3, (0, common_1.Inject)(incomming_activity_service_1.IncommingActivityService)),
+    __param(4, (0, common_1.Inject)(incomming_activity_mapper_1.IncommingActivityMapper)),
+    __param(5, (0, common_1.Inject)(casl_ability_factory_1.CaslAbilityFactory)),
+    __param(6, (0, common_1.Inject)(cqrs_1.CommandBus)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof activity_service_1.ActivityService !== "undefined" && activity_service_1.ActivityService) === "function" ? _b : Object, typeof (_c = typeof activity_mapper_1.ActivityMapper !== "undefined" && activity_mapper_1.ActivityMapper) === "function" ? _c : Object, typeof (_d = typeof incomming_activity_service_1.IncommingActivityService !== "undefined" && incomming_activity_service_1.IncommingActivityService) === "function" ? _d : Object, typeof (_e = typeof incomming_activity_mapper_1.IncommingActivityMapper !== "undefined" && incomming_activity_mapper_1.IncommingActivityMapper) === "function" ? _e : Object, typeof (_f = typeof casl_ability_factory_1.CaslAbilityFactory !== "undefined" && casl_ability_factory_1.CaslAbilityFactory) === "function" ? _f : Object, typeof (_g = typeof cqrs_1.CommandBus !== "undefined" && cqrs_1.CommandBus) === "function" ? _g : Object])
 ], IncommingActivityController);
 
 
@@ -3812,9 +3908,9 @@ exports.AppModule = AppModule = __decorate([
                     const redisUrl = configService.get('REDIS_URL', 'redis://localhost:6379');
                     return {
                         stores: [
-                            new keyv_1.Keyv({ store: new redis_1.default(redisUrl), ttl: 60_000 }),
+                            new keyv_1.Keyv({ store: new redis_1.default(redisUrl), ttl: 5_000 }),
                             new keyv_1.Keyv({
-                                store: new cacheable_1.CacheableMemory({ ttl: 60000, lruSize: 5000 }),
+                                store: new cacheable_1.CacheableMemory({ ttl: 5_000, lruSize: 5_000 }),
                             }),
                         ],
                     };
@@ -3826,7 +3922,7 @@ exports.AppModule = AppModule = __decorate([
             throttler_1.ThrottlerModule.forRoot({
                 throttlers: [
                     {
-                        limit: 10,
+                        limit: 9999999999,
                         ttl: 6000,
                     },
                 ],
@@ -4222,7 +4318,7 @@ let AppService = class AppService {
                 entity.updateDescription(updateAppDto.description);
             }
             if (updateAppDto.category) {
-                entity.updateDescription(updateAppDto.category);
+                entity.updateCategory(updateAppDto.category);
             }
             entity.updateUpdatedBy(updatedBy);
             await this.repo.update(entity.id, this.mapper.toPersistence(entity));
@@ -4755,7 +4851,7 @@ __decorate([
     __metadata("design:type", typeof (_b = typeof app_entity_1.Category !== "undefined" && app_entity_1.Category) === "function" ? _b : Object)
 ], App.prototype, "category", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
 ], App.prototype, "description", void 0);
 __decorate([
@@ -4830,42 +4926,39 @@ let AppCreatedHandler = class AppCreatedHandler {
         this.appService = appService;
     }
     async execute(command) {
-        this.logger.debug('App created handler called', {
-            correlationId: '8adf5d96-ec23-45bc-abf4-3d650c30a76a',
-            command: JSON.stringify(command),
-        });
-        if (!command.entity.description && !command.entity.category) {
-            const modelId = 'gpt-4o-mini-2024-07-18';
-            const [description, category] = await Promise.all([
-                this.aiService.processGenericPrompt({
-                    modelId,
-                    id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
-                    conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
-                    timestamp: Date.now(),
-                    content: `Short description for ${command.entity.name} software. dont include name`,
-                    contentType: 'text',
-                    debug: false,
-                }),
-                this.aiService.processGenericPrompt({
-                    modelId,
-                    id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
-                    conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
-                    timestamp: Date.now(),
-                    content: `return category that best suites software ${command.entity.name}: ${Object.keys(app_entity_1.Category).join(',')}`,
-                    contentType: 'text',
-                    debug: false,
-                }),
-            ]);
-            this.logger.debug(`App description auto generated from ai for app: ${command.entity.id}`, {
-                correlationId: '7f12ee2c-2710-48cf-9fc0-27e3ef2169c5',
-                appId: command.entity.id,
-                description: JSON.stringify(description),
-                category: JSON.stringify(category),
+        try {
+            if (!command.entity.description) {
+                const modelId = 'gpt-4o-mini-2024-07-18';
+                const [description, category] = await Promise.all([
+                    this.aiService.processGenericPrompt({
+                        modelId,
+                        id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
+                        conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
+                        timestamp: Date.now(),
+                        content: `Write a concise, one-sentence description of the app or software represented by the following package name: ${command.entity.name}. Focus on its main purpose or functionality, avoiding marketing fluff or unrelated details.`,
+                        contentType: 'text',
+                        debug: false,
+                    }),
+                    this.aiService.processGenericPrompt({
+                        modelId,
+                        id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
+                        conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
+                        timestamp: Date.now(),
+                        content: `Given the app ${command.entity.name}, determine the single most appropriate category from the following list: ${Object.values(app_entity_1.Category).join(',')}. Focus on the app's primary use or function, not Keywords. Return only the category, without explanation or additional text.`,
+                        contentType: 'text',
+                        debug: false,
+                    }),
+                ]);
+                const updateDto = new update_app_dto_1.UpdateAppDto();
+                updateDto.description = description.content;
+                updateDto.category = category.content;
+                await this.appService.update(command.entity.id, updateDto, command.entity.createdBy);
+            }
+        }
+        catch (error) {
+            this.logger.error(error, {
+                correlationId: '25b0fffe-51d3-4aa6-b363-3da4cbdfeee3',
             });
-            const updateDto = new update_app_dto_1.UpdateAppDto();
-            updateDto.description = description.content;
-            updateDto.category = category.content;
-            await this.appService.update(command.entity.id, updateDto, command.entity.createdBy);
         }
         return {
             actionId: (0, uuid_1.v4)(),
@@ -5427,26 +5520,29 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtStrategy = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const passport_1 = __webpack_require__(/*! @nestjs/passport */ "@nestjs/passport");
 const passport_jwt_1 = __webpack_require__(/*! passport-jwt */ "passport-jwt");
 const user_service_1 = __webpack_require__(/*! ../user/user.service */ "./src/modules/user/user.service.ts");
+const logging_1 = __webpack_require__(/*! @app/logging */ "./libs/logging/src/index.ts");
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
+    logger;
     userService;
-    constructor(userService) {
+    constructor(logger, userService) {
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
-            ignoreExpiration: false,
+            ignoreExpiration: true,
             secretOrKey: '7ac54472-4dcf-4fa1-be39-8967d47d02d6',
         });
+        this.logger = logger;
         this.userService = userService;
     }
     async validate(payload) {
-        const foundUsser = await this.userService.findOne(payload.sub);
-        if (!foundUsser) {
+        const foundUser = await this.userService.findOne(payload.sub);
+        if (!foundUser) {
             throw new common_1.UnauthorizedException();
         }
         return {
@@ -5460,8 +5556,9 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
 exports.JwtStrategy = JwtStrategy;
 exports.JwtStrategy = JwtStrategy = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(user_service_1.UserService)),
-    __metadata("design:paramtypes", [typeof (_a = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _a : Object])
+    __param(0, (0, common_1.Inject)(logging_1.LoggingService)),
+    __param(1, (0, common_1.Inject)(user_service_1.UserService)),
+    __metadata("design:paramtypes", [typeof (_a = typeof logging_1.LoggingService !== "undefined" && logging_1.LoggingService) === "function" ? _a : Object, typeof (_b = typeof user_service_1.UserService !== "undefined" && user_service_1.UserService) === "function" ? _b : Object])
 ], JwtStrategy);
 
 
@@ -5552,6 +5649,7 @@ const subscription_entity_1 = __webpack_require__(/*! src/modules/subscription/e
 const device_entity_1 = __webpack_require__(/*! src/modules/device/entities/device.entity */ "./src/modules/device/entities/device.entity.ts");
 const incomming_activity_entity_1 = __webpack_require__(/*! src/modules/activity/entities/incomming-activity.entity */ "./src/modules/activity/entities/incomming-activity.entity.ts");
 const incomming_extension_activity_entity_1 = __webpack_require__(/*! src/modules/activity/entities/incomming-extension-activity.entity */ "./src/modules/activity/entities/incomming-extension-activity.entity.ts");
+const activity_entity_1 = __webpack_require__(/*! src/modules/activity/entities/activity.entity */ "./src/modules/activity/entities/activity.entity.ts");
 var Action;
 (function (Action) {
     Action["Manage"] = "manage";
@@ -5567,6 +5665,9 @@ let CaslAbilityFactory = class CaslAbilityFactory {
     }
     async createForUser(userId) {
         const user = await this.userService.findOne(userId);
+        if (!user) {
+            throw new common_1.NotFoundException();
+        }
         const { can, build } = new ability_1.AbilityBuilder(ability_1.createMongoAbility);
         if ([user_entity_1.Role.Admin].includes(user.role)) {
             can(Action.Manage, 'all');
@@ -5606,6 +5707,7 @@ let CaslAbilityFactory = class CaslAbilityFactory {
             can(Action.Delete, device_entity_1.Device, { createdBy: user.id });
             can(Action.Create, incomming_activity_entity_1.IncommingActivity);
             can(Action.Create, incomming_extension_activity_entity_1.IncommingExtensionActivity);
+            can(Action.Read, activity_entity_1.Activity, { accountId: user.accountId });
         }
         return build({
             detectSubjectType: (item) => item.constructor,
@@ -9812,6 +9914,9 @@ let UserController = class UserController {
     async findOne(id, req) {
         const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         const user = await this.service.findOne(id);
+        if (!user) {
+            throw new common_1.NotFoundException();
+        }
         if (!ability.can(casl_ability_factory_1.Action.Read, user)) {
             throw new common_1.UnauthorizedException();
         }
@@ -9820,6 +9925,9 @@ let UserController = class UserController {
     async update(id, updateUserDto, req) {
         const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         const user = await this.service.findOne(id);
+        if (!user) {
+            throw new common_1.NotFoundException();
+        }
         if (!ability.can(casl_ability_factory_1.Action.Update, user)) {
             throw new common_1.UnauthorizedException();
         }
@@ -9830,6 +9938,9 @@ let UserController = class UserController {
     async remove(id, req) {
         const ability = await this.caslAbilityFactory.createForUser(req.user.id);
         const user = await this.service.findOne(id);
+        if (!user) {
+            throw new common_1.NotFoundException();
+        }
         if (!ability.can(casl_ability_factory_1.Action.Delete, user)) {
             throw new common_1.UnauthorizedException();
         }

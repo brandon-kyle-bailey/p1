@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 8080",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 8080",
     "lint": "next lint",
     "stripe:webhook": "stripe listen --forward-to localhost:3000/api/billing/webhook"
   },
@@ -52,6 +52,7 @@
     "framer-motion": "^12.23.12",
     "input-otp": "^1.4.2",
     "ioredis": "^5.7.0",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.536.0",
     "next": "15.4.5",
     "next-auth": "^5.0.0-beta.29",
@@ -71,6 +72,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

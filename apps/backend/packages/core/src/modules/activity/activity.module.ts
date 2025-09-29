@@ -16,6 +16,7 @@ import { AppModule } from '../app/app.module';
 import { DeviceModule } from '../device/device.module';
 import { CaslModule } from '../casl/casl.module';
 import { IncommingExtensionActivityCreatedHandler } from './handlers/incomming-extension-activity-created.handler';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { IncommingExtensionActivityCreatedHandler } from './handlers/incomming-e
     UserModule,
     AppModule,
     DeviceModule,
+    AuthModule,
   ],
   controllers: [IncommingActivityController],
   providers: [

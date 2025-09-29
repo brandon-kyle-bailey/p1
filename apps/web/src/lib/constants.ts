@@ -10,6 +10,10 @@ export enum WebRoutes {
   Tos = "/terms-of-service",
   Home = "/",
   Demo = "/demo",
+  Account = "/account",
+  Apps = "/apps",
+  Devices = "/devices",
+  Workspaces = "/workspaces",
 }
 
 export enum ApiRoutes {

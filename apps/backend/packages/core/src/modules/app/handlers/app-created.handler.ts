@@ -18,50 +18,42 @@ export class AppCreatedHandler implements ICommandHandler<AppCreatedCommand> {
   ) {}
 
   async execute(command: AppCreatedCommand) {
-    this.logger.debug('App created handler called', {
-      correlationId: '8adf5d96-ec23-45bc-abf4-3d650c30a76a',
-      command: JSON.stringify(command),
-    });
-    if (!command.entity.description && !command.entity.category) {
-      const modelId = 'gpt-4o-mini-2024-07-18';
-      const [description, category] = await Promise.all([
-        this.aiService.processGenericPrompt({
-          modelId,
-          id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
-          conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
-          timestamp: Date.now(),
-          content: `Short description for ${command.entity.name} software. dont include name`,
-          contentType: 'text',
-          debug: false,
-        }),
-        this.aiService.processGenericPrompt({
-          modelId,
-          id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
-          conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
-          timestamp: Date.now(),
-          content: `return category that best suites software ${command.entity.name}: ${Object.keys(Category).join(',')}`,
-          contentType: 'text',
-          debug: false,
-        }),
-      ]);
-
-      this.logger.debug(
-        `App description auto generated from ai for app: ${command.entity.id}`,
-        {
-          correlationId: '7f12ee2c-2710-48cf-9fc0-27e3ef2169c5',
-          appId: command.entity.id,
-          description: JSON.stringify(description),
-          category: JSON.stringify(category),
-        },
-      );
-      const updateDto = new UpdateAppDto();
-      updateDto.description = description.content;
-      updateDto.category = category.content as Category;
-      await this.appService.update(
-        command.entity.id,
-        updateDto,
-        command.entity.createdBy!,
-      );
+    try {
+      if (!command.entity.description) {
+        const modelId = 'gpt-4o-mini-2024-07-18';
+        const [description, category] = await Promise.all([
+          this.aiService.processGenericPrompt({
+            modelId,
+            id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
+            conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
+            timestamp: Date.now(),
+            content: `Write a concise, one-sentence description of the app or software represented by the following package name: ${command.entity.name}. Focus on its main purpose or functionality, avoiding marketing fluff or unrelated details.`,
+            contentType: 'text',
+            debug: false,
+          }),
+          this.aiService.processGenericPrompt({
+            modelId,
+            id: '9cae780f-327b-4e33-88f0-6f32adb6bf6c',
+            conversationId: 'f3c38e59-3f1f-4f7f-bb6b-090e8bf0530f',
+            timestamp: Date.now(),
+            content: `Given the app ${command.entity.name}, determine the single most appropriate category from the following list: ${Object.values(Category).join(',')}. Focus on the app's primary use or function, not Keywords. Return only the category, without explanation or additional text.`,
+            contentType: 'text',
+            debug: false,
+          }),
+        ]);
+        const updateDto = new UpdateAppDto();
+        updateDto.description = description.content;
+        updateDto.category = category.content as Category;
+        await this.appService.update(
+          command.entity.id,
+          updateDto,
+          command.entity.createdBy!,
+        );
+      }
+    } catch (error) {
+      this.logger.error(error, {
+        correlationId: '25b0fffe-51d3-4aa6-b363-3da4cbdfeee3',
+      });
     }
     return {
       actionId: v4(),

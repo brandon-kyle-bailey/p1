@@ -1,7 +1,7 @@
 import { LoggingService } from '@app/logging';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { NIL } from 'uuid';
 import { ActivityMapper } from './dto/activity.mapper';
 import { CreateActivityDto } from './dto/create-activity.dto';
@@ -31,8 +31,42 @@ export class ActivityService {
     return this.mapper.toDomain(result);
   }
 
-  findAll() {
-    return `This action returns all activity`;
+  async findAll(
+    skip: number = 0,
+    take: number = 100,
+    where: FindOptionsWhere<Activity>,
+    sortField: keyof Activity = 'startTime',
+    sortOrder: 'asc' | 'desc' = 'desc',
+  ) {
+    try {
+      const [entities, count] = await this.repo.findAndCount({
+        skip,
+        take,
+        where,
+        order: { [sortField]: sortOrder.toUpperCase() as 'ASC' | 'DESC' },
+      });
+      return {
+        data: entities.map((entity) => this.mapper.toDomain(entity)),
+        pagination: {
+          total: count,
+          skip,
+          take,
+          hasNextPage: skip + take < count,
+        },
+      };
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.findAll.name} encountered an error`,
+        {
+          correlationId: '6d437955-6b3a-417d-825b-3f43dedd8825',
+          err: JSON.stringify(err),
+        },
+      );
+      return {
+        data: [],
+        pagination: { total: 0, skip: 0, take, hasNextPage: false },
+      };
+    }
   }
 
   findOne(id: number) {

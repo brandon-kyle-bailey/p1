@@ -50,7 +50,7 @@ export class App {
   @Column({ type: 'enum', enum: Category, default: Category.None })
   category: Category;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   description?: string;
 
   @CreateDateColumn()

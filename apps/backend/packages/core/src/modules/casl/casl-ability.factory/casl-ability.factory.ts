@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Role, User } from 'src/modules/user/entities/user.entity';
 
 import {
@@ -18,6 +18,7 @@ import { Subscription } from 'src/modules/subscription/entities/subscription.ent
 import { Device } from 'src/modules/device/entities/device.entity';
 import { IncommingActivity } from 'src/modules/activity/entities/incomming-activity.entity';
 import { IncommingExtensionActivity } from 'src/modules/activity/entities/incomming-extension-activity.entity';
+import { Activity } from 'src/modules/activity/entities/activity.entity';
 
 export enum Action {
   Manage = 'manage',
@@ -39,6 +40,7 @@ type Subjects =
       | typeof Device
       | typeof IncommingActivity
       | typeof IncommingExtensionActivity
+      | typeof Activity
     >
   | 'all';
 
@@ -49,6 +51,9 @@ export class CaslAbilityFactory {
   constructor(@Inject(UserService) private readonly userService: UserService) {}
   async createForUser(userId: string) {
     const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException();
+    }
     const { can, build } = new AbilityBuilder(createMongoAbility);
 
     if ([Role.Admin].includes(user.role)) {
@@ -96,6 +101,8 @@ export class CaslAbilityFactory {
 
       can(Action.Create, IncommingActivity);
       can(Action.Create, IncommingExtensionActivity);
+
+      can(Action.Read, Activity, { accountId: user.accountId });
     }
 
     return build({

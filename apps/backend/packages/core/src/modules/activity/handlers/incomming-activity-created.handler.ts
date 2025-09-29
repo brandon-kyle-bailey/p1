@@ -1,6 +1,6 @@
 import { LoggingService } from '@app/logging';
 import { Inject } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AppService } from 'src/modules/app/app.service';
 import { CreateAppDto } from 'src/modules/app/dto/create-app.dto';
 import { DeviceService } from 'src/modules/device/device.service';
@@ -9,6 +9,8 @@ import { NIL } from 'uuid';
 import { ActivityService } from '../activity.service';
 import { IncommingActivityCreatedCommand } from '../commands/incomming-activity-created.command';
 import { CreateActivityDto } from '../dto/create-activity.dto';
+import { AppCreatedCommand } from 'src/modules/app/commands/app-created.command';
+import { DeviceCreatedCommand } from 'src/modules/device/commands/device-created.command';
 
 @CommandHandler(IncommingActivityCreatedCommand)
 export class IncommingActivityCreatedHandler
@@ -20,6 +22,8 @@ export class IncommingActivityCreatedHandler
     @Inject(AppService) private readonly appService: AppService,
     @Inject(ActivityService) private readonly activityService: ActivityService,
     @Inject(DeviceService) private readonly deviceService: DeviceService,
+    @Inject(CommandBus)
+    private readonly commandBus: CommandBus,
   ) {}
 
   async execute(command: IncommingActivityCreatedCommand) {
@@ -48,10 +52,12 @@ export class IncommingActivityCreatedHandler
         createAppDto.name = name;
         createAppDto.accountId = accountId;
         foundApp = await this.appService.create(createAppDto, NIL);
+        void this.commandBus.execute(new AppCreatedCommand(foundApp));
       }
 
       // device discovery
       let foundDevice = await this.deviceService.findOneBy({
+        accountId,
         hostname,
         macAddress,
         os,
@@ -68,6 +74,7 @@ export class IncommingActivityCreatedHandler
         createDeviceDto.macAddress = macAddress;
         createDeviceDto.fingerprint = deviceFingerprint;
         foundDevice = await this.deviceService.create(createDeviceDto, NIL);
+        void this.commandBus.execute(new DeviceCreatedCommand(foundDevice));
       }
 
       // activity creation

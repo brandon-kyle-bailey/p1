@@ -13,7 +13,7 @@ function withRateLimit(handler: AppRouteHandlerFn) {
     const ip = getIp(req);
     const { success } = await rateLimit({
       key: ip,
-      limit: 5,
+      limit: 9999999999,
       window: 60,
     });
 
