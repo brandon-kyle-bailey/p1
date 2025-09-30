@@ -1,7 +1,7 @@
 export interface ActivityProps {
   id: string;
   source: string;
-  incommingActivityId: string;
+  incomingActivityId: string;
   accountId: string;
   userId?: string;
   appId: string;
@@ -28,8 +28,8 @@ export class Activity {
     };
   }
 
-  get incommingActivityId() {
-    return this.props.incommingActivityId;
+  get incomingActivityId() {
+    return this.props.incomingActivityId;
   }
 
   get description() {

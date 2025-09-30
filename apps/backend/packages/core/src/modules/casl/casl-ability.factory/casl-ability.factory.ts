@@ -16,8 +16,8 @@ import { Integration } from 'src/modules/integration/entities/integration.entity
 import { Department } from 'src/modules/department/entities/department.entity';
 import { Subscription } from 'src/modules/subscription/entities/subscription.entity';
 import { Device } from 'src/modules/device/entities/device.entity';
-import { IncommingActivity } from 'src/modules/activity/entities/incomming-activity.entity';
-import { IncommingExtensionActivity } from 'src/modules/activity/entities/incomming-extension-activity.entity';
+import { IncomingActivity } from 'src/modules/activity/entities/incoming-activity.entity';
+import { IncomingExtensionActivity } from 'src/modules/activity/entities/incoming-extension-activity.entity';
 import { Activity } from 'src/modules/activity/entities/activity.entity';
 
 export enum Action {
@@ -38,8 +38,8 @@ type Subjects =
       | typeof Department
       | typeof Subscription
       | typeof Device
-      | typeof IncommingActivity
-      | typeof IncommingExtensionActivity
+      | typeof IncomingActivity
+      | typeof IncomingExtensionActivity
       | typeof Activity
     >
   | 'all';
@@ -99,8 +99,8 @@ export class CaslAbilityFactory {
       can(Action.Update, Device, { accountId: user.accountId });
       can(Action.Delete, Device, { createdBy: user.id });
 
-      can(Action.Create, IncommingActivity);
-      can(Action.Create, IncommingExtensionActivity);
+      can(Action.Create, IncomingActivity);
+      can(Action.Create, IncomingExtensionActivity);
 
       can(Action.Read, Activity, { accountId: user.accountId });
     }

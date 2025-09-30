@@ -12,7 +12,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { IncommingActivity } from './incomming-activity.model';
+import { IncomingActivity } from './incoming-activity.model';
 
 @Entity('activities')
 export class Activity {
@@ -20,13 +20,13 @@ export class Activity {
   id: string;
 
   @Column({ nullable: false })
-  incommingActivityId: string;
+  incomingActivityId: string;
 
-  @OneToOne(() => IncommingActivity, (ia) => ia.activity, {
+  @OneToOne(() => IncomingActivity, (ia) => ia.activity, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'incommingActivityId' })
-  incommingActivity: IncommingActivity;
+  @JoinColumn({ name: 'incomingActivityId' })
+  incomingActivity: IncomingActivity;
 
   @Column({ nullable: false })
   accountId: string;

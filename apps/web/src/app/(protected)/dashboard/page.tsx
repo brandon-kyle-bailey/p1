@@ -10,7 +10,7 @@ import { auth } from "@/lib/auth";
 import { Clock } from "lucide-react";
 
 type Activity = {
-  incommingActivityId: string;
+  incomingActivityId: string;
   accountId: string;
   userId: string | null;
   appId: string;
@@ -70,7 +70,7 @@ export default async function Page() {
             <div className="space-y-1">
               <p>
                 <span className="font-medium">Activity ID:</span>{" "}
-                {activity.incommingActivityId}
+                {activity.incomingActivityId}
               </p>
               <p>
                 <span className="font-medium">Account ID:</span>{" "}

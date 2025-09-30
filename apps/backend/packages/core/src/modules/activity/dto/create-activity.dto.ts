@@ -8,9 +8,9 @@ import {
 } from 'class-validator';
 
 export class CreateActivityDto {
-  @ApiProperty({ description: 'The id of the incomming activity id' })
+  @ApiProperty({ description: 'The id of the incoming activity id' })
   @IsUUID()
-  incommingActivityId: string;
+  incomingActivityId: string;
 
   @ApiProperty({ description: 'The id of the account' })
   @IsUUID()

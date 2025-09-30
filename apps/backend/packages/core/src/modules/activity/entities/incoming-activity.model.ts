@@ -12,8 +12,8 @@ import {
 } from 'typeorm';
 import { Activity } from './activity.model';
 
-@Entity('incomming_activities')
-export class IncommingActivity {
+@Entity('incoming_activities')
+export class IncomingActivity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -32,7 +32,7 @@ export class IncommingActivity {
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
-  @OneToOne(() => Activity, (a) => a.incommingActivity)
+  @OneToOne(() => Activity, (a) => a.incomingActivity)
   activity: Activity;
 
   @Column({ nullable: true })

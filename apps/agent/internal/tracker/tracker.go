@@ -1,7 +1,7 @@
 // Package tracker
 package tracker
 
-type IncommingActivityDto struct {
+type IncomingActivityDto struct {
 	IPAddress          string `json:"ipAddress"`
 	Hostname           string `json:"hostname"`
 	MacAddress         string `json:"macAddress"`

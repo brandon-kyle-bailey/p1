@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
-export class CreateIncommingActivityDto {
+export class CreateIncomingExtensionActivityDto {
   @ApiProperty({ description: 'The id of the activity' })
   @IsUUID()
   externalActivityId: string;
@@ -11,29 +11,8 @@ export class CreateIncommingActivityDto {
   accountId: string;
 
   @ApiProperty({ description: 'The id of the user' })
-  @IsOptional()
   @IsUUID()
   userId: string;
-
-  @ApiProperty({ description: 'The IP Address of the client' })
-  @IsString()
-  ipAddress: string;
-
-  @ApiProperty({ description: 'The hostname of the client' })
-  @IsString()
-  hostname: string;
-
-  @ApiProperty({ description: 'The mac address of the client' })
-  @IsString()
-  macAddress: string;
-
-  @ApiProperty({ description: 'The operating system of the client' })
-  @IsString()
-  os: string;
-
-  @ApiProperty({ description: 'The architecture of the client' })
-  @IsString()
-  arch: string;
 
   @ApiProperty({ description: 'The source system of the activity' })
   @IsString()

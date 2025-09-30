@@ -32,9 +32,10 @@ import { Department } from './department/entities/department.model';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { ActivityModule } from './activity/activity.module';
 import { Activity } from './activity/entities/activity.model';
-import { IncommingActivity } from './activity/entities/incomming-activity.model';
+import { IncomingActivity } from './activity/entities/incoming-activity.model';
 import { DeviceModule } from './device/device.module';
 import { Device } from './device/entities/device.model';
+import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -60,7 +61,7 @@ import { Device } from './device/entities/device.model';
           Workspace,
           WorkspaceUser,
           Activity,
-          IncommingActivity,
+          IncomingActivity,
           Device,
         ],
         synchronize: true,
@@ -113,6 +114,7 @@ import { Device } from './device/entities/device.model';
     AiModule,
     ActivityModule,
     DeviceModule,
+    AuditModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: LoggingThrottlerGuard }],
 })

@@ -4,40 +4,41 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApiKeyGuard } from 'src/guards/api-auth.guard';
 import { ActivityService } from './activity.service';
 import { ActivityMapper } from './dto/activity.mapper';
-import { IncommingActivityMapper } from './dto/incomming-activity.mapper';
+import { IncomingActivityMapper } from './dto/incoming-activity.mapper';
 import { Activity } from './entities/activity.model';
-import { IncommingActivity } from './entities/incomming-activity.model';
+import { IncomingActivity } from './entities/incoming-activity.model';
 import { ActivityCreatedHandler } from './handlers/activity-created.handler';
-import { IncommingActivityCreatedHandler } from './handlers/incomming-activity-created.handler';
-import { IncommingActivityController } from './incomming-activity.controller';
-import { IncommingActivityService } from './incomming-activity.service';
+import { IncomingActivityCreatedHandler } from './handlers/incoming-activity-created.handler';
+import { IncomingActivityController } from './incoming-activity.controller';
+import { IncomingActivityService } from './incoming-activity.service';
 import { UserModule } from '../user/user.module';
 import { AppModule } from '../app/app.module';
 import { DeviceModule } from '../device/device.module';
 import { CaslModule } from '../casl/casl.module';
-import { IncommingExtensionActivityCreatedHandler } from './handlers/incomming-extension-activity-created.handler';
+import { IncomingExtensionActivityCreatedHandler } from './handlers/incoming-extension-activity-created.handler';
 import { AuthModule } from '../auth/auth.module';
+import { ActivityController } from './activity.controller';
 
 @Module({
   imports: [
     LoggingModule,
-    TypeOrmModule.forFeature([Activity, IncommingActivity]),
+    TypeOrmModule.forFeature([Activity, IncomingActivity]),
     CaslModule,
     UserModule,
     AppModule,
     DeviceModule,
     AuthModule,
   ],
-  controllers: [IncommingActivityController],
+  controllers: [IncomingActivityController, ActivityController],
   providers: [
     ApiKeyGuard,
     ActivityMapper,
-    IncommingActivityMapper,
+    IncomingActivityMapper,
     ActivityService,
-    IncommingActivityService,
+    IncomingActivityService,
     ActivityCreatedHandler,
-    IncommingActivityCreatedHandler,
-    IncommingExtensionActivityCreatedHandler,
+    IncomingActivityCreatedHandler,
+    IncomingExtensionActivityCreatedHandler,
   ],
   exports: [ActivityService],
 })

@@ -12,9 +12,9 @@ export class ActivityDto {
     Object.assign(this, partial);
   }
 
-  @ApiProperty({ description: 'The id of the incomming activity id' })
+  @ApiProperty({ description: 'The id of the incoming activity id' })
   @IsUUID()
-  incommingActivityId: string;
+  incomingActivityId: string;
 
   @ApiProperty({ description: 'The id of the account' })
   @IsUUID()

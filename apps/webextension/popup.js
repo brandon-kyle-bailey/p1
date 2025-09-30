@@ -1,7 +1,5 @@
-
-// popup.js
 const form = document.getElementById("loginForm");
-const status = document.getElementById("status");
+const statusElement = document.getElementById("status");
 
 function parseJwt(token) {
   try {
@@ -16,7 +14,7 @@ function parseJwt(token) {
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  status.textContent = "Logging in...";
+  statusElement.textContent = "Logging in...";
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
@@ -35,10 +33,10 @@ form.addEventListener("submit", async (e) => {
     const userId = payload?.sub || "anonymous";
 
     await browser.storage.local.set({ token, userId, accountId });
-    status.style.color = "green";
-    status.textContent = "Login successful!";
+    statusElement.style.color = "green";
+    statusElement.textContent = "Login successful!";
   } catch (err) {
-    status.style.color = "red";
-    status.textContent = "Login failed: " + err.message;
+    statusElement.style.color = "red";
+    statusElement.textContent = "Login failed: " + err.message;
   }
 });

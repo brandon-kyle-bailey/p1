@@ -5,13 +5,13 @@ import { AppService } from 'src/modules/app/app.service';
 import { CreateAppDto } from 'src/modules/app/dto/create-app.dto';
 import { NIL } from 'uuid';
 import { ActivityService } from '../activity.service';
-import { IncommingExtensionActivityCreatedCommand } from '../commands/incomming-extension-activity-created.command';
+import { IncomingExtensionActivityCreatedCommand } from '../commands/incoming-extension-activity-created.command';
 import { CreateActivityDto } from '../dto/create-activity.dto';
 import { AppCreatedCommand } from 'src/modules/app/commands/app-created.command';
 
-@CommandHandler(IncommingExtensionActivityCreatedCommand)
-export class IncommingExtensionActivityCreatedHandler
-  implements ICommandHandler<IncommingExtensionActivityCreatedCommand>
+@CommandHandler(IncomingExtensionActivityCreatedCommand)
+export class IncomingExtensionActivityCreatedHandler
+  implements ICommandHandler<IncomingExtensionActivityCreatedCommand>
 {
   constructor(
     @Inject(LoggingService)
@@ -22,7 +22,7 @@ export class IncommingExtensionActivityCreatedHandler
     private readonly commandBus: CommandBus,
   ) {}
 
-  async execute(command: IncommingExtensionActivityCreatedCommand) {
+  async execute(command: IncomingExtensionActivityCreatedCommand) {
     try {
       const {
         id,
@@ -49,7 +49,7 @@ export class IncommingExtensionActivityCreatedHandler
       // activity creation
       const createActivityDto = new CreateActivityDto();
       createActivityDto.accountId = accountId;
-      createActivityDto.incommingActivityId = id;
+      createActivityDto.incomingActivityId = id;
       createActivityDto.appId = foundApp.id;
       createActivityDto.userId = userId;
       createActivityDto.source = source;

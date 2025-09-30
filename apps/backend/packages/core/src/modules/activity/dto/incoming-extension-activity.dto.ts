@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
-export class IncommingExtensionActivityDto {
-  constructor(partial: Partial<IncommingExtensionActivityDto>) {
+export class IncomingExtensionActivityDto {
+  constructor(partial: Partial<IncomingExtensionActivityDto>) {
     Object.assign(this, partial);
   }
 

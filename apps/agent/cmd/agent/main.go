@@ -118,7 +118,7 @@ func main() {
 				if err != nil {
 					log.Error(err.Error(), "35e53dd5-8ead-497c-89db-2a31dff8df48")
 				}
-				dto := tracker.IncommingActivityDto{
+				dto := tracker.IncomingActivityDto{
 					Source:             "agent",
 					IPAddress:          ipAddress,
 					Hostname:           hostname,

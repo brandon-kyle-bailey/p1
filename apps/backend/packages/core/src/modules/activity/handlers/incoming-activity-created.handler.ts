@@ -7,14 +7,14 @@ import { DeviceService } from 'src/modules/device/device.service';
 import { CreateDeviceDto } from 'src/modules/device/dto/create-device.dto';
 import { NIL } from 'uuid';
 import { ActivityService } from '../activity.service';
-import { IncommingActivityCreatedCommand } from '../commands/incomming-activity-created.command';
+import { IncomingActivityCreatedCommand } from '../commands/incoming-activity-created.command';
 import { CreateActivityDto } from '../dto/create-activity.dto';
 import { AppCreatedCommand } from 'src/modules/app/commands/app-created.command';
 import { DeviceCreatedCommand } from 'src/modules/device/commands/device-created.command';
 
-@CommandHandler(IncommingActivityCreatedCommand)
-export class IncommingActivityCreatedHandler
-  implements ICommandHandler<IncommingActivityCreatedCommand>
+@CommandHandler(IncomingActivityCreatedCommand)
+export class IncomingActivityCreatedHandler
+  implements ICommandHandler<IncomingActivityCreatedCommand>
 {
   constructor(
     @Inject(LoggingService)
@@ -26,7 +26,7 @@ export class IncommingActivityCreatedHandler
     private readonly commandBus: CommandBus,
   ) {}
 
-  async execute(command: IncommingActivityCreatedCommand) {
+  async execute(command: IncomingActivityCreatedCommand) {
     try {
       const {
         id,
@@ -80,7 +80,7 @@ export class IncommingActivityCreatedHandler
       // activity creation
       const createActivityDto = new CreateActivityDto();
       createActivityDto.accountId = accountId;
-      createActivityDto.incommingActivityId = id;
+      createActivityDto.incomingActivityId = id;
       createActivityDto.appId = foundApp.id;
       if (foundDevice.userId) {
         createActivityDto.userId = foundDevice.userId;

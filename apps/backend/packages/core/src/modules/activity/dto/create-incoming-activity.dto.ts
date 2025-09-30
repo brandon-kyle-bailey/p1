@@ -1,11 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
-export class IncommingActivityDto {
-  constructor(partial: Partial<IncommingActivityDto>) {
-    Object.assign(this, partial);
-  }
-
+export class CreateIncomingActivityDto {
   @ApiProperty({ description: 'The id of the activity' })
   @IsUUID()
   externalActivityId: string;
@@ -15,8 +11,8 @@ export class IncommingActivityDto {
   accountId: string;
 
   @ApiProperty({ description: 'The id of the user' })
-  @IsUUID()
   @IsOptional()
+  @IsUUID()
   userId: string;
 
   @ApiProperty({ description: 'The IP Address of the client' })
@@ -39,7 +35,7 @@ export class IncommingActivityDto {
   @IsString()
   arch: string;
 
-  @ApiProperty({ description: 'The source of the activity' })
+  @ApiProperty({ description: 'The source system of the activity' })
   @IsString()
   source: string;
 
@@ -74,20 +70,4 @@ export class IncommingActivityDto {
   @IsUUID()
   @IsOptional()
   updatedBy?: string;
-
-  @IsUUID()
-  @IsOptional()
-  deletedBy?: string;
-
-  @IsDateString()
-  @IsOptional()
-  createdAt?: Date;
-
-  @IsDateString()
-  @IsOptional()
-  updatedAt?: Date;
-
-  @IsDateString()
-  @IsOptional()
-  deletedAt?: Date;
 }
