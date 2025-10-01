@@ -178,7 +178,9 @@ Log in to the webextension with the credentials you used to register with.
 Run the desktop extension via `./bin/p1-agent --account-id <YOUR ACCOUNT ID>`
 
 You will then be able to see:
-- Automatic App discovery via [http://localhost:8080/apps](http://localhost:8080/apps)
+- Automatic App discovery and AI enrichment via [http://localhost:8080/apps](http://localhost:8080/apps)
+- <img width="1593" height="409" alt="Screenshot From 2025-10-01 01-08-06" src="https://github.com/user-attachments/assets/309fa8e3-efd0-47d7-8339-de63bdffadf4" />
+- <img width="1593" height="409" alt="Screenshot From 2025-10-01 01-06-55" src="https://github.com/user-attachments/assets/70049257-7f4c-4154-8a28-fb050d174d4a" />
 - Automatic Device discovery via [http://localhost:8080/devices](http://localhost:8080/devices)
 - Extension and Agent sourced activities via [http://localhost:8080/dashboard](http://localhost:8080/dashboard)
 
