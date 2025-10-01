@@ -62,5 +62,5 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 *.db
 */**/dist
-/chrome
-/firefox
+*/**/chrome
+*/**/firefox
