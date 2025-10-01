@@ -5,6 +5,8 @@ import (
 	"errors"
 	"flag"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -14,9 +16,38 @@ type Config struct {
 	Poll              int
 	DBProvider        string
 	DBPath            string
+	LogfilePath       string
 	IngestionEndpoint string
 	APIKey            string
 	SecretKey         string
+}
+
+func defaultAppDir() (string, error) {
+	var baseDir string
+	switch runtime.GOOS {
+	case "windows":
+		baseDir = os.Getenv("APPDATA")
+	case "darwin":
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		baseDir = filepath.Join(home, "Library", "Application Support")
+	default: // linux/unix
+		baseDir = os.Getenv("XDG_DATA_HOME")
+		if baseDir == "" {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				return "", err
+			}
+			baseDir = filepath.Join(home, ".local", "share")
+		}
+	}
+	appDir := filepath.Join(baseDir, "p1")
+	if err := os.MkdirAll(appDir, 0o755); err != nil {
+		return "", err
+	}
+	return appDir, nil
 }
 
 func Load() (*Config, error) {
@@ -34,12 +65,18 @@ func Load() (*Config, error) {
 		return nil, errors.New("account-id is required (pass via --account-id or RMM_ACCOUNT_ID)")
 	}
 
+	appDir, err := defaultAppDir()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
 		AccountID:         accountID,
 		Debug:             *debugFlag,
 		Poll:              *pollFlag,
 		DBProvider:        "sqlite",
-		DBPath:            "activities.db",
+		DBPath:            filepath.Join(appDir, "p1.db"),
+		LogfilePath:       filepath.Join(appDir, "p1.log"),
 		IngestionEndpoint: "http://localhost:3000/api/core/v1/incoming-activities/agent",
 		APIKey:            "900be976-5c0c-47ae-bac7-055718edf1f6",
 		SecretKey:         "4b7ad3ec-a5ab-4f4f-852f-55797db5258a",

@@ -70,7 +70,6 @@ async function onWindowFocusChanged(windowId) {
 }
 
 async function onIdleStateChanged(state) {
-  console.log("onIdleStateChanged", state);
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
   if (!tab) return;
   if (state === "idle" || state === "locked") {
