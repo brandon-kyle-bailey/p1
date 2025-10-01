@@ -1,5 +1,4 @@
-```markdown
-# Project P2
+# Project P1
 
 Monorepo containing multiple applications spanning desktop, web, mobile, and browser extensions.
 
@@ -11,6 +10,7 @@ Monorepo containing multiple applications spanning desktop, web, mobile, and bro
 - Go version: >=1.24.1
 - Description: Desktop agent that collects system and user activity, persists data to a local SQLite database, and sends it to the ingestion backend.
 - Structure:
+
 ```
 
 agent/
@@ -20,9 +20,11 @@ agent/
 ```
 
 ### `backend`
+
 - Language: TypeScript (NestJS)
 - Description: API backend for data ingestion, processing, and management. Exposes REST endpoints for agents, web apps, and extensions.
 - Structure:
+
 ```
 
 backend/
@@ -32,9 +34,11 @@ backend/
 ```
 
 ### `desktop`
+
 - Language: TypeScript (Electron/React)
 - Description: Cross-platform desktop application interface for the agent and backend.
 - Structure:
+
 ```
 
 desktop/
@@ -43,9 +47,11 @@ desktop/
 ```
 
 ### `native`
+
 - Language: TypeScript (React Native / Expo)
 - Description: Mobile app client for viewing and interacting with agent-collected data.
 - Structure:
+
 ```
 
 native/
@@ -60,9 +66,11 @@ native/
 ```
 
 ### `web`
+
 - Language: TypeScript (Next.js / React)
 - Description: Web application frontend for interacting with the backend APIs.
 - Structure:
+
 ```
 
 web/
@@ -73,19 +81,22 @@ web/
 ```
 
 ### `webextension`
+
 - Language: JavaScript/TypeScript
 - Description: Browser extension supporting Firefox and Chrome for activity tracking and integration with the backend.
 - Structure:
+
 ```
 
 webextension/
 └── firefox # Firefox-specific extension code
 
-````
+```
 
 ## Setup
 
 ### Prerequisites
+
 - Go >= 1.24.1 (for `agent`)
 - Node.js >= 20, npm >= 9 (for `backend`, `web`, `desktop`, `native`)
 - Yarn or npm for package management
@@ -94,11 +105,12 @@ webextension/
 ### Running
 
 #### Agent
+
 ```bash
 cd apps/agent
 go build -o p1-agent ./cmd
 ./p1-agent --account-id=<ACCOUNT_ID>
-````
+```
 
 #### Backend
 
