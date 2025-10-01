@@ -1,8 +1,8 @@
-// Polyfill for chromium
 if (typeof browser === "undefined") {
   var browser = chrome;
 }
 
+const browserName = getBrowserName();
 let previousActivity = null;
 let deviceFingerprint = null;
 
@@ -17,14 +17,12 @@ function getBrowserName() {
 }
 
 async function init() {
-  console.log("Initializing background script");
-
+  console.log("Initializing extension");
   const stored = await browser.storage.local.get("deviceFingerprint");
   deviceFingerprint = stored.deviceFingerprint || crypto.randomUUID();
   if (!stored.deviceFingerprint) {
     await browser.storage.local.set({ deviceFingerprint });
   }
-
   browser.tabs.onActivated.addListener(onTabActivated);
   browser.tabs.onUpdated.addListener(onTabUpdated);
   browser.windows.onFocusChanged.addListener(onWindowFocusChanged);
@@ -34,23 +32,24 @@ async function init() {
 }
 
 async function createActivity(tab) {
-
-  const browserName = getBrowserName();
-
+  const id = crypto.randomUUID();
   return {
-    id: crypto.randomUUID(),
+    id,
     name: browserName,
     title: tab.title || "",
     expression: tab.url || "",
-    startTime: new Date().toISOString()
+    startTime: new Date().toISOString(),
+    source: "extension",
+    externalActivityId: id,
+    deviceFingerprint
   };
 }
 
 function isSameActivity(a, b) {
   if (!a || !b) return false;
   return a.name === b.name &&
-         a.title === b.title &&
-         a.expression === b.expression;
+    a.title === b.title &&
+    a.expression === b.expression;
 }
 
 async function onTabActivated(activeInfo) {
@@ -102,44 +101,90 @@ async function onVisibilityChanged(msg, sender) {
 
 async function handleTab(tab) {
   const newActivity = await createActivity(tab);
-
-  if (!isSameActivity(previousActivity, newActivity) && previousActivity) {
+  if (previousActivity && !isSameActivity(previousActivity, newActivity)) {
     previousActivity.endTime = new Date().toISOString();
     sendActivity(previousActivity);
   }
-
   previousActivity = newActivity;
+}
+
+async function enqueueActivity(activity) {
+  const stored = await browser.storage.local.get("activityQueue");
+  const queue = stored.activityQueue || [];
+  queue.push(activity);
+  await browser.storage.local.set({ activityQueue: queue });
+}
+
+async function flushQueue() {
+  const stored = await browser.storage.local.get("activityQueue");
+  const queue = stored.activityQueue || [];
+  if (!queue.length) return;
+
+  const successIndices = [];
+
+  for (let i = 0; i < queue.length; i++) {
+    const activity = queue[i];
+    let attempt = 0;
+    let success = false;
+    let delay = 1000;
+
+    while (attempt < 5 && !success) {
+      try {
+        await postActivity(activity);
+        success = true;
+        successIndices.push(i);
+      } catch (err) {
+        attempt++;
+        console.error(`Failed to send activity (attempt ${attempt}):`, err);
+        if (attempt < 5) {
+          await new Promise(res => setTimeout(res, delay));
+          delay *= 2;
+        }
+      }
+    }
+  }
+  const newQueue = queue.filter((_, idx) => !successIndices.includes(idx));
+  await browser.storage.local.set({ activityQueue: newQueue });
+}
+
+async function postActivity(activity) {
+  const stored = await browser.storage.local.get(["accountId", "userId", "token"]);
+  const { token, userId, accountId } = stored;
+  if (!token || !accountId || !userId) {
+    console.warn("No token, accountId or userId skipping activity send")
+    return;
+  }
+  return await fetch("http://localhost:3000/api/core/v1/activities/extension", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    keepalive: true,
+    body: JSON.stringify({...activity, accountId, userId})
+  });
 }
 
 async function sendActivity(activity) {
   try {
-    const stored = await browser.storage.local.get(["accountId","userId", "token"]);
-    const { token, userId, accountId } = stored;
-    if (!token || !accountId || !userId) {
-      console.warn("No token, accountId or userId skipping activity send")
-      return;
-    }
-    const requestConfig = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      keepalive: true,
-      body: JSON.stringify({ 
-        ...activity,
-        source: "extension",
-        externalActivityId: activity.id,
-        accountId,
-        userId,
-        deviceFingerprint
-      })
-    }
-    const result = await fetch("http://localhost:3000/api/core/v1/activities/extension", requestConfig);
-    console.log(result.status, requestConfig)
+    return await postActivity(activity)
   } catch (err) {
-    console.error("Failed to send activity:", err);
+    console.warn("Network failure, storing activity locally");
+    await enqueueActivity(activity);
+  }
+}
+
+async function periodicFlush() {
+  while (true) {
+    try {
+      await flushQueue();
+    } catch (err) {
+      console.error("Flush error:", err);
+    }
+    await new Promise(res => setTimeout(res, 30000));
   }
 }
 
 init();
+periodicFlush();
+flushQueue();
