@@ -155,7 +155,6 @@ async function postActivity(activity) {
     console.warn("No token, accountId or userId skipping activity send")
     return;
   }
-  console.log("sending activity", {...activity, accountId, userId, token})
   return await fetch("http://localhost:3000/api/core/v1/incoming-activities/extension", {
     method: "POST",
     headers: {
