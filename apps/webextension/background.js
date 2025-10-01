@@ -1,3 +1,8 @@
+// Polyfill for chromium
+if (typeof browser === "undefined") {
+  var browser = chrome;
+}
+
 let previousActivity = null;
 let deviceFingerprint = null;
 
@@ -23,6 +28,9 @@ async function init() {
   browser.tabs.onActivated.addListener(onTabActivated);
   browser.tabs.onUpdated.addListener(onTabUpdated);
   browser.windows.onFocusChanged.addListener(onWindowFocusChanged);
+  browser.runtime.onMessage.addListener(onVisibilityChanged);
+  browser.idle.setDetectionInterval(60);
+  browser.idle.onStateChanged.addListener(onIdleStateChanged)
 }
 
 async function createActivity(tab) {
@@ -60,6 +68,36 @@ async function onWindowFocusChanged(windowId) {
   if (windowId === browser.windows.WINDOW_ID_NONE) return;
   const [tab] = await browser.tabs.query({ active: true, windowId });
   if (tab) handleTab(tab);
+}
+
+async function onIdleStateChanged(state) {
+  const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+  if (!tab) return;
+  if (state === "idle" || state === "locked") {
+    if (previousActivity && previousActivity.expression === tab.url) {
+      previousActivity.endTime = new Date().toISOString();
+      sendActivity(previousActivity);
+      previousActivity = null;
+    }
+  } else if (state === "active") {
+    handleTab(tab);
+  }
+}
+
+async function onVisibilityChanged(msg, sender) {
+  if (!sender.tab) return;
+  if (msg.type === "visibility_change") {
+    const tab = sender.tab;
+    if (msg.payload.visibilityState === "hidden") {
+      if (previousActivity && previousActivity.expression === tab.url) {
+        previousActivity.endTime = new Date().toISOString();
+        sendActivity(previousActivity);
+        previousActivity = null;
+      }
+    } else if (msg.payload.visibilityState === "visible") {
+      handleTab(tab);
+    }
+  }
 }
 
 async function handleTab(tab) {

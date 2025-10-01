@@ -1,3 +1,7 @@
+if (typeof browser === "undefined") {
+  var browser = chrome;
+}
+
 const form = document.getElementById("loginForm");
 const statusElement = document.getElementById("status");
 

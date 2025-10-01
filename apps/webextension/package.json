@@ -4,10 +4,14 @@
   "description": "This project contains a blank WebExtension addon, a \"white canvas\" for your new experiment of extending and remixing the Web.",
   "main": "background.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:firefox": "mkdir -p firefox; cp *.js *.html *.png ./firefox; cp manifest.firefox.json ./firefox/manifest.json",
+    "build:chrome": "mkdir -p chrome; cp *.js *.html *.png ./chrome; cp manifest.chrome.json ./chrome/manifest.json"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "devDependencies": {
+    "webextension-polyfill": "^0.12.0"
+  }
 }
