@@ -53,20 +53,17 @@ function isSameActivity(a, b) {
 }
 
 async function onTabActivated(activeInfo) {
-  console.log("onTabActivated", activeInfo);
   const tab = await browser.tabs.get(activeInfo.tabId);
   handleTab(tab);
 }
 
 async function onTabUpdated(tabId, changeInfo, tab) {
-  console.log("onTabUpdated", tabId, changeInfo, tab);
   if (changeInfo.url || changeInfo.title) {
     handleTab(tab);
   }
 }
 
 async function onWindowFocusChanged(windowId) {
-  console.log("onWindowFocusChanged", windowId);
   if (windowId === browser.windows.WINDOW_ID_NONE) return;
   const [tab] = await browser.tabs.query({ active: true, windowId });
   if (tab) handleTab(tab);
@@ -88,7 +85,6 @@ async function onIdleStateChanged(state) {
 }
 
 async function onVisibilityChanged(msg, sender) {
-  console.log("onVisibilityChanged", msg, sender);
   if (!sender.tab) return;
   if (msg.type === "visibility_change") {
     const tab = sender.tab;
@@ -105,7 +101,6 @@ async function onVisibilityChanged(msg, sender) {
 }
 
 async function handleTab(tab) {
-  console.log("handleTab", tab);
   const newActivity = await createActivity(tab);
   if (!isSameActivity(previousActivity, newActivity) && previousActivity ) {
     previousActivity.endTime = new Date().toISOString();
@@ -115,7 +110,6 @@ async function handleTab(tab) {
 }
 
 async function enqueueActivity(activity) {
-  console.log("enqueueActivity", activity);
   const stored = await browser.storage.local.get("activityQueue");
   const queue = stored.activityQueue || [];
   queue.push(activity);
@@ -123,7 +117,6 @@ async function enqueueActivity(activity) {
 }
 
 async function flushQueue() {
-  console.log("flushQueue");
   const stored = await browser.storage.local.get("activityQueue");
   const queue = stored.activityQueue || [];
   if (!queue.length) return;
@@ -156,7 +149,6 @@ async function flushQueue() {
 }
 
 async function postActivity(activity) {
-  console.log("postActivity", activity);
   const stored = await browser.storage.local.get(["accountId", "userId", "token"]);
   const { token, userId, accountId } = stored;
   if (!token || !accountId || !userId) {
@@ -176,7 +168,6 @@ async function postActivity(activity) {
 }
 
 async function sendActivity(activity) {
-  console.log("sendActivity", activity);
   try {
     return await postActivity(activity)
   } catch (err) {
@@ -186,7 +177,6 @@ async function sendActivity(activity) {
 }
 
 async function periodicFlush() {
-  console.log("periodicFlush");
   while (true) {
     try {
       await flushQueue();
