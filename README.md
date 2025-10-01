@@ -108,8 +108,8 @@ webextension/
 
 ```bash
 cd apps/agent
-go build -o p1-agent ./cmd
-./p1-agent --account-id=<ACCOUNT_ID>
+go build -o ./bin/p1-agent ./cmd/agent
+./bin/p1-agent --account-id=<ACCOUNT_ID>
 ```
 
 #### Backend
@@ -169,10 +169,21 @@ apps/
 
 ## Using the tools
 
-Once the infrastructure is provisioned and webextension installed, visit `http://localhost:8080/register` and register with an email address and password.
-
-Once authenticated, visit `http://localhost:8080/account` and grab your account-id, we'll use this to configure your agent properly.
-
+Once the infrastructure is provisioned and webextension installed, visit [http://localhost:8080/register](http://localhost:8080/register) and register with an email address and password.
+<img width="1914" height="1085" alt="Screenshot From 2025-10-01 00-50-07" src="https://github.com/user-attachments/assets/d96fd505-8e74-42e4-ac09-75249eabb751" />
+Once authenticated, visit [http://localhost:8080/account](http://localhost:8080/account) and grab your account-id, we'll use this to configure your agent properly.
+<img width="893" height="539" alt="Screenshot From 2025-10-01 00-54-07" src="https://github.com/user-attachments/assets/2eb9ff15-116b-43db-a556-eb94192a6b0b" />
 Log in to the webextension with the credentials you used to register with.
+<img width="506" height="294" alt="Screenshot From 2025-10-01 00-51-18" src="https://github.com/user-attachments/assets/a40a04bf-2ffc-4488-9de8-3e9872f03677" />
+Run the desktop extension via `./bin/p1-agent --account-id <YOUR ACCOUNT ID>`
 
-Run the desktop extension via `./p1-agent --account-id <YOUR ACCOUNT ID>`
+You will then be able to see:
+- Automatic App discovery via [http://localhost:8080/apps](http://localhost:8080/apps)
+- Automatic Device discovery via [http://localhost:8080/devices](http://localhost:8080/devices)
+- Extension and Agent sourced activities via [http://localhost:8080/dashboard](http://localhost:8080/dashboard)
+
+Devices ingested from the source `agent` will be in an anonymous state until a device is claimed.
+A device can be claimed by making an authenticated `PATCH` request for the given device id with the payload `{"userId":"<YOUR USER ID>"}`by visiting [http://localhost:3000/api/#/Device](http://localhost:3000/api/#/Device/DeviceController_update_v1)
+You can generate a token by logging in via [http://localhost:3000/api/#/Auth/AuthController_login_v1](http://localhost:3000/api/#/Auth/AuthController_login_v1) and logging in with the credentials you used to register with.
+file:///home/brandon/Pictures/Screenshots/Screenshot%20From%202025-10-01%2001-03-01.png
+Once claimed, activities from the agent with this device will be associated to the given user.
