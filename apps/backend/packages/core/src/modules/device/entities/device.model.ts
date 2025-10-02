@@ -38,6 +38,9 @@ export class Device {
   ipAddress: string;
 
   @Column({ nullable: false })
+  hostuser: string;
+
+  @Column({ nullable: false })
   hostname: string;
 
   @Column({ nullable: false })

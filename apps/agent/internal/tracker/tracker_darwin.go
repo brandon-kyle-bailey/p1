@@ -8,6 +8,13 @@ import (
 	"strings"
 )
 
+/*
+#cgo LDFLAGS: -framework IOKit -framework CoreFoundation
+#include <IOKit/IOKitLib.h>
+#include <IOKit/hidsystem/IOHIDLib.h>
+*/
+import "C"
+
 type darwinProvider struct{}
 
 func (d *darwinProvider) GetApplicationName() (string, error) {
@@ -50,6 +57,31 @@ func (d *darwinProvider) GetExpression() (string, error) {
 	}
 
 	return strings.TrimSpace(string(out)), nil
+}
+
+func (d *darwinProvider) IsIdle() (bool, error) {
+	idle := C.IOHIDGetTimeSinceLastInput()
+	return float64(idle)/1000 > 60, nil
+}
+
+func (d *darwinProvider) IsLocked() (bool, error) {
+	// Use CGSessionCopyCurrentDictionary from CoreGraphics to check for loginwindow status
+	dict := C.CGSessionCopyCurrentDictionary()
+	if dict == nil {
+		return false, nil
+	}
+	defer C.CFRelease(C.CFTypeRef(dict))
+
+	// Check for kCGSSessionScreenIsLocked key
+	locked := C.CFDictionaryGetValue(dict, C.CFSTR("CGSSessionScreenIsLocked"))
+	if locked != nil {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (d *darwinProvider) IsSuspended() (bool, error) {
+	return false, nil
 }
 
 func NewTrackerProvider() TrackerProvider { return &darwinProvider{} }

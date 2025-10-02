@@ -16,7 +16,8 @@ type LogEntry struct {
 }
 
 type Logger struct {
-	out *os.File
+	out  *os.File
+	base *log.Logger
 }
 
 func New(filePath string) (*Logger, error) {
@@ -31,7 +32,10 @@ func New(filePath string) (*Logger, error) {
 		output = os.Stdout
 	}
 
-	return &Logger{out: output}, nil
+	return &Logger{
+		out:  output,
+		base: log.New(output, "", 0),
+	}, nil
 }
 
 func (l *Logger) log(level, msg, correlationID string) {
@@ -42,7 +46,7 @@ func (l *Logger) log(level, msg, correlationID string) {
 		Timestamp:     time.Now().Format(time.RFC3339),
 	}
 	data, _ := json.Marshal(entry)
-	log.Println(string(data))
+	l.base.Println(string(data))
 }
 
 func (l *Logger) Info(msg string, correlationID string) {

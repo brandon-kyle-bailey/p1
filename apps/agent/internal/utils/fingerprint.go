@@ -9,39 +9,53 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"p1/agent/internal/config"
 	"runtime"
 )
 
-func IPAddress() (string, error) {
+var cachedIP string
+
+func IPAddress() string {
+	if cachedIP != "" {
+		return cachedIP
+	}
 	resp, err := http.Get("https://api.ipify.org")
 	if err != nil {
-		return "", err
+		cachedIP = "unknown"
+		return cachedIP
 	}
 	defer resp.Body.Close()
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		cachedIP = "unknown"
+		return cachedIP
 	}
-
-	return string(body), nil
+	cachedIP = string(body)
+	return cachedIP
 }
 
-func Hostname() (string, error) {
-	return os.Hostname()
+func Hostname() string {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return "unknown"
+	}
+	return hostname
 }
 
-func MacAddress() (string, error) {
+func MacAddress() string {
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		return "", err
+		return "unknown"
 	}
 	for _, i := range interfaces {
-		if len(i.HardwareAddr) > 0 {
-			return i.HardwareAddr.String(), nil
+		if i.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+		if len(i.HardwareAddr) == 6 {
+			return i.HardwareAddr.String()
 		}
 	}
-	return "", nil
+	return "unknown"
 }
 
 func OperatingSystem() string {
@@ -52,21 +66,13 @@ func Architecture() string {
 	return runtime.GOARCH
 }
 
-func DeviceFingerprint() (string, error) {
-	hostname, err := Hostname()
-	if err != nil {
-		return "", err
-	}
-
-	mac, err := MacAddress()
-	if err != nil {
-		return "", err
-	}
-
+func DeviceFingerprint(cfg *config.Config) string {
+	hostuser := cfg.Username
+	hostname := Hostname()
+	mac := MacAddress()
 	os := OperatingSystem()
 	arch := Architecture()
-
-	fingerprint := fmt.Sprintf("%s:%s:%s:%s", hostname, mac, os, arch)
+	fingerprint := fmt.Sprintf("%s:%s:%s:%s:%s", hostuser, hostname, mac, os, arch)
 	hash := sha256.Sum256([]byte(fingerprint))
-	return hex.EncodeToString(hash[:]), nil
+	return hex.EncodeToString(hash[:])
 }

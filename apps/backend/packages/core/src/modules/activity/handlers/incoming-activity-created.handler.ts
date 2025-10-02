@@ -32,6 +32,7 @@ export class IncomingActivityCreatedHandler
         id,
         accountId,
         ipAddress,
+        hostuser,
         hostname,
         macAddress,
         os,
@@ -58,6 +59,7 @@ export class IncomingActivityCreatedHandler
       // device discovery
       let foundDevice = await this.deviceService.findOneBy({
         accountId,
+        hostuser,
         hostname,
         macAddress,
         os,

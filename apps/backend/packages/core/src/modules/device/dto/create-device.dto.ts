@@ -10,6 +10,10 @@ export class CreateDeviceDto {
   @IsString()
   ipAddress: string;
 
+  @ApiProperty({ description: 'The hostuser of the device' })
+  @IsString()
+  hostuser: string;
+
   @ApiProperty({ description: 'The hostname of the device' })
   @IsString()
   hostname: string;

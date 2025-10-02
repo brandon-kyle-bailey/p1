@@ -4,7 +4,9 @@ package config
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"os"
+	"os/user"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -13,6 +15,7 @@ import (
 type Config struct {
 	AccountID         string
 	Debug             bool
+	Dryrun            bool
 	Poll              int
 	DBProvider        string
 	DBPath            string
@@ -20,6 +23,7 @@ type Config struct {
 	IngestionEndpoint string
 	APIKey            string
 	SecretKey         string
+	Username          string
 }
 
 func defaultAppDir() (string, error) {
@@ -47,12 +51,14 @@ func defaultAppDir() (string, error) {
 	if err := os.MkdirAll(appDir, 0o755); err != nil {
 		return "", err
 	}
+	fmt.Println(appDir)
 	return appDir, nil
 }
 
 func Load() (*Config, error) {
 	accountIDFlag := flag.String("account-id", "", "Account ID for RMM")
 	debugFlag := flag.Bool("debug", false, "Enable debug mode")
+	dryrunFlag := flag.Bool("dry-run", false, "Enable dry run mode")
 	pollFlag := flag.Int("poll", 200, "Ticker polling interval (milliseconds)")
 
 	flag.Parse()
@@ -70,15 +76,30 @@ func Load() (*Config, error) {
 		return nil, err
 	}
 
+	usr, err := user.Current()
+	username := ""
+	if err == nil {
+		username = usr.Username
+	} else {
+		if runtime.GOOS == "windows" {
+			username = os.Getenv("USERNAME")
+		} else {
+			username = os.Getenv("USER")
+		}
+	}
+
 	return &Config{
 		AccountID:         accountID,
 		Debug:             *debugFlag,
+		Dryrun:            *dryrunFlag,
 		Poll:              *pollFlag,
 		DBProvider:        "sqlite",
 		DBPath:            filepath.Join(appDir, "p1.db"),
-		LogfilePath:       filepath.Join(appDir, "p1.log"),
+		LogfilePath:       "",
 		IngestionEndpoint: "http://localhost:3000/api/core/v1/incoming-activities/agent",
 		APIKey:            "900be976-5c0c-47ae-bac7-055718edf1f6",
 		SecretKey:         "4b7ad3ec-a5ab-4f4f-852f-55797db5258a",
+		Username:          username,
+		// LogfilePath:       filepath.Join(appDir, "p1.log"),
 	}, nil
 }

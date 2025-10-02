@@ -23,6 +23,10 @@ export class IncomingActivityDto {
   @IsString()
   ipAddress: string;
 
+  @ApiProperty({ description: 'The logged in username of the client' })
+  @IsString()
+  hostuser: string;
+
   @ApiProperty({ description: 'The hostname of the client' })
   @IsString()
   hostname: string;

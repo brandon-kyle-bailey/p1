@@ -15,7 +15,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/google/uuid"
 	_ "modernc.org/sqlite"
 )
 
@@ -23,14 +22,14 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	log, err := logger.New("")
+	cfg, err := config.Load()
 	if err != nil {
 		panic(err)
 	}
 
-	cfg, err := config.Load()
+	log, err := logger.New(cfg.LogfilePath)
 	if err != nil {
-		log.Fatal(err.Error(), "1dba498b-e3e1-46f2-a523-59a66a2f592b")
+		panic(err)
 	}
 
 	httpClient := http.NewHTTPClient(cfg.APIKey, cfg.SecretKey, *log)
@@ -54,40 +53,64 @@ func main() {
 		log.Fatal("active window provider not available on this platform", "38e1dc35-ae97-49f5-8fab-0d570392c024")
 	}
 
-	fingerprint, _ := utils.DeviceFingerprint()
 	ticker := time.NewTicker(time.Duration(cfg.Poll) * time.Millisecond)
 	defer ticker.Stop()
 
+	fingerprint := utils.DeviceFingerprint(cfg)
 	var previousActivity *db.Activity
+	var wasInactive bool
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			expression := "unknown"
-			appName := "unknown"
+			var idle, locked, suspended bool
 			if provider != nil {
-				if windowName, err := provider.GetWindowName(); err == nil {
-					expression = windowName
+				idle, _ = provider.IsIdle()
+				locked, _ = provider.IsLocked()
+				suspended, _ = provider.IsSuspended()
+			}
+			inactive := idle || locked || suspended
+
+			// flush only on transition from active → inactive
+			if previousActivity != nil && inactive && !wasInactive {
+				utils.FlushActivity(cfg, httpClient, conn, log, previousActivity)
+				previousActivity = nil
+			}
+
+			wasInactive = inactive
+
+			if inactive {
+				continue
+			}
+
+			// business as usual
+			windowName, windowTitle, windowExpression := "unknown", "unknown", "unknown"
+			if provider != nil {
+				if name, err := provider.GetApplicationName(); err == nil {
+					windowName = name
 				}
-				if softwareName, err := provider.GetApplicationName(); err == nil {
-					appName = softwareName
+				if title, err := provider.GetWindowName(); err == nil {
+					windowTitle = title
+				}
+				if expr, err := provider.GetExpression(); err == nil {
+					windowExpression = expr
 				}
 			}
 			newActivity := db.Activity{
 				ID:                utils.NewUUID(),
 				AccountID:         cfg.AccountID,
 				DeviceFingerprint: fingerprint,
-				Name:              appName,
-				Title:             expression,
-				Expression:        expression,
+				Name:              windowName,
+				Title:             windowTitle,
+				Expression:        windowExpression,
 				StartTime:         time.Now().UTC(),
 			}
 			if previousActivity == nil {
 				previousActivity = &newActivity
 				continue
 			}
-			activitiesMatch := reflect.DeepEqual(
+			if !reflect.DeepEqual(
 				db.Activity{
 					Name:       previousActivity.Name,
 					Title:      previousActivity.Title,
@@ -98,46 +121,8 @@ func main() {
 					Title:      newActivity.Title,
 					Expression: newActivity.Expression,
 				},
-			)
-			if !activitiesMatch {
-				now := time.Now().UTC()
-				previousActivity.EndTime = now
-				err := db.InsertActivity(conn, *previousActivity)
-				if err != nil {
-					log.Error(err.Error(), "a3db9416-e79f-4551-b125-bda3b37129ba")
-				}
-				ipAddress, err := utils.IPAddress()
-				if err != nil {
-					log.Error(err.Error(), "c71e12b9-0c42-4640-9ec0-9c5d2264768b")
-				}
-				hostname, err := utils.Hostname()
-				if err != nil {
-					log.Error(err.Error(), "492b3308-1f3e-4b89-899e-4f974e61f546")
-				}
-				macAddress, err := utils.MacAddress()
-				if err != nil {
-					log.Error(err.Error(), "35e53dd5-8ead-497c-89db-2a31dff8df48")
-				}
-				dto := tracker.IncomingActivityDto{
-					Source:             "agent",
-					IPAddress:          ipAddress,
-					Hostname:           hostname,
-					MacAddress:         macAddress,
-					Os:                 utils.OperatingSystem(),
-					Arch:               utils.Architecture(),
-					ExternalActivityID: uuid.MustParse(previousActivity.ID).String(),
-					AccountID:          uuid.MustParse(cfg.AccountID).String(),
-					DeviceFingerprint:  previousActivity.DeviceFingerprint,
-					Name:               previousActivity.Name,
-					Title:              previousActivity.Title,
-					Expression:         previousActivity.Expression,
-					StartTime:          previousActivity.StartTime.UTC().Format(time.RFC3339Nano),
-					EndTime:            previousActivity.EndTime.UTC().Format(time.RFC3339Nano),
-				}
-				err = httpClient.PostJSON(cfg.IngestionEndpoint, dto)
-				if err != nil {
-					log.Error(err.Error(), "0c4dce23-9b20-41dd-bb22-506ad1eed880")
-				}
+			) {
+				utils.FlushActivity(cfg, httpClient, conn, log, previousActivity)
 				previousActivity = &newActivity
 			}
 		}

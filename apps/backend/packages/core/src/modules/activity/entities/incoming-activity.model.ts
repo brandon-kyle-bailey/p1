@@ -39,6 +39,9 @@ export class IncomingActivity {
   ipAddress: string;
 
   @Column({ nullable: true })
+  hostuser: string;
+
+  @Column({ nullable: true })
   hostname: string;
 
   @Column({ nullable: true })

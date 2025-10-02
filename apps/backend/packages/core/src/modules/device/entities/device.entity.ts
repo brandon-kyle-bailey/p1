@@ -2,6 +2,7 @@ export interface DeviceProps {
   id: string;
   accountId: string;
   ipAddress: string;
+  hostuser: string;
   hostname: string;
   macAddress: string;
   os: string;
@@ -40,6 +41,9 @@ export class Device {
   }
   get ipAddress() {
     return this.props.ipAddress;
+  }
+  get hostuser() {
+    return this.props.hostuser;
   }
   get hostname() {
     return this.props.hostname;

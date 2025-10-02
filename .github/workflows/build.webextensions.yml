@@ -3,6 +3,8 @@ name: Build Webextensions
 on:
   push:
     branches: [master]
+    paths:
+      - "apps/webextension/**"
 
 jobs:
   build:

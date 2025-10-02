@@ -3,6 +3,8 @@ name: Build Agents
 on:
   push:
     branches: [master]
+    paths:
+      - "apps/agent/**"
 
 jobs:
   build:

@@ -3,6 +3,7 @@ package tracker
 
 type IncomingActivityDto struct {
 	IPAddress          string `json:"ipAddress"`
+	Hostuser           string `json:"hostuser"`
 	Hostname           string `json:"hostname"`
 	MacAddress         string `json:"macAddress"`
 	Os                 string `json:"os"`
@@ -22,4 +23,7 @@ type TrackerProvider interface {
 	GetWindowName() (string, error)
 	GetApplicationName() (string, error)
 	GetExpression() (string, error)
+	IsIdle() (bool, error)
+	IsLocked() (bool, error)
+	IsSuspended() (bool, error)
 }
