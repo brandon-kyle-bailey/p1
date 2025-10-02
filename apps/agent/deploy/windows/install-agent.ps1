@@ -44,5 +44,8 @@ sc.exe create $ServiceName `
 Write-Host "Starting $ServiceName..."
 Start-Service -Name $ServiceName
 
+# -------------------------------
+# Installation complete 
+# -------------------------------
 Write-Host "Installation complete. Check service status with:"
 Write-Host "  Get-Service -Name $ServiceName"
