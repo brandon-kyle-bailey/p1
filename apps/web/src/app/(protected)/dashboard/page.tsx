@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import fetchWithAuth from "@/hooks/fetch-with-auth.hook";
 import { auth } from "@/lib/auth";
 import { Clock } from "lucide-react";
 
@@ -34,7 +35,7 @@ export default async function Page() {
     return <p>Not authenticated</p>;
   }
 
-  const res = await fetch(
+  const res = await fetchWithAuth(
     `http://localhost:3000/api/core/v1/activities?sortField=startTime&sortOrder=desc`,
     {
       headers: {
@@ -43,7 +44,7 @@ export default async function Page() {
     },
   );
 
-  if (!res.ok) {
+  if (!res?.ok) {
     throw new Error("Failed to fetch activities");
   }
 

@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import fetchWithAuth from "@/hooks/fetch-with-auth.hook";
 
 type App = {
   id: string;
@@ -27,13 +28,13 @@ export default async function Page() {
     return <p>Not authenticated</p>;
   }
 
-  const res = await fetch(`http://localhost:3000/api/core/v1/apps`, {
+  const res = await fetchWithAuth(`http://localhost:3000/api/core/v1/apps`, {
     headers: {
       Authorization: `Bearer ${session.user.accessToken}`,
     },
   });
 
-  if (!res.ok) {
+  if (!res?.ok) {
     throw new Error("Failed to fetch account");
   }
 
