@@ -38,6 +38,11 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @Post('refresh')
+  async refresh(@Body('refresh_token') refreshToken: string) {
+    return this.authService.refresh(refreshToken);
+  }
+
   @Post('register')
   async register(@Body() body: RegisterDto) {
     if (body.password !== body.confirmPassword) {

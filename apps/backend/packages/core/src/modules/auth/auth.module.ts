@@ -10,9 +10,11 @@ import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     LoggingModule,
     CaslModule,
     HttpModule,
@@ -21,8 +23,6 @@ import { JwtStrategy } from './jwt.strategy';
     PassportModule,
     JwtModule.register({
       global: true,
-      secret: '7ac54472-4dcf-4fa1-be39-8967d47d02d6',
-      signOptions: { expiresIn: '1h' },
     }),
   ],
   controllers: [AuthController],

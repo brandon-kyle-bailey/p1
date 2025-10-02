@@ -31,12 +31,13 @@ form.addEventListener("submit", async (e) => {
 
     if (!res.ok) throw new Error("Login failed");
     const result = await res.json();
-    const token = result.access_token;
-    const payload = parseJwt(token);
+    const access_token = result.access_token;
+    const refresh_token = result.refresh_token;
+    const payload = parseJwt(access_token);
     const accountId = payload?.accountId || "anonymous";
     const userId = payload?.sub || "anonymous";
 
-    await browser.storage.local.set({ token, userId, accountId });
+    await browser.storage.local.set({ access_token, refresh_token, userId, accountId });
     statusElement.style.color = "green";
     statusElement.textContent = "Login successful!";
   } catch (err) {

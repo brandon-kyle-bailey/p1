@@ -147,22 +147,64 @@ async function flushQueue() {
   await browser.storage.local.set({ activityQueue: newQueue });
 }
 
+
+let refreshInProgress
+
+async function refreshTokens(refresh_token) {
+  try {
+    if (refreshInProgress) return refreshInProgress;
+    refreshInProgress = (async () => {
+      const refreshResult = await fetch("http://localhost:3000/api/core/v1/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token }),
+        keepalive: true,
+      });
+      if (!refreshResult.ok) throw new Error("Unable to refresh token");
+      const { access_token, refresh_token: newRefreshToken } = await refreshResult.json();
+      await browser.storage.local.set({ access_token, refresh_token: newRefreshToken });
+    })();
+    await refreshInProgress;
+    refreshInProgress = null;
+  } catch (error) {
+    refreshInProgress = null;
+    await browser.storage.local.remove(["access_token", "refresh_token"]);
+    throw error;
+  }
+}
+
 async function postActivity(activity) {
-  const stored = await browser.storage.local.get(["accountId", "userId", "token"]);
-  const { token, userId, accountId } = stored;
-  if (!token || !accountId || !userId) {
-    console.warn("No token, accountId or userId skipping activity send")
+  const stored = await browser.storage.local.get(["accountId", "userId", "access_token", "refresh_token"]);
+  const { access_token, refresh_token, userId, accountId } = stored;
+  if (!access_token || !refresh_token || !accountId || !userId) {
+    console.warn("No access_token, refresh_token, accountId or userId skipping activity send")
     return;
   }
-  return await fetch("http://localhost:3000/api/core/v1/incoming-activities/extension", {
+  const response = await fetch("http://localhost:3000/api/core/v1/incoming-activities/extension", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
+      "Authorization": `Bearer ${access_token}`
     },
     keepalive: true,
     body: JSON.stringify({...activity, accountId, userId})
   });
+
+  if (response.status === 401) {
+    await refreshTokens(refresh_token);
+    const stored = await browser.storage.local.get(["access_token"]);
+    return await fetch("http://localhost:3000/api/core/v1/incoming-activities/extension", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${stored.access_token}`
+      },
+      keepalive: true,
+      body: JSON.stringify({...activity, accountId, userId})
+    });
+  }
+  return response;
+
 }
 
 async function sendActivity(activity) {
