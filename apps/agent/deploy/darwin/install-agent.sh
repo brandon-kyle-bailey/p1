@@ -87,5 +87,8 @@ echo "Loading and starting LaunchDaemon..."
 sudo launchctl bootstrap system "$PLIST_PATH"
 sudo launchctl enable system/com.p1.agent
 
+# -------------------------------
+# Installation complete
+# -------------------------------
 echo "Installation complete. Check status with:"
 echo "  sudo launchctl print system/com.p1.agent"
