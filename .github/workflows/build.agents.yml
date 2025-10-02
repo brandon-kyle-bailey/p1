@@ -7,77 +7,45 @@ on:
       - "apps/agent/**"
 
 jobs:
-  build-linux:
-    name: Build Linux Agent
-    runs-on: ubuntu-latest
+  build:
+    name: Build Agent
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
+        os: [linux, windows, macos]
         goarch: [amd64, arm64]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.24.1"
-      - name: Build Linux
-        working-directory: apps/agent
-        run: |
-          mkdir -p dist/linux-${{ matrix.goarch }}
-          GOOS=linux GOARCH=${{ matrix.goarch }} go build -o dist/linux-${{ matrix.goarch }}/agent ./cmd/agent
-      - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: agent-linux-${{ matrix.goarch }}
-          path: |
-            apps/agent/dist/linux-${{ matrix.goarch }}
-            apps/agent/deploy/linux/*
+        include:
+          - os: linux
+            runner: ubuntu-latest
+          - os: windows
+            runner: windows-latest
+          - os: macos
+            runner: macos-latest
 
-  build-windows:
-    name: Build Windows Agent
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        goarch: [amd64, arm64]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: "1.24.1"
-      - name: Build Windows
-        working-directory: apps/agent
-        shell: pwsh
-        run: |
-          mkdir -Force dist/windows-${{ matrix.goarch }}
-          $env:GOOS = "windows"
-          $env:GOARCH = "${{ matrix.goarch }}"
-          go build -o dist/windows-${{ matrix.goarch }}/agent.exe ./cmd/agent
-      - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: agent-windows-${{ matrix.goarch }}
-          path: |
-            apps/agent/dist/windows-${{ matrix.goarch }}
-            apps/agent/deploy/windows/*
 
-  build-macos:
-    name: Build macOS Agent
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        goarch: [amd64, arm64]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.24.1"
-      - name: Build macOS
+      - name: Build
         working-directory: apps/agent
+        shell: ${{ matrix.os == 'windows' && 'pwsh' || 'bash' }}
         run: |
-          mkdir -p dist/darwin-${{ matrix.goarch }}
-          CGO_ENABLED=1 GOOS=darwin GOARCH=${{ matrix.goarch }} go build -o dist/darwin-${{ matrix.goarch }}/agent ./cmd/agent
-      - name: Upload macOS artifact
+          mkdir -p dist/${{ matrix.os }}-${{ matrix.goarch }}
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            $env:GOOS = "windows"
+            $env:GOARCH = "${{ matrix.goarch }}"
+            go build -o dist/windows-${{ matrix.goarch }}/agent.exe ./cmd/agent
+          else
+            GOOS=${{ matrix.os == 'macos' && 'darwin' || matrix.os }} \
+            GOARCH=${{ matrix.goarch }} go build -o dist/${{ matrix.os == 'macos' && 'darwin' || matrix.os }}-${{ matrix.goarch }}/agent ./cmd/agent
+          fi
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: agent-darwin-${{ matrix.goarch }}
+          name: agent-${{ matrix.os == 'macos' && 'darwin' || matrix.os }}-${{ matrix.goarch }}
           path: |
-            apps/agent/dist/darwin-${{ matrix.goarch }}
-            apps/agent/deploy/darwin/*
+            apps/agent/dist/${{ matrix.os == 'macos' && 'darwin' || matrix.os }}-${{ matrix.goarch }}
+            apps/agent/deploy/${{ matrix.os == 'macos' && 'darwin' || matrix.os }}/*

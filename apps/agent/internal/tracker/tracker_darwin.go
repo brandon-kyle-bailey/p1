@@ -4,16 +4,12 @@
 package tracker
 
 import (
+	"bufio"
+	"bytes"
 	"os/exec"
+	"strconv"
 	"strings"
 )
-
-/*
-#cgo LDFLAGS: -framework IOKit -framework CoreFoundation
-#include <IOKit/IOKitLib.h>
-#include <IOKit/hidsystem/IOHIDLib.h>
-*/
-import "C"
 
 type darwinProvider struct{}
 
@@ -59,26 +55,39 @@ func (d *darwinProvider) GetExpression() (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
+func parseIdle(data []byte) float64 {
+	scanner := bufio.NewScanner(bytes.NewReader(data))
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, "HIDIdleTime") {
+			parts := strings.Fields(line)
+			if len(parts) > 1 {
+				idleNs, err := strconv.ParseUint(parts[len(parts)-1], 10, 64)
+				if err == nil {
+					return float64(idleNs) / 1e9
+				}
+			}
+		}
+	}
+	return 0
+}
+
 func (d *darwinProvider) IsIdle() (bool, error) {
-	idle := C.IOHIDGetTimeSinceLastInput()
-	return float64(idle)/1000 > 60, nil
+	out, err := exec.Command("ioreg", "-c", "IOHIDSystem").Output()
+	if err != nil {
+		return false, err
+	}
+	// parse out IdleTime value from output (nanoseconds)
+	return parseIdle(out) > 60, nil
 }
 
 func (d *darwinProvider) IsLocked() (bool, error) {
-	// Use CGSessionCopyCurrentDictionary from CoreGraphics to check for loginwindow status
-	dict := C.CGSessionCopyCurrentDictionary()
-
-	if dict == nil {
-		return false, nil
+	out, err := exec.Command("osascript", "-e",
+		`tell application "System Events" to get running of screen saver preferences`).Output()
+	if err != nil {
+		return false, err
 	}
-	defer C.CFRelease(C.CFTypeRef(dict))
-
-	// Check for kCGSSessionScreenIsLocked key
-	locked := C.CFDictionaryGetValue(dict, C.CFSTR("CGSSessionScreenIsLocked"))
-	if locked != nil {
-		return true, nil
-	}
-	return false, nil
+	return strings.TrimSpace(string(out)) == "true", nil
 }
 
 func (d *darwinProvider) IsSuspended() (bool, error) {
