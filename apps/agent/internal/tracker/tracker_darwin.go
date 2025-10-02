@@ -67,6 +67,7 @@ func (d *darwinProvider) IsIdle() (bool, error) {
 func (d *darwinProvider) IsLocked() (bool, error) {
 	// Use CGSessionCopyCurrentDictionary from CoreGraphics to check for loginwindow status
 	dict := C.CGSessionCopyCurrentDictionary()
+
 	if dict == nil {
 		return false, nil
 	}
