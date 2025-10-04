@@ -6,7 +6,7 @@ export class CreateDepartmentDto {
   @IsOptional()
   accountId?: string;
 
-  @ApiProperty({ description: 'The name of the workspace' })
+  @ApiProperty({ description: 'The name of the department' })
   @IsString()
   name: string;
 

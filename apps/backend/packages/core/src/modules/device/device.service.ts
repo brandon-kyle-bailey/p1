@@ -40,11 +40,19 @@ export class DeviceService {
     return this.mapper.toDomain(result);
   }
 
-  async findAll(skip: number = 0, take: number = 100) {
+  async findAll(
+    skip: number = 0,
+    take: number = 100,
+    where: FindOptionsWhere<Device>,
+    sortField: keyof Device = 'createdAt',
+    sortOrder: 'asc' | 'desc' = 'desc',
+  ) {
     try {
       const [entities, count] = await this.repo.findAndCount({
         skip,
         take,
+        where,
+        order: { [sortField]: sortOrder.toUpperCase() as 'ASC' | 'DESC' },
       });
       return {
         data: entities.map((entity) => this.mapper.toDomain(entity)),
@@ -59,7 +67,7 @@ export class DeviceService {
       this.logger.error(
         `${this.constructor.name}.${this.findAll.name} encountered an error`,
         {
-          correlationId: 'eb9e90e0-6394-484c-a431-6a79eb56468e',
+          correlationId: '7495a11a-d192-4cf5-b234-afa35140da03',
           err: JSON.stringify(err),
         },
       );

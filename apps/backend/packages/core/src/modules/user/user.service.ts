@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserMapper } from './dto/user.mapper';
@@ -40,11 +40,19 @@ export class UserService {
     return this.mapper.toDomain(result);
   }
 
-  async findAll(skip: number = 0, take: number = 100) {
+  async findAll(
+    skip: number = 0,
+    take: number = 100,
+    where: FindOptionsWhere<User>,
+    sortField: keyof User = 'createdAt',
+    sortOrder: 'asc' | 'desc' = 'desc',
+  ) {
     try {
       const [entities, count] = await this.repo.findAndCount({
         skip,
         take,
+        where,
+        order: { [sortField]: sortOrder.toUpperCase() as 'ASC' | 'DESC' },
       });
       return {
         data: entities.map((entity) => this.mapper.toDomain(entity)),
@@ -59,7 +67,7 @@ export class UserService {
       this.logger.error(
         `${this.constructor.name}.${this.findAll.name} encountered an error`,
         {
-          correlationId: 'eb9e90e0-6394-484c-a431-6a79eb56468e',
+          correlationId: 'af3a70ac-5358-40a7-9bf8-217929571c91',
           err: JSON.stringify(err),
         },
       );
@@ -132,6 +140,9 @@ export class UserService {
       if (updateUserDto.name) {
         entity.updateName(updateUserDto.name);
       }
+      if (updateUserDto.departmentId) {
+        entity.updateDepartment(updateUserDto.departmentId);
+      }
       if (updateUserDto.password) {
         entity.updatePassword(updateUserDto.password);
       }
@@ -177,8 +188,17 @@ export class UserService {
       if (updateUserDto.name) {
         entity.updateName(updateUserDto.name);
       }
+      if (updateUserDto.departmentId) {
+        entity.updateDepartment(updateUserDto.departmentId);
+      }
       if (updateUserDto.password) {
         entity.updatePassword(updateUserDto.password);
+      }
+      if (updateUserDto.createdBy) {
+        entity.updateOwner(updateUserDto.createdBy);
+      }
+      if (updateUserDto.updatedBy) {
+        entity.updateUpdatedBy(updateUserDto.updatedBy);
       }
       entity.updateUpdatedBy(updatedBy);
       await this.repo.update(entity.id, this.mapper.toPersistence(entity));

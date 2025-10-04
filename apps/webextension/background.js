@@ -19,7 +19,6 @@ function getBrowserName() {
 
 // ================== Initialization ==================
 async function init() {
-  console.log("Initializing extension");
   const stored = await browser.storage.local.get("deviceFingerprint");
   deviceFingerprint = stored.deviceFingerprint || crypto.randomUUID();
   if (!stored.deviceFingerprint) {
@@ -113,7 +112,6 @@ async function onVisibilityChanged(msg, sender) {
   const tab = sender.tab;
 
   if (msg.type === "visibility_change") {
-    console.log(`visibility_change event detected ${msg.payload.visibilityState}`)
     if (msg.payload.visibilityState === "hidden") {
       if (previousActivity && previousActivity.expression === tab.url) {
         previousActivity.endTime = new Date().toISOString();
@@ -124,20 +122,6 @@ async function onVisibilityChanged(msg, sender) {
       handleTab(tab);
     }
   }
-
-  // if (msg.type === "window_blur") {
-  //   console.log("window_blur event detected")
-  //   if (previousActivity && previousActivity.expression === tab.url) {
-  //     previousActivity.endTime = new Date().toISOString();
-  //     sendActivity(previousActivity);
-  //     previousActivity = null;
-  //   }
-  // }
-  //
-  // if (msg.type === "window_focus") {
-  //   console.log("window_focus event detected")
-  //   handleTab(tab);
-  // }
 }
 
 // ================== Queue Management ==================

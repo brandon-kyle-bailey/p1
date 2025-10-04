@@ -34,6 +34,8 @@ import { FindAllResponseDto } from '@app/dtos';
 import { DeviceCreatedCommand } from './commands/device-created.command';
 import { DeviceUpdatedCommand } from './commands/device-updated.command';
 import { DeviceRemovedCommand } from './commands/device-removed.command';
+import { User as UserDomain } from '../user/entities/user.entity';
+import { Device } from './entities/device.model';
 
 @Controller({ path: 'devices', version: '1' })
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -71,18 +73,45 @@ export class DeviceController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @CheckPolicies((ability: AppAbility) =>
     ability.can(Action.Read, DeviceDomain),
   )
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
+  @ApiQuery({
+    name: 'sortField',
+    required: false,
+    type: String,
+    example: 'startTime',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    type: String,
+    example: 'asc',
+  })
   @ApiOkResponse({ type: FindAllResponseDto })
   async findAll(
     @Query('skip') skip = 0,
     @Query('take') take = 100,
-    @Request() req: { user: DeviceDomain },
+    @Query('sortField') sortField: string = 'createdAt',
+    @Query('sortOrder') sortOrder: 'asc' | 'desc' = 'desc',
+    @Request() req: { user: UserDomain },
   ): Promise<FindAllResponseDto<{ [key: string]: any }>> {
-    const result = await this.service.findAll(skip, take);
+    if (!['asc', 'desc'].includes(sortOrder)) {
+      sortOrder = 'desc';
+    }
+    const result = await this.service.findAll(
+      skip,
+      take,
+      {
+        accountId: req.user.accountId,
+      },
+      sortField ? (sortField as keyof Device) : undefined,
+      sortOrder,
+    );
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     return {
       ...result,

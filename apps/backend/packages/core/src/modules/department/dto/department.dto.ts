@@ -9,10 +9,6 @@ export class DepartmentDto {
   @IsUUID()
   accountId: string;
 
-  @ApiProperty({ description: 'The id of the user' })
-  @IsUUID()
-  userId: string;
-
   @ApiProperty({ description: 'The name of the integration' })
   @IsString()
   name: string;
