@@ -80,7 +80,14 @@ async function onTabUpdated(_tabId, changeInfo, tab) {
 }
 
 async function onWindowFocusChanged(windowId) {
-  if (windowId === browser.windows.WINDOW_ID_NONE) return;
+  if (windowId === browser.windows.WINDOW_ID_NONE) {
+    if (previousActivity) {
+      previousActivity.endTime = new Date().toISOString();
+      sendActivity(previousActivity);
+      previousActivity = null;
+    }
+    return;
+  }
   const [tab] = await browser.tabs.query({ active: true, windowId });
   if (tab) handleTab(tab);
 }
@@ -102,8 +109,11 @@ async function onIdleStateChanged(state) {
 
 async function onVisibilityChanged(msg, sender) {
   if (!sender.tab) return;
+
+  const tab = sender.tab;
+
   if (msg.type === "visibility_change") {
-    const tab = sender.tab;
+    console.log(`visibility_change event detected ${msg.payload.visibilityState}`)
     if (msg.payload.visibilityState === "hidden") {
       if (previousActivity && previousActivity.expression === tab.url) {
         previousActivity.endTime = new Date().toISOString();
@@ -114,6 +124,20 @@ async function onVisibilityChanged(msg, sender) {
       handleTab(tab);
     }
   }
+
+  // if (msg.type === "window_blur") {
+  //   console.log("window_blur event detected")
+  //   if (previousActivity && previousActivity.expression === tab.url) {
+  //     previousActivity.endTime = new Date().toISOString();
+  //     sendActivity(previousActivity);
+  //     previousActivity = null;
+  //   }
+  // }
+  //
+  // if (msg.type === "window_focus") {
+  //   console.log("window_focus event detected")
+  //   handleTab(tab);
+  // }
 }
 
 // ================== Queue Management ==================
