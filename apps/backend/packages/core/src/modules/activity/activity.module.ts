@@ -18,29 +18,38 @@ import { CaslModule } from '../casl/casl.module';
 import { IncomingExtensionActivityCreatedHandler } from './handlers/incoming-extension-activity-created.handler';
 import { AuthModule } from '../auth/auth.module';
 import { ActivityController } from './activity.controller';
+import { FanoutActivity } from './entities/fanout-activity.model';
+import { FanoutActivityMapper } from './dto/fanout-activity.mapper';
+import { FanoutActivityService } from './fanout-activity.service';
+import { WorkspaceModule } from '../workspace/workspace.module';
+import { ActivityUpdatedHandler } from './handlers/activity-updated.handler';
 
 @Module({
   imports: [
     LoggingModule,
-    TypeOrmModule.forFeature([Activity, IncomingActivity]),
+    TypeOrmModule.forFeature([Activity, IncomingActivity, FanoutActivity]),
     CaslModule,
     UserModule,
     AppModule,
     // forwardRef resolves circular dependency
     forwardRef(() => DeviceModule),
     AuthModule,
+    WorkspaceModule,
   ],
   controllers: [IncomingActivityController, ActivityController],
   providers: [
     ApiKeyGuard,
     ActivityMapper,
+    FanoutActivityMapper,
     IncomingActivityMapper,
     ActivityService,
+    FanoutActivityService,
     IncomingActivityService,
     ActivityCreatedHandler,
+    ActivityUpdatedHandler,
     IncomingActivityCreatedHandler,
     IncomingExtensionActivityCreatedHandler,
   ],
-  exports: [ActivityService, IncomingActivityService],
+  exports: [ActivityService, IncomingActivityService, FanoutActivityService],
 })
 export class ActivityModule {}

@@ -5,6 +5,7 @@ import { Device } from 'src/modules/device/entities/device.model';
 import { Integration } from 'src/modules/integration/entities/integration.model';
 import { Subscription } from 'src/modules/subscription/entities/subscription.model';
 import { User } from 'src/modules/user/entities/user.model';
+import { WorkspaceUser } from 'src/modules/workspace/entities/workspace-user.model';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -27,6 +28,9 @@ export class Account {
     cascade: true,
   })
   users?: User[];
+
+  @OneToMany(() => WorkspaceUser, (wu) => wu.account)
+  workspaceUsers: WorkspaceUser[];
 
   @OneToMany(() => Activity, (activity) => activity.account, {
     cascade: true,

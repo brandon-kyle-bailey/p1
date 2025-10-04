@@ -11,6 +11,9 @@ import { WorkspaceRemovedHandler } from './handlers/workspace-removed.handler';
 import { WorkspaceUpdatedHandler } from './handlers/workspace-updated.handler';
 import { User } from '../user/entities/user.model';
 import { WorkspaceUser } from './entities/workspace-user.model';
+import { WorkspaceUserMapper } from './dto/workspace-user.mapper';
+import { WorkspaceUserService } from './workspace-user.service';
+import { WorkspaceUserController } from './workspace-user.controller';
 
 @Module({
   imports: [
@@ -18,14 +21,16 @@ import { WorkspaceUser } from './entities/workspace-user.model';
     TypeOrmModule.forFeature([User, Workspace, WorkspaceUser]),
     CaslModule,
   ],
-  controllers: [WorkspaceController],
+  controllers: [WorkspaceController, WorkspaceUserController],
   providers: [
     WorkspaceMapper,
+    WorkspaceUserMapper,
     WorkspaceService,
+    WorkspaceUserService,
     WorkspaceCreatedHandler,
     WorkspaceUpdatedHandler,
     WorkspaceRemovedHandler,
   ],
-  exports: [WorkspaceService],
+  exports: [WorkspaceService, WorkspaceUserService],
 })
 export class WorkspaceModule {}

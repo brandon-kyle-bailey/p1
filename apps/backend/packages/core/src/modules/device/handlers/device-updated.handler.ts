@@ -1,11 +1,13 @@
 import { LoggingService } from '@app/logging';
 import { Inject } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DeviceUpdatedCommand } from '../commands/device-updated.command';
 import { ActivityService } from 'src/modules/activity/activity.service';
 import { IncomingActivityService } from 'src/modules/activity/incoming-activity.service';
 import { UpdateActivityDto } from 'src/modules/activity/dto/update-activity.dto';
 import { NIL } from 'uuid';
+import { Activity } from 'src/modules/activity/entities/activity.entity';
+import { ActivityUpdatedCommand } from 'src/modules/activity/commands/activity-updated.command';
 
 const BATCH_SIZE = 100;
 
@@ -20,6 +22,8 @@ export class DeviceUpdatedHandler
     private readonly activityService: ActivityService,
     @Inject(IncomingActivityService)
     private readonly incomingActivityService: IncomingActivityService,
+    @Inject(CommandBus)
+    private readonly commandBus: CommandBus,
   ) {}
 
   private async *_getIncomingActivityIdsGenerator(
@@ -69,6 +73,7 @@ export class DeviceUpdatedHandler
     });
 
     const batch: string[] = [];
+    const updated: Activity[] = [];
 
     const dto = new UpdateActivityDto();
     for await (const incomingId of this._getIncomingActivityIdsGenerator(
@@ -78,13 +83,18 @@ export class DeviceUpdatedHandler
 
       if (batch.length >= BATCH_SIZE) {
         dto.userId = command.entity.userId;
-        await this.activityService.updateMany(batch, dto, NIL);
+        updated.push(
+          ...(await this.activityService.updateMany(batch, dto, NIL)),
+        );
         batch.length = 0; // reset batch
       }
     }
     if (batch.length > 0) {
-      await this.activityService.updateMany(batch, dto, NIL);
+      updated.push(...(await this.activityService.updateMany(batch, dto, NIL)));
     }
+    updated.map((activity) => {
+      void this.commandBus.execute(new ActivityUpdatedCommand(activity));
+    });
 
     return { actionId: crypto.randomUUID() };
   }

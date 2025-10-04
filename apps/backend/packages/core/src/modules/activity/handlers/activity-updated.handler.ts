@@ -2,16 +2,16 @@ import { LoggingService } from '@app/logging';
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { WorkspaceUserService } from 'src/modules/workspace/workspace-user.service';
-import { ActivityCreatedCommand } from '../commands/activity-created.command';
+import { ActivityUpdatedCommand } from '../commands/activity-updated.command';
 import { FanoutActivityService } from '../fanout-activity.service';
 import { FanoutActivityDto } from '../dto/fanout-activity.dto';
 import { NIL } from 'uuid';
 
 const BATCH_SIZE = 100;
 
-@CommandHandler(ActivityCreatedCommand)
-export class ActivityCreatedHandler
-  implements ICommandHandler<ActivityCreatedCommand>
+@CommandHandler(ActivityUpdatedCommand)
+export class ActivityUpdatedHandler
+  implements ICommandHandler<ActivityUpdatedCommand>
 {
   constructor(
     @Inject(LoggingService)
@@ -23,7 +23,7 @@ export class ActivityCreatedHandler
   ) {}
 
   private async *_getWorkspaceIdsGenerator(
-    command: ActivityCreatedCommand,
+    command: ActivityUpdatedCommand,
   ): AsyncGenerator<string, void, unknown> {
     let skip = 0;
     const take = BATCH_SIZE;
@@ -52,8 +52,8 @@ export class ActivityCreatedHandler
     }
   }
 
-  async execute(command: ActivityCreatedCommand) {
-    this.logger.debug('Activity created handler called', {
+  async execute(command: ActivityUpdatedCommand) {
+    this.logger.debug('Activity updated handler called', {
       correlationId: '3623e7de-987b-4971-9757-8b6a86592a2f',
       accountId: command.entity.accountId,
     });

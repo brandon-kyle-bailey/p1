@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { WorkspaceMapper } from './dto/workspace.mapper';
@@ -50,11 +50,19 @@ export class WorkspaceService {
     return this.mapper.toDomain(result);
   }
 
-  async findAll(skip: number = 0, take: number = 100) {
+  async findAll(
+    skip: number = 0,
+    take: number = 100,
+    where: FindOptionsWhere<Workspace>,
+    sortField: keyof Workspace = 'createdAt',
+    sortOrder: 'asc' | 'desc' = 'desc',
+  ) {
     try {
       const [entities, count] = await this.repo.findAndCount({
         skip,
         take,
+        where,
+        order: { [sortField]: sortOrder.toUpperCase() as 'ASC' | 'DESC' },
       });
       return {
         data: entities.map((entity) => this.mapper.toDomain(entity)),

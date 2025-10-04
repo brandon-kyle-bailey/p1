@@ -10,11 +10,16 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Workspace } from './workspace.model';
+import { Account } from 'src/modules/account/entities/account.model';
+import { Role } from 'src/modules/user/entities/user.entity';
 
 @Entity('workspace_users')
 export class WorkspaceUser {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  accountId: string;
 
   @Column()
   userId: string;
@@ -31,6 +36,15 @@ export class WorkspaceUser {
   })
   @JoinColumn({ name: 'workspaceId' })
   workspace: Workspace;
+
+  @ManyToOne(() => Account, (account) => account.workspaceUsers, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'accountId' })
+  account: Account;
+
+  @Column({ type: 'enum', enum: Role, default: Role.User })
+  role: Role;
 
   @CreateDateColumn()
   createdAt: Date;

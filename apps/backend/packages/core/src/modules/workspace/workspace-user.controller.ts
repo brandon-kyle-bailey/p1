@@ -16,7 +16,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CheckPolicies, PoliciesGuard } from 'src/guards/policies.guard';
@@ -27,54 +26,51 @@ import {
   CaslAbilityFactory,
 } from '../casl/casl-ability.factory/casl-ability.factory';
 import { User as UserDomain } from '../user/entities/user.entity';
-import { WorkspaceCreatedCommand } from './commands/workspace-created.command';
-import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
-import { WorkspaceMapper } from './dto/workspace.mapper';
-import { Workspace as WorkspaceDomain } from './entities/workspace.entity';
-import { WorkspaceService } from './workspace.service';
-import { WorkspaceRemovedCommand } from './commands/workspace-removed.command';
-import { WorkspaceUpdatedCommand } from './commands/workspace-updated.command';
-import { Workspace } from './entities/workspace.model';
+import { CreateWorkspaceUserDto } from './dto/create-workspace-user.dto';
+import { UpdateWorkspaceUserDto } from './dto/update-workspace-user.dto';
+import { WorkspaceUserMapper } from './dto/workspace-user.mapper';
+import { WorkspaceUser as WorkspaceUserDomain } from './entities/workspace-user.entity';
+import { WorkspaceUser } from './entities/workspace-user.model';
+import { WorkspaceUserService } from './workspace-user.service';
 
-@Controller({ path: 'workspaces', version: '1' })
+@Controller({ path: 'workspace-users', version: '1' })
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(ControllerCacheInterceptor, ClassSerializerInterceptor)
 @ApiBearerAuth()
-export class WorkspaceController {
+export class WorkspaceUserController {
   constructor(
     @Inject(LoggingService)
     private readonly logger: LoggingService,
-    @Inject(WorkspaceService)
-    private readonly service: WorkspaceService,
-    @Inject(WorkspaceMapper)
-    private readonly mapper: WorkspaceMapper,
+    @Inject(WorkspaceUserService)
+    private readonly service: WorkspaceUserService,
+    @Inject(WorkspaceUserMapper)
+    private readonly mapper: WorkspaceUserMapper,
     @Inject(CaslAbilityFactory)
     private readonly caslAbilityFactory: CaslAbilityFactory,
-    @Inject(CommandBus)
-    private readonly commandBus: CommandBus,
   ) {}
 
   @Post()
   @CheckPolicies((ability: AppAbility) =>
-    ability.can(Action.Create, WorkspaceDomain),
+    ability.can(Action.Create, WorkspaceUserDomain),
   )
   async create(
-    @Body() createWorkspaceDto: CreateWorkspaceDto,
+    @Body() createWorkspaceUserDto: CreateWorkspaceUserDto,
     @Request() req: { user: UserDomain },
   ) {
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
-    if (!ability.can(Action.Create, WorkspaceDomain)) {
+    if (!ability.can(Action.Create, WorkspaceUserDomain)) {
       throw new UnauthorizedException();
     }
-    const result = await this.service.create(createWorkspaceDto, req.user.id);
-    void this.commandBus.execute(new WorkspaceCreatedCommand(result));
+    const result = await this.service.create(
+      createWorkspaceUserDto,
+      req.user.id,
+    );
     return this.mapper.toInterface(result);
   }
 
   @Get()
   @CheckPolicies((ability: AppAbility) =>
-    ability.can(Action.Read, WorkspaceDomain),
+    ability.can(Action.Read, WorkspaceUserDomain),
   )
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
@@ -107,7 +103,7 @@ export class WorkspaceController {
       {
         accountId: req.user.accountId,
       },
-      sortField ? (sortField as keyof Workspace) : undefined,
+      sortField ? (sortField as keyof WorkspaceUser) : undefined,
       sortOrder,
     );
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
@@ -121,7 +117,7 @@ export class WorkspaceController {
 
   @Get(':id')
   @CheckPolicies((ability: AppAbility) =>
-    ability.can(Action.Read, WorkspaceDomain),
+    ability.can(Action.Read, WorkspaceUserDomain),
   )
   async findOne(@Param('id') id: string, @Request() req: { user: UserDomain }) {
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
@@ -134,11 +130,11 @@ export class WorkspaceController {
 
   @Patch(':id')
   @CheckPolicies((ability: AppAbility) =>
-    ability.can(Action.Update, WorkspaceDomain),
+    ability.can(Action.Update, WorkspaceUserDomain),
   )
   async update(
     @Param('id') id: string,
-    @Body() updateWorkspaceDto: UpdateWorkspaceDto,
+    @Body() updateWorkspaceUserDto: UpdateWorkspaceUserDto,
     @Request() req: { user: UserDomain },
   ) {
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
@@ -148,16 +144,15 @@ export class WorkspaceController {
     }
     const updated = await this.service.update(
       id,
-      updateWorkspaceDto,
+      updateWorkspaceUserDto,
       req.user.id,
     );
-    void this.commandBus.execute(new WorkspaceUpdatedCommand(updated));
     return this.mapper.toInterface(updated);
   }
 
   @Delete(':id')
   @CheckPolicies((ability: AppAbility) =>
-    ability.can(Action.Delete, WorkspaceDomain),
+    ability.can(Action.Delete, WorkspaceUserDomain),
   )
   async remove(@Param('id') id: string, @Request() req: { user: UserDomain }) {
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
@@ -166,7 +161,6 @@ export class WorkspaceController {
       throw new UnauthorizedException();
     }
     await this.service.remove(id, req.user.id);
-    void this.commandBus.execute(new WorkspaceRemovedCommand(entity));
     return entity.id;
   }
 }

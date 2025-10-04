@@ -38,7 +38,6 @@ import { WebRoutes } from "@/lib/constants";
 import Link from "next/link";
 import customApiImage from "../../../public/customapi.png";
 import githubImage from "../../../public/github.png";
-import heroImage from "../../../public/hero.png";
 import jiraImage from "../../../public/jira.png";
 import linearImage from "../../../public/linear.png";
 import slackImage from "../../../public/slack.png";
@@ -257,7 +256,7 @@ export default function Page() {
         </div>
         <div className="flex flex-col justify-center w-3/4">
           <Image
-            src={heroImage}
+            src={""}
             alt="Developer dashboard showing contribution metrics and team impact insights"
             width={1920}
             height={1080}
@@ -370,7 +369,7 @@ export default function Page() {
                 }`}
               >
                 <Image
-                  src={heroImage}
+                  src={""}
                   alt={`${feature.name} dashboard showing detailed contribution metrics and developer insights`}
                   width={1920}
                   height={1080}
