@@ -13,6 +13,7 @@ import { WorkspaceMapper } from './dto/workspace.mapper';
 import { Workspace as WorkspaceDomain } from './entities/workspace.entity';
 import { Workspace } from './entities/workspace.model';
 import { WorkspaceUser } from './entities/workspace-user.model';
+import { Role } from '../user/entities/user.entity';
 
 @Injectable()
 export class WorkspaceService {
@@ -45,6 +46,7 @@ export class WorkspaceService {
       accountId: result.accountId,
       workspaceId: result.id,
       userId: createdBy,
+      role: Role.Owner,
       createdBy,
     });
     await this.workspaceUserRepo.save(wu);
