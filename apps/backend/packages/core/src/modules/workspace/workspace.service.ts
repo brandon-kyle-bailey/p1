@@ -42,6 +42,7 @@ export class WorkspaceService {
     const entity = this.repo.create({ ...createWorkspaceDto, createdBy });
     const result = await this.repo.save(entity);
     const wu = this.workspaceUserRepo.create({
+      accountId: result.accountId,
       workspaceId: result.id,
       userId: createdBy,
       createdBy,

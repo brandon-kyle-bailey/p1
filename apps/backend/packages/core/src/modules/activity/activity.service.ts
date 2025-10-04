@@ -105,9 +105,9 @@ export class ActivityService {
     updatedBy: string,
   ) {
     try {
-      const entities = (await this.repo.findBy({ id: In(ids) })).map((entity) =>
-        this.mapper.toDomain(entity),
-      );
+      const entities = (
+        await this.repo.findBy({ incomingActivityId: In(ids) })
+      ).map((entity) => this.mapper.toDomain(entity));
 
       for (const entity of entities) {
         if (dto.userId) entity.updateUserId(dto.userId);

@@ -13,6 +13,7 @@ type Device = {
   id: string;
   accountId: string;
   ipAddress: string;
+  hostuser: string;
   hostname: string;
   macAddress: string;
   os: string;
@@ -54,8 +55,8 @@ export default async function Page() {
         return (
           <Card key={device.id}>
             <CardHeader>
-              <CardTitle>{device.hostname}</CardTitle>
-              <CardDescription>App details</CardDescription>
+              <CardTitle>{device.hostuser}</CardTitle>
+              <CardDescription>{device.hostname} details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               <p>

@@ -55,7 +55,7 @@ export class ActivityCreatedHandler
   async execute(command: ActivityCreatedCommand) {
     this.logger.debug('Activity created handler called', {
       correlationId: '3623e7de-987b-4971-9757-8b6a86592a2f',
-      accountId: command.entity.accountId,
+      command: JSON.stringify(command),
     });
 
     if (!command.entity.userId) {

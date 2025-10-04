@@ -1,13 +1,14 @@
 import { LoggingService } from '@app/logging';
 import { Inject } from '@nestjs/common';
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { DeviceUpdatedCommand } from '../commands/device-updated.command';
 import { ActivityService } from 'src/modules/activity/activity.service';
-import { IncomingActivityService } from 'src/modules/activity/incoming-activity.service';
-import { UpdateActivityDto } from 'src/modules/activity/dto/update-activity.dto';
-import { NIL } from 'uuid';
-import { Activity } from 'src/modules/activity/entities/activity.entity';
 import { ActivityUpdatedCommand } from 'src/modules/activity/commands/activity-updated.command';
+import { UpdateActivityDto } from 'src/modules/activity/dto/update-activity.dto';
+import { Activity } from 'src/modules/activity/entities/activity.entity';
+import { IncomingActivityService } from 'src/modules/activity/incoming-activity.service';
+import { IsNull } from 'typeorm';
+import { NIL } from 'uuid';
+import { DeviceUpdatedCommand } from '../commands/device-updated.command';
 
 const BATCH_SIZE = 100;
 
@@ -45,7 +46,8 @@ export class DeviceUpdatedHandler
           macAddress: command.entity.macAddress,
           os: command.entity.os,
           arch: command.entity.arch,
-          userId: undefined,
+          userId: IsNull(),
+          source: 'agent',
         },
       );
 
@@ -57,7 +59,7 @@ export class DeviceUpdatedHandler
         correlationId: 'b3446a95-3135-4f31-87ac-093c069cc2ff',
         skip,
         take,
-        activityCount: activities.data.length,
+        count: activities.data.length,
         hasNextPage: activities.pagination.hasNextPage,
       });
 
@@ -90,6 +92,7 @@ export class DeviceUpdatedHandler
       }
     }
     if (batch.length > 0) {
+      dto.userId = command.entity.userId;
       updated.push(...(await this.activityService.updateMany(batch, dto, NIL)));
     }
     updated.map((activity) => {

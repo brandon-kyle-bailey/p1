@@ -11,6 +11,7 @@ import { IncomingActivityCreatedCommand } from '../commands/incoming-activity-cr
 import { CreateActivityDto } from '../dto/create-activity.dto';
 import { AppCreatedCommand } from 'src/modules/app/commands/app-created.command';
 import { DeviceCreatedCommand } from 'src/modules/device/commands/device-created.command';
+import { ActivityCreatedCommand } from '../commands/activity-created.command';
 
 @CommandHandler(IncomingActivityCreatedCommand)
 export class IncomingActivityCreatedHandler
@@ -94,7 +95,15 @@ export class IncomingActivityCreatedHandler
       createActivityDto.endTime = endTime;
       createActivityDto.createdBy = foundDevice.userId ?? NIL;
       createActivityDto.description = `User visited ${expression} in window ${title} of ${name}`;
-      await this.activityService.create(createActivityDto);
+      const result = await this.activityService.create(createActivityDto);
+      if (result) {
+        this.logger.debug('posting newly created activity to command bus:', {
+          correlationId: '7a1a6464-243b-480e-9f32-ab542cf34f1d',
+          result: JSON.stringify(result),
+        });
+
+        void this.commandBus.execute(new ActivityCreatedCommand(result));
+      }
     } catch (error) {
       this.logger.error(error, {
         correlationId: 'dd447c82-4e60-4b6e-b856-f356ca5c39cb',
