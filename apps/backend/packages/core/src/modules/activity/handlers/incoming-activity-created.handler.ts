@@ -70,6 +70,7 @@ export class IncomingActivityCreatedHandler
         const createDeviceDto = new CreateDeviceDto();
         createDeviceDto.accountId = accountId;
         createDeviceDto.arch = arch;
+        createDeviceDto.hostuser = hostuser;
         createDeviceDto.hostname = hostname;
         createDeviceDto.ipAddress = ipAddress;
         createDeviceDto.os = os;
@@ -84,6 +85,7 @@ export class IncomingActivityCreatedHandler
       createActivityDto.accountId = accountId;
       createActivityDto.incomingActivityId = id;
       createActivityDto.appId = foundApp.id;
+      // use a claimed device for user association
       if (foundDevice.userId) {
         createActivityDto.userId = foundDevice.userId;
       }

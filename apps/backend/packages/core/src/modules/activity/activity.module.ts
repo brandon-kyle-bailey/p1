@@ -1,5 +1,5 @@
 import { LoggingModule } from '@app/logging';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApiKeyGuard } from 'src/guards/api-auth.guard';
 import { ActivityService } from './activity.service';
@@ -26,7 +26,8 @@ import { ActivityController } from './activity.controller';
     CaslModule,
     UserModule,
     AppModule,
-    DeviceModule,
+    // forwardRef resolves circular dependency
+    forwardRef(() => DeviceModule),
     AuthModule,
   ],
   controllers: [IncomingActivityController, ActivityController],
@@ -40,6 +41,6 @@ import { ActivityController } from './activity.controller';
     IncomingActivityCreatedHandler,
     IncomingExtensionActivityCreatedHandler,
   ],
-  exports: [ActivityService],
+  exports: [ActivityService, IncomingActivityService],
 })
 export class ActivityModule {}

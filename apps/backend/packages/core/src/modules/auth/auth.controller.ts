@@ -20,6 +20,7 @@ import { RegisterDto } from './dto/register.dto';
 import { CreateAccountDto } from '../account/dto/create-account.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { UpdateAccountDto } from '../account/dto/update-account.dto';
+import { NIL } from 'uuid';
 
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
@@ -62,6 +63,7 @@ export class AuthController {
       createUserDto.email = body.username;
       createUserDto.password = bcrypt.hashSync(body.password, 10);
       createUserDto.role = Role.Owner;
+      createUserDto.createdBy = NIL;
       const user = await this.userService.createWithManager(
         createUserDto,
         manager,

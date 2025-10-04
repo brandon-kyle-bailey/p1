@@ -28,6 +28,11 @@ export class Activity {
     };
   }
 
+  updateUserId(userId: string) {
+    this.props.userId = userId;
+    this.touch();
+  }
+
   get incomingActivityId() {
     return this.props.incomingActivityId;
   }
@@ -98,12 +103,11 @@ export class Activity {
 
   updateOwner(id: string) {
     this.props.createdBy = id;
-    this.touch();
+    this.touch(id);
   }
 
   updateUpdatedBy(id: string) {
-    this.props.updatedBy = id;
-    this.touch();
+    this.touch(id);
   }
 
   restore() {

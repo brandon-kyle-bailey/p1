@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { DeviceService } from './device.service';
 import { DeviceController } from './device.controller';
 import { LoggingModule } from '@app/logging';
@@ -9,9 +9,16 @@ import { DeviceMapper } from './dto/device.mapper';
 import { DeviceCreatedHandler } from './handlers/device-created.handler';
 import { DeviceRemovedHandler } from './handlers/device-removed.handler';
 import { DeviceUpdatedHandler } from './handlers/device-updated.handler';
+import { ActivityModule } from '../activity/activity.module';
 
 @Module({
-  imports: [LoggingModule, TypeOrmModule.forFeature([Device]), CaslModule],
+  imports: [
+    LoggingModule,
+    TypeOrmModule.forFeature([Device]),
+    CaslModule,
+    // forwardRef resolves circular dependency
+    forwardRef(() => ActivityModule),
+  ],
   controllers: [DeviceController],
   providers: [
     DeviceMapper,

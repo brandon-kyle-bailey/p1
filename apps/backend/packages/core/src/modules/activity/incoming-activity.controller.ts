@@ -66,6 +66,9 @@ export class IncomingActivityController {
   })
   async agent(@Body() dto: CreateIncomingActivityDto) {
     const result = await this.service.create(dto);
+    if (!result) {
+      return;
+    }
     void this.commandBus.execute(new IncomingActivityCreatedCommand(result));
     return this.mapper.toInterface(result);
   }
@@ -85,6 +88,9 @@ export class IncomingActivityController {
       throw new UnauthorizedException();
     }
     const result = await this.service.create(dto);
+    if (!result) {
+      return;
+    }
     void this.commandBus.execute(
       new IncomingExtensionActivityCreatedCommand(
         result as unknown as IncomingExtensionActivityDomain,

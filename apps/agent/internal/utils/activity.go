@@ -3,7 +3,6 @@ package utils
 
 import (
 	"database/sql"
-	"fmt"
 	"p1/agent/internal/config"
 	"p1/agent/internal/db"
 	"p1/agent/internal/http"
@@ -49,7 +48,6 @@ func FlushActivity(cfg *config.Config, httpClient *http.HTTPClient, conn *sql.DB
 	if err != nil {
 		log.Error(err.Error(), "b7d02848-aad5-4583-b799-e7a31e9de251")
 	}
-	log.Debug(fmt.Sprintf("Would post activity dto: %v", dto), "ef84857b-789f-42c1-87fb-f32af91b982d")
 	if !cfg.Dryrun {
 		if err := httpClient.PostJSON(cfg.IngestionEndpoint, dto); err != nil {
 			log.Error(err.Error(), "c7353a7b-53f7-4e45-abea-4c7a2e7e6edc")

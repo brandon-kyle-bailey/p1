@@ -1,12 +1,18 @@
 import { LoggingService } from '@app/logging';
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { NIL } from 'uuid';
 import { ActivityMapper } from './dto/activity.mapper';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { Activity } from './entities/activity.model';
+import { Activity as ActivityDomain } from './entities/activity.entity';
 
 @Injectable()
 export class ActivityService {
@@ -21,6 +27,11 @@ export class ActivityService {
     const duration =
       new Date(createActivityDto.endTime).getTime() -
       new Date(createActivityDto.startTime).getTime();
+
+    // activity too short
+    if (duration < 1000) {
+      return;
+    }
     const entity = this.repo.create({
       ...createActivityDto,
       duration,
@@ -69,20 +80,85 @@ export class ActivityService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} activity`;
+  async findOne(id: string): Promise<ActivityDomain> {
+    try {
+      const entity = await this.repo.findOneBy({ id });
+      if (!entity) {
+        throw new NotFoundException();
+      }
+      return this.mapper.toDomain(entity);
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.findOne.name} encountered an error`,
+        {
+          correlationId: '45c6f8ed-6cab-4cbe-9f08-6881844b54fc',
+          err: JSON.stringify(err),
+        },
+      );
+      throw new InternalServerErrorException();
+    }
   }
 
-  update(id: number, updateActivityDto: UpdateActivityDto) {
-    this.logger.debug(`${this.constructor.name}.${this.update.name} called`, {
-      correlationId: '3430a322-ceab-4d97-8144-d2e66019cbbd',
-      id,
-      dto: JSON.stringify(updateActivityDto),
-    });
-    return `This action updates a #${id} activity`;
+  async updateMany(
+    ids: string[],
+    dto: Partial<UpdateActivityDto>,
+    updatedBy: string,
+  ) {
+    try {
+      const entities = (await this.repo.findBy({ id: In(ids) })).map((entity) =>
+        this.mapper.toDomain(entity),
+      );
+
+      for (const entity of entities) {
+        if (dto.userId) entity.updateUserId(dto.userId);
+        entity.updateUpdatedBy(updatedBy);
+      }
+
+      await Promise.all(
+        entities.map((entity) =>
+          this.repo.update(entity.id, this.mapper.toPersistence(entity)),
+        ),
+      );
+
+      return entities;
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.updateMany.name} encountered an error`,
+        {
+          correlationId: 'ca35371a-1997-44ee-97b3-1edcec9f8458',
+          err: JSON.stringify(err),
+        },
+      );
+      throw new InternalServerErrorException();
+    }
   }
 
-  remove(id: number) {
+  async update(
+    id: string,
+    dto: UpdateActivityDto,
+    updatedBy: string,
+  ): Promise<ActivityDomain> {
+    try {
+      const entity = await this.findOne(id);
+      if (dto.userId) {
+        entity.updateUserId(dto.userId);
+      }
+      entity.updateUpdatedBy(updatedBy);
+      await this.repo.update(entity.id, this.mapper.toPersistence(entity));
+      return entity;
+    } catch (err: any) {
+      this.logger.error(
+        `${this.constructor.name}.${this.update.name} encountered an error`,
+        {
+          correlationId: '3c15f8e8-7d66-4134-b172-6dfbd7b5f549',
+          err: JSON.stringify(err),
+        },
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  remove(id: string) {
     return `This action removes a #${id} activity`;
   }
 }
