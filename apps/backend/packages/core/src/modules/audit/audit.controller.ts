@@ -1,21 +1,16 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
-  Delete,
-  UseInterceptors,
   ClassSerializerInterceptor,
+  Controller,
+  Post,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { AuditService } from './audit.service';
-import { CreateAuditDto } from './dto/create-audit.dto';
-import { UpdateAuditDto } from './dto/update-audit.dto';
-import { ControllerCacheInterceptor } from 'src/interceptors/logging-cache.interceptor';
 import { ApiHeader } from '@nestjs/swagger';
 import { ApiKeyGuard } from 'src/guards/api-auth.guard';
+import { ControllerCacheInterceptor } from 'src/interceptors/logging-cache.interceptor';
+import { AuditService } from './audit.service';
+import { CreateAuditDto } from './dto/create-audit.dto';
 
 @Controller({ path: 'audit', version: '1' })
 @UseInterceptors(ControllerCacheInterceptor, ClassSerializerInterceptor)
@@ -46,25 +41,5 @@ export class AuditController {
   })
   logs(@Body() createAuditDto: CreateAuditDto) {
     return this.auditService.create(createAuditDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.auditService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.auditService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuditDto: UpdateAuditDto) {
-    return this.auditService.update(+id, updateAuditDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.auditService.remove(+id);
   }
 }

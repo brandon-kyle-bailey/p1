@@ -35,6 +35,7 @@ import { Subscription as SubscriptionDomain } from './entities/subscription.enti
 import { SubscriptionService } from './subscription.service';
 import { SubscriptionUpdatedCommand } from './commands/subscription-updated.command';
 import { SubscriptionRemovedCommand } from './commands/subscription-removed.command';
+import { Subscription } from './entities/subscription.model';
 
 @Controller({ path: 'subscriptions', version: '1' })
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -75,20 +76,45 @@ export class SubscriptionController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @CheckPolicies((ability: AppAbility) =>
     ability.can(Action.Read, SubscriptionDomain),
   )
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
+  @ApiQuery({
+    name: 'sortField',
+    required: false,
+    type: String,
+    example: 'startTime',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    type: String,
+    example: 'asc',
+  })
   @ApiOkResponse({ type: FindAllResponseDto })
   async findAll(
     @Query('skip') skip = 0,
     @Query('take') take = 100,
+    @Query('sortField') sortField: string = 'createdAt',
+    @Query('sortOrder') sortOrder: 'asc' | 'desc' = 'desc',
     @Request() req: { user: UserDomain },
   ): Promise<FindAllResponseDto<{ [key: string]: any }>> {
-    const result = await this.service.findAll(skip, take, {
-      accountId: req.user.accountId,
-    });
+    if (!['asc', 'desc'].includes(sortOrder)) {
+      sortOrder = 'desc';
+    }
+    const result = await this.service.findAll(
+      skip,
+      take,
+      {
+        accountId: req.user.accountId,
+      },
+      sortField ? (sortField as keyof Subscription) : undefined,
+      sortOrder,
+    );
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     return {
       ...result,

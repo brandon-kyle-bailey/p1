@@ -45,12 +45,15 @@ export class IntegrationService {
     skip: number = 0,
     take: number = 100,
     where: FindOptionsWhere<Integration>,
+    sortField: keyof Integration = 'createdAt',
+    sortOrder: 'asc' | 'desc' = 'desc',
   ) {
     try {
       const [entities, count] = await this.repo.findAndCount({
         skip,
         take,
         where,
+        order: { [sortField]: sortOrder.toUpperCase() as 'ASC' | 'DESC' },
       });
       return {
         data: entities.map((entity) => this.mapper.toDomain(entity)),
@@ -65,7 +68,7 @@ export class IntegrationService {
       this.logger.error(
         `${this.constructor.name}.${this.findAll.name} encountered an error`,
         {
-          correlationId: '6d437955-6b3a-417d-825b-3f43dedd8825',
+          correlationId: '7868c151-bdee-414c-bb27-a737b42cd513',
           err: JSON.stringify(err),
         },
       );

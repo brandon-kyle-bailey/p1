@@ -28,13 +28,14 @@ import {
 } from '../casl/casl-ability.factory/casl-ability.factory';
 import { User as UserDomain } from '../user/entities/user.entity';
 import { IntegrationCreatedCommand } from './commands/integration-created.command';
-import { CreateIntegrationDto } from './dto/create-integration.dto';
-import { UpdateIntegrationDto } from './dto/update-integration.dto';
-import { IntegrationMapper } from './dto/integration.mapper';
-import { Integration as IntegrationDomain } from './entities/integration.entity';
-import { IntegrationService } from './integration.service';
-import { IntegrationUpdatedCommand } from './commands/integration-updated.command';
 import { IntegrationRemovedCommand } from './commands/integration-removed.command';
+import { IntegrationUpdatedCommand } from './commands/integration-updated.command';
+import { CreateIntegrationDto } from './dto/create-integration.dto';
+import { IntegrationMapper } from './dto/integration.mapper';
+import { UpdateIntegrationDto } from './dto/update-integration.dto';
+import { Integration as IntegrationDomain } from './entities/integration.entity';
+import { Integration } from './entities/integration.model';
+import { IntegrationService } from './integration.service';
 
 @Controller({ path: 'integrations', version: '1' })
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -72,20 +73,45 @@ export class IntegrationController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, PoliciesGuard)
   @CheckPolicies((ability: AppAbility) =>
     ability.can(Action.Read, IntegrationDomain),
   )
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
+  @ApiQuery({
+    name: 'sortField',
+    required: false,
+    type: String,
+    example: 'startTime',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    type: String,
+    example: 'asc',
+  })
   @ApiOkResponse({ type: FindAllResponseDto })
   async findAll(
     @Query('skip') skip = 0,
     @Query('take') take = 100,
+    @Query('sortField') sortField: string = 'createdAt',
+    @Query('sortOrder') sortOrder: 'asc' | 'desc' = 'desc',
     @Request() req: { user: UserDomain },
   ): Promise<FindAllResponseDto<{ [key: string]: any }>> {
-    const result = await this.service.findAll(skip, take, {
-      accountId: req.user.accountId,
-    });
+    if (!['asc', 'desc'].includes(sortOrder)) {
+      sortOrder = 'desc';
+    }
+    const result = await this.service.findAll(
+      skip,
+      take,
+      {
+        accountId: req.user.accountId,
+      },
+      sortField ? (sortField as keyof Integration) : undefined,
+      sortOrder,
+    );
     const ability = await this.caslAbilityFactory.createForUser(req.user.id);
     return {
       ...result,
