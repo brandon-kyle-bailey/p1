@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <title>Extension Options</title>
+    <!-- Strict CSP: only allow extension resources and HTTPS API calls -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+    connect-src http://localhost:3000;
+    object-src 'none';
+    base-uri 'none';
+    form-action 'none';
+    upgrade-insecure-requests;
+  "
+    />
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -25,12 +36,28 @@
   </head>
   <body>
     <h2>Login</h2>
-    <form id="loginForm">
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="password" placeholder="Password" required />
+    <!-- No action attribute; handled securely by JS -->
+    <form id="loginForm" method="POST" autocomplete="on">
+      <input
+        type="email"
+        id="email"
+        name="email"
+        placeholder="Email"
+        required
+        autocomplete="username"
+        inputmode="email"
+      />
+      <input
+        type="password"
+        id="password"
+        name="password"
+        placeholder="Password"
+        required
+        autocomplete="current-password"
+      />
       <button type="submit">Login</button>
     </form>
-    <div id="status"></div>
+    <div id="status" role="alert" aria-live="polite"></div>
     <script src="browser-polyfill.js"></script>
     <script src="popup.js"></script>
   </body>
