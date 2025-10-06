@@ -30,6 +30,7 @@ export class ActivityUpdatedHandler
     let hasNextPage = true;
 
     while (hasNextPage) {
+      // TODO:... Filter on active workspace subscriptions for the given activity source and expression
       const entities = await this.workspaceUserService.findAll(skip, take, {
         accountId: command.entity.accountId,
         userId: command.entity.userId,

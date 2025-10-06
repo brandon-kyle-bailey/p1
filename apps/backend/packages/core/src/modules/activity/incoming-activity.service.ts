@@ -1,5 +1,5 @@
 import { LoggingService } from '@app/logging';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { NIL } from 'uuid';
@@ -7,11 +7,14 @@ import { CreateIncomingActivityDto } from './dto/create-incoming-activity.dto';
 import { IncomingActivity } from './entities/incoming-activity.model';
 import { IncomingActivityMapper } from './dto/incoming-activity.mapper';
 import { CreateIncomingExtensionActivityDto } from './dto/create-incoming-extension-activity.dto';
+import { AccountService } from '../account/account.service';
 
 @Injectable()
 export class IncomingActivityService {
   constructor(
     @Inject(LoggingService) private readonly logger: LoggingService,
+    @InjectRepository(AccountService)
+    private readonly accountService: AccountService,
     @InjectRepository(IncomingActivity)
     private readonly repo: Repository<IncomingActivity>,
     @Inject(IncomingActivityMapper)
@@ -22,6 +25,7 @@ export class IncomingActivityService {
   ) {
     // activity is bad, drop it.
     if (
+      !dto.accountId ||
       [
         dto.name.toLowerCase(),
         dto.title.toLowerCase(),
@@ -29,6 +33,11 @@ export class IncomingActivityService {
       ].includes('unknown')
     ) {
       return;
+    }
+
+    const account = await this.accountService.findOne(dto.accountId);
+    if (!account) {
+      throw new NotFoundException();
     }
 
     const entity = this.repo.create({
