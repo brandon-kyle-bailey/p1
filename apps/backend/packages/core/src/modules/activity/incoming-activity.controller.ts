@@ -3,9 +3,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  Delete,
   Inject,
-  Param,
   Post,
   Request,
   UnauthorizedException,
@@ -97,10 +95,5 @@ export class IncomingActivityController {
       ),
     );
     return this.mapper.toInterface(result);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.service.remove(+id);
   }
 }
