@@ -47,6 +47,18 @@ export class IncomingActivityCreatedHandler
         endTime,
       } = command.entity;
 
+      // ignore browser events from agent
+      if (
+        source === 'agent' &&
+        ['opera', 'safari', 'edge', 'chrome', 'firefox'].some((e) =>
+          name.toLowerCase().includes(e.toLowerCase()),
+        )
+      ) {
+        return {
+          actionId: crypto.randomUUID(),
+        };
+      }
+
       // app discovery
       let foundApp = await this.appService.findOneByName(name, accountId);
       if (!foundApp) {
@@ -97,11 +109,6 @@ export class IncomingActivityCreatedHandler
       createActivityDto.description = `User visited ${expression} in window ${title} of ${name}`;
       const result = await this.activityService.create(createActivityDto);
       if (result) {
-        this.logger.debug('posting newly created activity to command bus:', {
-          correlationId: '7a1a6464-243b-480e-9f32-ab542cf34f1d',
-          result: JSON.stringify(result),
-        });
-
         void this.commandBus.execute(new ActivityCreatedCommand(result));
       }
     } catch (error) {

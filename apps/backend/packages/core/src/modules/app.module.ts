@@ -1,41 +1,32 @@
 import { LoggingModule } from '@app/logging';
+import KeyvRedis from '@keyv/redis';
 import { HttpModule } from '@nestjs/axios';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AccountModule } from './account/account.module';
-import { Account } from './account/entities/account.model';
-import { HealthModule } from './health/health.module';
-import KeyvRedis from '@keyv/redis';
-import { APP_GUARD } from '@nestjs/core';
 import { CacheableMemory } from 'cacheable';
 import { Keyv } from 'keyv';
 import { LoggingThrottlerGuard } from 'src/guards/logging-thottler.guard';
-import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
-import { User } from './user/entities/user.model';
-import { CaslModule } from './casl/casl.module';
-import { AppModule as AppsModule } from './app/app.module';
-import { WorkspaceModule } from './workspace/workspace.module';
-import { Workspace } from './workspace/entities/workspace.model';
-import { App } from './app/entities/app.model';
-import { WorkspaceUser } from './workspace/entities/workspace-user.model';
-import { IntegrationModule } from './integration/integration.module';
-import { AiModule } from './ai/ai.module';
-import { Integration } from './integration/entities/integration.model';
-import { Department } from './department/entities/department.model';
-import { SubscriptionModule } from './subscription/subscription.module';
+import { AccountModule } from './account/account.module';
+import { Account } from './account/entities/account.model';
 import { ActivityModule } from './activity/activity.module';
 import { Activity } from './activity/entities/activity.model';
 import { IncomingActivity } from './activity/entities/incoming-activity.model';
+import { AiModule } from './ai/ai.module';
+import { AppModule as AppsModule } from './app/app.module';
+import { App } from './app/entities/app.model';
+import { AuthModule } from './auth/auth.module';
+import { CaslModule } from './casl/casl.module';
 import { DeviceModule } from './device/device.module';
 import { Device } from './device/entities/device.model';
-import { AuditModule } from './audit/audit.module';
+import { User } from './user/entities/user.model';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -52,18 +43,7 @@ import { AuditModule } from './audit/audit.module';
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'p1'),
-        entities: [
-          Account,
-          User,
-          App,
-          Integration,
-          Department,
-          Workspace,
-          WorkspaceUser,
-          Activity,
-          IncomingActivity,
-          Device,
-        ],
+        entities: [Account, User, App, Activity, IncomingActivity, Device],
         synchronize: true,
         autoLoadEntities: true,
         retryAttempts: 10,
@@ -101,20 +81,15 @@ import { AuditModule } from './audit/audit.module';
       ],
     }),
     HttpModule,
-    HealthModule,
     AccountModule,
     LoggingModule,
     UserModule,
     AuthModule,
     CaslModule,
     AppsModule,
-    WorkspaceModule,
-    IntegrationModule,
-    SubscriptionModule,
     AiModule,
     ActivityModule,
     DeviceModule,
-    AuditModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: LoggingThrottlerGuard }],
 })

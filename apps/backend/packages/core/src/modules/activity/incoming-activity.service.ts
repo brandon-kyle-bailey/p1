@@ -13,7 +13,7 @@ import { AccountService } from '../account/account.service';
 export class IncomingActivityService {
   constructor(
     @Inject(LoggingService) private readonly logger: LoggingService,
-    @InjectRepository(AccountService)
+    @Inject(AccountService)
     private readonly accountService: AccountService,
     @InjectRepository(IncomingActivity)
     private readonly repo: Repository<IncomingActivity>,

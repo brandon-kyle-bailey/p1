@@ -6,6 +6,13 @@ let browserName = getBrowserName();
 let previousActivity = null;
 let deviceFingerprint = null;
 
+const CONFIG = {
+  version: "0.0.1",
+  refreshUrl: "http://localhost:3000/api/core/v1/auth/refresh",
+  incomingUrl: "http://localhost:3000/api/core/v1/incoming-activities/extension",
+  source: "extension"
+};
+
 // ================== Browser Detection ==================
 function getBrowserName() {
   const ua = navigator.userAgent;
@@ -26,13 +33,16 @@ async function init() {
   }
 
   // Event listeners
-  browser.tabs.onActivated.addListener(onTabActivated);
-  browser.tabs.onUpdated.addListener(onTabUpdated);
-  browser.windows.onFocusChanged.addListener(onWindowFocusChanged);
-  browser.runtime.onMessage.addListener(onVisibilityChanged);
-
   browser.idle.setDetectionInterval(60);
   browser.idle.onStateChanged.addListener(onIdleStateChanged);
+
+  browser.tabs.onActivated.addListener(onTabActivated);
+  browser.tabs.onUpdated.addListener(onTabUpdated);
+
+  browser.windows.onFocusChanged.addListener(onWindowFocusChanged);
+
+  browser.runtime.onMessage.addListener(onVisibilityChanged);
+
 }
 
 // ================== Activity Management ==================
@@ -44,7 +54,7 @@ async function createActivity(tab) {
     title: tab.title || "",
     expression: tab.url || "",
     startTime: new Date().toISOString(),
-    source: "extension",
+    source: CONFIG.source,
     externalActivityId: id,
     deviceFingerprint
   };
@@ -172,7 +182,7 @@ async function refreshTokens(refresh_token) {
   try {
     if (refreshInProgress) return refreshInProgress;
     refreshInProgress = (async () => {
-      const refreshResult = await fetch("http://localhost:3000/api/core/v1/auth/refresh", {
+      const refreshResult = await fetch(CONFIG.refreshUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh_token }),
@@ -181,14 +191,14 @@ async function refreshTokens(refresh_token) {
 
       if (!refreshResult.ok) throw new Error("Unable to refresh token");
       const { access_token, refresh_token: newRefreshToken } = await refreshResult.json();
-      await browser.storage.session.set({ access_token, refresh_token: newRefreshToken });
+      await browser.storage.local.set({ access_token, refresh_token: newRefreshToken });
     })();
 
     await refreshInProgress;
     refreshInProgress = null;
   } catch (error) {
     refreshInProgress = null;
-    await browser.storage.session.remove(["access_token", "refresh_token"]);
+    await browser.storage.local.remove(["access_token", "refresh_token"]);
     throw error;
   }
 }
@@ -213,7 +223,7 @@ function parseJwt(token) {
 
 // ================== Posting Activities ==================
 async function postActivity(activity) {
-  const stored = await browser.storage.session.get(["access_token", "refresh_token"]);
+  const stored = await browser.storage.local.get(["access_token", "refresh_token"]);
   const { access_token, refresh_token } = stored;
 
   if (!access_token || !refresh_token) {
@@ -230,7 +240,7 @@ async function postActivity(activity) {
   const userId = payload.sub;
   const accountId = payload.accountId;
 
-  const response = await fetch("http://localhost:3000/api/core/v1/incoming-activities/extension", {
+  const response = await fetch(CONFIG.incomingUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -242,8 +252,8 @@ async function postActivity(activity) {
 
   if (response.status === 401) {
     await refreshTokens(refresh_token);
-    const updated = await browser.storage.session.get(["access_token"]);
-    return fetch("http://localhost:3000/api/core/v1/incoming-activities/extension", {
+    const updated = await browser.storage.local.get(["access_token"]);
+    return fetch(CONFIG.incomingUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

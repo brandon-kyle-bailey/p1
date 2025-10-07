@@ -8,20 +8,50 @@ import (
 	"p1/agent/internal/http"
 	"p1/agent/internal/logger"
 	"p1/agent/internal/tracker"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 )
 
+func GetBrowserName(activity *db.Activity) string {
+	name := strings.ToLower(activity.Name)
+
+	switch {
+	case strings.Contains(name, "edg/"):
+		return "Edge"
+	case strings.Contains(name, "opr/") || strings.Contains(name, "opera/"):
+		return "Opera"
+	case strings.Contains(name, "firefox"):
+		return "Firefox"
+	case strings.Contains(name, "chrome/"):
+		return "Chrome"
+	case strings.Contains(name, "safari/"):
+		return "Safari"
+	default:
+		return "Unknown"
+	}
+}
+
+func IsBrowser(activity *db.Activity) bool {
+	return GetBrowserName(activity) != "Unknown"
+}
+
 func CreateActivityDto(config *config.Config, activity *db.Activity) (tracker.IncomingActivityDto, error) {
 	if activity == nil {
 		return tracker.IncomingActivityDto{}, nil
 	}
+
+	name := activity.Name
+	if IsBrowser(activity) {
+		name = GetBrowserName(activity)
+	}
+
 	return tracker.IncomingActivityDto{
 		Source:             "agent",
 		AccountID:          uuid.MustParse(config.AccountID).String(),
 		DeviceFingerprint:  activity.DeviceFingerprint,
-		Name:               activity.Name,
+		Name:               name,
 		Title:              activity.Title,
 		Expression:         activity.Expression,
 		StartTime:          activity.StartTime.UTC().Format(time.RFC3339Nano),

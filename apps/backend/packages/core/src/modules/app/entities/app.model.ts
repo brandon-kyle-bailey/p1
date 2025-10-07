@@ -11,8 +11,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Category } from './app.entity';
-import { Integration } from 'src/modules/integration/entities/integration.model';
-import { Subscription } from 'src/modules/subscription/entities/subscription.model';
 import { Activity } from 'src/modules/activity/entities/activity.model';
 
 @Entity('apps')
@@ -28,16 +26,6 @@ export class App {
   })
   @JoinColumn({ name: 'accountId' })
   account: Account;
-
-  @OneToMany(() => Integration, (relation) => relation.app, {
-    cascade: true,
-  })
-  integrations?: Integration[];
-
-  @OneToMany(() => Subscription, (relation) => relation.app, {
-    cascade: true,
-  })
-  subscriptions?: Subscription[];
 
   @OneToMany(() => Activity, (activity) => activity.app, {
     cascade: true,

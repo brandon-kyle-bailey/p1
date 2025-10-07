@@ -11,15 +11,10 @@ import {
 import { Account } from 'src/modules/account/entities/account.entity';
 import { UserService } from 'src/modules/user/user.service';
 import { App } from 'src/modules/app/entities/app.entity';
-import { Workspace } from 'src/modules/workspace/entities/workspace.entity';
-import { Integration } from 'src/modules/integration/entities/integration.entity';
-import { Department } from 'src/modules/department/entities/department.entity';
-import { Subscription } from 'src/modules/subscription/entities/subscription.entity';
 import { Device } from 'src/modules/device/entities/device.entity';
 import { IncomingActivity } from 'src/modules/activity/entities/incoming-activity.entity';
 import { IncomingExtensionActivity } from 'src/modules/activity/entities/incoming-extension-activity.entity';
 import { Activity } from 'src/modules/activity/entities/activity.entity';
-import { WorkspaceUser } from 'src/modules/workspace/entities/workspace-user.entity';
 
 export enum Action {
   Manage = 'manage',
@@ -34,11 +29,6 @@ type Subjects =
       | typeof User
       | typeof Account
       | typeof App
-      | typeof Workspace
-      | typeof WorkspaceUser
-      | typeof Integration
-      | typeof Department
-      | typeof Subscription
       | typeof Device
       | typeof IncomingActivity
       | typeof IncomingExtensionActivity
@@ -66,36 +56,10 @@ export class CaslAbilityFactory {
       can(Action.Update, Account, { createdBy: user.id });
       can(Action.Delete, Account, { createdBy: user.id });
 
-      can(Action.Create, Department);
-      can(Action.Read, Department, { accountId: user.accountId });
-      can(Action.Update, Department, { createdBy: user.id });
-      can(Action.Delete, Department, { createdBy: user.id });
-
       can(Action.Create, App);
       can(Action.Read, App, { accountId: user.accountId });
       can(Action.Update, App, { createdBy: user.id });
       can(Action.Delete, App, { createdBy: user.id });
-
-      can(Action.Create, Integration);
-      can(Action.Read, Integration, { accountId: user.accountId });
-      can(Action.Update, Integration, { createdBy: user.id });
-      can(Action.Delete, Integration, { createdBy: user.id });
-
-      can(Action.Create, Subscription);
-      can(Action.Read, Subscription, { accountId: user.accountId });
-      can(Action.Update, Subscription, { createdBy: user.id });
-      can(Action.Delete, Subscription, { createdBy: user.id });
-
-      can(Action.Create, Workspace);
-      can(Action.Read, Workspace, { accountId: user.accountId });
-      can(Action.Update, Workspace, { createdBy: user.id });
-      can(Action.Delete, Workspace, { createdBy: user.id });
-
-      can(Action.Create, WorkspaceUser);
-      can(Action.Read, WorkspaceUser, { accountId: user.accountId });
-      can(Action.Update, WorkspaceUser, { userId: user.id });
-      can(Action.Update, WorkspaceUser, { createdBy: user.id });
-      can(Action.Delete, WorkspaceUser, { createdBy: user.id });
 
       can(Action.Create, User);
       can(Action.Read, User, { accountId: user.accountId });

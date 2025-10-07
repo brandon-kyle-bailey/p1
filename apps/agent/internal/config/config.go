@@ -13,6 +13,7 @@ import (
 )
 
 type Config struct {
+	Version           string
 	AccountID         string
 	Debug             bool
 	Dryrun            bool
@@ -21,7 +22,6 @@ type Config struct {
 	DBPath            string
 	LogfilePath       string
 	IngestionEndpoint string
-	AuditEndpoint     string
 	APIKey            string
 	SecretKey         string
 	Username          string
@@ -90,18 +90,17 @@ func Load() (*Config, error) {
 	}
 
 	return &Config{
+		Version:           "0.0.1",
 		AccountID:         accountID,
 		Debug:             *debugFlag,
 		Dryrun:            *dryrunFlag,
 		Poll:              *pollFlag,
 		DBProvider:        "sqlite",
 		DBPath:            filepath.Join(appDir, "p1.db"),
-		LogfilePath:       "",
 		IngestionEndpoint: "http://localhost:3000/api/core/v1/incoming-activities/agent",
-		AuditEndpoint:     "http://localhost:3000/api/core/v1/audit/logs",
 		APIKey:            "900be976-5c0c-47ae-bac7-055718edf1f6",
 		SecretKey:         "4b7ad3ec-a5ab-4f4f-852f-55797db5258a",
 		Username:          username,
-		// LogfilePath:       filepath.Join(appDir, "p1.log"),
+		LogfilePath:       filepath.Join(appDir, "p1.log"),
 	}, nil
 }

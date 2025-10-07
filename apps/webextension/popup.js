@@ -2,12 +2,16 @@ if (typeof browser === "undefined") {
   var browser = chrome;
 }
 
+const CONFIG = {
+  version: "0.0.1",
+  loginUrl: "http://localhost:3000/api/core/v1/auth/login",
+}
+
 const form = document.getElementById("loginForm");
 const statusElement = document.getElementById("status");
 
-// Do not trust JWT contents on client. Treat tokens as opaque.
 async function handleLogin(email, password) {
-  const res = await fetch("http://localhost:3000/api/core/v1/auth/login", {
+  const res = await fetch(CONFIG.loginUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: email, password }),
@@ -24,8 +28,7 @@ async function handleLogin(email, password) {
     throw new Error("Missing tokens in server response");
   }
 
-  // Store tokens in session storage (not persistent local)
-  await browser.storage.session.set({ access_token, refresh_token });
+  await browser.storage.local.set({ access_token, refresh_token });
 
   return true;
 }

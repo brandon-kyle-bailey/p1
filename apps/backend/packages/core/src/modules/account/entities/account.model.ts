@@ -1,11 +1,7 @@
 import { Activity } from 'src/modules/activity/entities/activity.model';
 import { App } from 'src/modules/app/entities/app.model';
-import { Department } from 'src/modules/department/entities/department.model';
 import { Device } from 'src/modules/device/entities/device.model';
-import { Integration } from 'src/modules/integration/entities/integration.model';
-import { Subscription } from 'src/modules/subscription/entities/subscription.model';
 import { User } from 'src/modules/user/entities/user.model';
-import { WorkspaceUser } from 'src/modules/workspace/entities/workspace-user.model';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -29,9 +25,6 @@ export class Account {
   })
   users?: User[];
 
-  @OneToMany(() => WorkspaceUser, (wu) => wu.account)
-  workspaceUsers: WorkspaceUser[];
-
   @OneToMany(() => Activity, (activity) => activity.account, {
     cascade: true,
   })
@@ -42,25 +35,10 @@ export class Account {
   })
   devices?: Device[];
 
-  @OneToMany(() => Department, (relation) => relation.account, {
-    cascade: true,
-  })
-  departments?: Department[];
-
   @OneToMany(() => App, (relation) => relation.account, {
     cascade: true,
   })
   apps?: App[];
-
-  @OneToMany(() => Integration, (relation) => relation.account, {
-    cascade: true,
-  })
-  integrations?: Integration[];
-
-  @OneToMany(() => Subscription, (relation) => relation.account, {
-    cascade: true,
-  })
-  subscriptions?: Subscription[];
 
   @CreateDateColumn()
   createdAt: Date;

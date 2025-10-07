@@ -60,11 +60,6 @@ export class IncomingExtensionActivityCreatedHandler
       createActivityDto.description = `User visited ${expression} in window ${title} of ${name}`;
       const result = await this.activityService.create(createActivityDto);
       if (result) {
-        this.logger.debug('posting newly created activity to command bus:', {
-          correlationId: '7a1a6464-243b-480e-9f32-ab542cf34f1d',
-          result: JSON.stringify(result),
-        });
-
         void this.commandBus.execute(new ActivityCreatedCommand(result));
       }
     } catch (error) {

@@ -140,9 +140,6 @@ export class UserService {
       if (updateUserDto.name) {
         entity.updateName(updateUserDto.name);
       }
-      if (updateUserDto.departmentId) {
-        entity.updateDepartment(updateUserDto.departmentId);
-      }
       if (updateUserDto.password) {
         entity.updatePassword(updateUserDto.password);
       }
@@ -187,9 +184,6 @@ export class UserService {
       }
       if (updateUserDto.name) {
         entity.updateName(updateUserDto.name);
-      }
-      if (updateUserDto.departmentId) {
-        entity.updateDepartment(updateUserDto.departmentId);
       }
       if (updateUserDto.password) {
         entity.updatePassword(updateUserDto.password);
