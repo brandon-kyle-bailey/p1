@@ -14,8 +14,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetBrowserName(activity *db.Activity) string {
-	name := strings.ToLower(activity.Name)
+func GetBrowserName(input string) string {
+	name := strings.ToLower(input)
 
 	switch {
 	case strings.Contains(name, "edg/"):
@@ -33,8 +33,8 @@ func GetBrowserName(activity *db.Activity) string {
 	}
 }
 
-func IsBrowser(activity *db.Activity) bool {
-	return GetBrowserName(activity) != "Unknown"
+func IsBrowser(name string) bool {
+	return GetBrowserName(name) != "Unknown"
 }
 
 func CreateActivityDto(config *config.Config, activity *db.Activity) (tracker.IncomingActivityDto, error) {
@@ -43,8 +43,8 @@ func CreateActivityDto(config *config.Config, activity *db.Activity) (tracker.In
 	}
 
 	name := activity.Name
-	if IsBrowser(activity) {
-		name = GetBrowserName(activity)
+	if IsBrowser(name) {
+		name = GetBrowserName(name)
 	}
 
 	return tracker.IncomingActivityDto{
