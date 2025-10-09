@@ -48,10 +48,6 @@ export class IncomingActivityService {
     return this.mapper.toDomain(result);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} activity`;
-  }
-
   async findAll(
     skip: number = 0,
     take: number = 100,

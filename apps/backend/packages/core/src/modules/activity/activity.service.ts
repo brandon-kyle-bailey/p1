@@ -28,7 +28,7 @@ export class ActivityService {
       new Date(createActivityDto.endTime).getTime() -
       new Date(createActivityDto.startTime).getTime();
 
-    // activity too short
+    // activity is too short to count, drop it
     if (duration < 1000) {
       return;
     }
