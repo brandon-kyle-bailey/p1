@@ -211,8 +211,8 @@ export default function Page() {
   return (
     <>
       {/* Hero Section */}
-      <section className="p-8 bg-background flex flex-col md:flex-row justify-center items-center gap-8 lg:pt-28">
-        <div className="flex flex-col justify-center gap-8 md:w-2/3">
+      <section className="p-8 bg-background flex flex-col justify-center items-center gap-8 lg:pt-28">
+        <div className="flex flex-col justify-center items-center gap-8 md:w-2/3">
           <Badge className="rounded-full px-3 py-1 bg-primary text-secondary">
             🚀 New: Real-Time Contribution Insights
           </Badge>
