@@ -4,7 +4,6 @@ package config
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -52,7 +51,6 @@ func defaultAppDir() (string, error) {
 	if err := os.MkdirAll(appDir, 0o755); err != nil {
 		return "", err
 	}
-	fmt.Println(appDir)
 	return appDir, nil
 }
 

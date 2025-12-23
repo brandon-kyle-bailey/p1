@@ -9,8 +9,9 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"p1/agent/internal/config"
 	"runtime"
+
+	"p1/agent/internal/config"
 )
 
 var cachedIP string
