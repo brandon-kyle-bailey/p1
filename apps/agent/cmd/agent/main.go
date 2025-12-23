@@ -65,11 +65,9 @@ func main() {
 			return
 		case <-ticker.C:
 			var idle, locked, suspended bool
-			if provider != nil {
-				idle, _ = provider.IsIdle()
-				locked, _ = provider.IsLocked()
-				suspended, _ = provider.IsSuspended()
-			}
+			idle, _ = provider.IsIdle()
+			locked, _ = provider.IsLocked()
+			suspended, _ = provider.IsSuspended()
 			inactive := idle || locked || suspended
 
 			// flush only on transition from active → inactive
@@ -86,16 +84,14 @@ func main() {
 
 			// business as usual
 			windowName, windowTitle, windowExpression := "unknown", "unknown", "unknown"
-			if provider != nil {
-				if name, err := provider.GetApplicationName(); err == nil {
-					windowName = name
-				}
-				if title, err := provider.GetWindowName(); err == nil {
-					windowTitle = title
-				}
-				if expr, err := provider.GetExpression(); err == nil {
-					windowExpression = expr
-				}
+			if name, err := provider.GetApplicationName(); err == nil {
+				windowName = name
+			}
+			if title, err := provider.GetWindowName(); err == nil {
+				windowTitle = title
+			}
+			if expr, err := provider.GetExpression(); err == nil {
+				windowExpression = expr
 			}
 			newActivity := db.Activity{
 				ID:                utils.NewUUID(),
